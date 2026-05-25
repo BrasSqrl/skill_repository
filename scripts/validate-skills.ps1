@@ -193,6 +193,16 @@ $requiredAgentSections = @(
     "Escalation Rules"
 )
 
+$requiredWorkflowSections = @(
+    "Trigger",
+    "Ordered Skills",
+    "Phase Outputs",
+    "Validation Gates",
+    "Context Continuity",
+    "Handoff Format",
+    "Escalation Rules"
+)
+
 $skillDirs = @(Get-ChildItem -LiteralPath $SkillsPath -Directory | Sort-Object Name)
 if ($skillDirs.Count -eq 0) {
     Write-Fail "No skill folders found under: $SkillsPath"
@@ -672,6 +682,50 @@ try {
             if (-not $agentBundleIds.Contains($agentBundleFileId)) {
                 Write-Fail "catalog/agent-bundles: '$($agentBundleFile.Name)' has no matching row in agent-bundles.tsv"
                 $failed++
+            }
+        }
+    }
+} catch {
+    Write-Fail $_.Exception.Message
+    $failed++
+}
+
+try {
+    $workflowsPath = Join-Path $repoRoot "workflows"
+    if (-not (Test-Path -LiteralPath $workflowsPath -PathType Container)) {
+        Write-Fail "Workflows directory not found: $workflowsPath"
+        $failed++
+    } else {
+        $workflowFiles = @(Get-ChildItem -LiteralPath $workflowsPath -Filter "*.md" -File | Sort-Object Name)
+        if ($workflowFiles.Count -eq 0) {
+            Write-Fail "No workflow templates found under: $workflowsPath"
+            $failed++
+        } else {
+            Write-Info "Validating $($workflowFiles.Count) workflow template(s) in $workflowsPath"
+        }
+
+        foreach ($workflowFile in $workflowFiles) {
+            $workflowFailed = $false
+            $content = Get-Content -Raw -LiteralPath $workflowFile.FullName
+
+            if ($workflowFile.BaseName -notmatch "^[a-z0-9]+(-[a-z0-9]+)*$") {
+                Write-Fail "$($workflowFile.Name): workflow file name must use lowercase kebab-case"
+                $workflowFailed = $true
+            }
+
+            foreach ($section in $requiredWorkflowSections) {
+                $sectionPattern = "(?m)^## $([regex]::Escape($section))\s*$"
+                if ($content -notmatch $sectionPattern) {
+                    Write-Fail "$($workflowFile.Name): missing required section '## $section'"
+                    $workflowFailed = $true
+                }
+            }
+
+            if ($workflowFailed) {
+                $failed++
+            } else {
+                Write-Pass "$($workflowFile.Name) workflow"
+                $passed++
             }
         }
     }

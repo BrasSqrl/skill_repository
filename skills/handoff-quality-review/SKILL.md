@@ -15,6 +15,7 @@ Ensure a handoff lets another agent continue work without stale assumptions, mis
 - Use before resuming work from a handoff.
 - Use when work transfers between agents, sessions, machines, or harnesses.
 - Use when a long task has validation results, risks, or partial progress that must be preserved.
+- Use when reviewing a workflow `Context Continuity` checkpoint before ending or transferring work.
 
 ## When Not to Use
 
@@ -29,6 +30,7 @@ Ensure a handoff lets another agent continue work without stale assumptions, mis
 - Validation commands and results.
 - Known blockers, risks, and next recommended action.
 - Any artifacts that the next agent must inspect.
+- Workflow name, current phase, completed steps, pending steps, and recommended continuation skills or subagents when reviewing a continuity checkpoint.
 
 ## Workflow
 
@@ -36,9 +38,10 @@ Ensure a handoff lets another agent continue work without stale assumptions, mis
 2. Verify file paths, branch names, commits, commands, and artifact references.
 3. Separate completed work, pending work, assumptions, and blockers.
 4. Confirm validation evidence is specific and recent.
-5. Remove sensitive or irrelevant content.
-6. Identify missing context that would force repeated discovery.
-7. Produce required edits or an acceptance decision.
+5. Confirm workflow checkpoints include current phase, success criteria, files inspected or changed, commands run, exact next action, and recommended continuation skills or subagents.
+6. Remove sensitive or irrelevant content.
+7. Identify missing context that would force repeated discovery.
+8. Produce required edits or an acceptance decision.
 
 ## Quality Gates
 
@@ -47,6 +50,7 @@ Ensure a handoff lets another agent continue work without stale assumptions, mis
 - Validation results include command names and outcomes.
 - Risks and blockers are not buried.
 - No secrets or unnecessary personal data are included.
+- Workflow checkpoints can be resumed without relying on chat history.
 
 ## Anti-Patterns
 

@@ -79,7 +79,8 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] Skills avoid generic prompting advice and use operational workflow language.
 - [ ] No project-specific assumptions remain.
 - [ ] Examples are accurate and match implemented script options.
-- [ ] Workflow templates include trigger, ordered skills, phase outputs, validation gates, handoff format, and escalation rules.
+- [ ] Workflow templates include trigger, ordered skills, phase outputs, validation gates, context continuity, handoff format, and escalation rules.
+- [ ] Workflow continuity checkpoints specify phase, objective, completed work, pending work, files, commands, validation, blockers, risks, next action, and recommended continuation skills or subagents.
 - [ ] Workflow loop templates reference subagents only for discovery, reproduction, review, audit, validation, and strategy.
 - [ ] Subagent definitions include trigger descriptions, permission boundaries, forbidden actions, output format, and escalation rules.
 

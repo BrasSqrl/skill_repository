@@ -47,6 +47,16 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Add verification or review skills at the end of the workflow.
 - Avoid loading every skill by default; broad context reduces precision.
 
+## Context Continuity
+
+Every workflow template includes a `Context Continuity` section so long-running work can be resumed before context loss.
+
+- Treat a workflow as long-running when it spans multiple phases, uses subagents, runs validation, revises artifacts, changes multiple files, or may continue across turns.
+- Create a checkpoint before starting a new phase, after major validation output, before large edits, when harness context warnings appear, or when context pressure is noticeable.
+- Use `handoff` when available and run `handoff-quality-review` before ending or transferring work.
+- Save handoff artifacts outside the repository by default, unless the workflow defines generated-output artifacts or the user requests project-local state.
+- Include workflow name and phase, objective, success criteria, completed and pending steps, files, commands, validation results, decisions, assumptions, blockers, risks, exact next action, and recommended skills or subagents.
+
 ## Subagent Use Rules
 
 Use subagents at phase boundaries where isolated context or independent review reduces risk.

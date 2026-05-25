@@ -243,6 +243,8 @@ The canonical machine-readable subagent catalog is `catalog/agents.tsv`.
 | `model-methodology-documentation.md` | Draft evidence-backed model methodology or technical model documentation from an extracted `llm_documentation_package/`. |
 | `agent-skill-quality-loop.md` | Reviewing skills, subagents, bundles, and workflow templates for publication. |
 
+Every workflow includes a `Context Continuity` section. For long-running work, agents should create a handoff checkpoint before phase changes, major validation output, large edits, or context pressure, then use `handoff-quality-review` before transferring work when available.
+
 ## Folder Structure
 
 ```text

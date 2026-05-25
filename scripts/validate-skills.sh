@@ -126,6 +126,16 @@ required_agent_sections=(
   "Escalation Rules"
 )
 
+required_workflow_sections=(
+  "Trigger"
+  "Ordered Skills"
+  "Phase Outputs"
+  "Validation Gates"
+  "Context Continuity"
+  "Handoff Format"
+  "Escalation Rules"
+)
+
 mapfile -t skill_dirs < <(find "$SKILLS_PATH" -mindepth 1 -maxdepth 1 -type d | sort)
 
 if [[ ${#skill_dirs[@]} -eq 0 ]]; then
@@ -653,6 +663,45 @@ else
       failed=$((failed + 1))
     fi
   done < <(find "$AGENT_BUNDLE_DIR" -mindepth 1 -maxdepth 1 -type f -name '*.txt' | sort)
+fi
+
+WORKFLOWS_DIR="$REPO_ROOT/workflows"
+if [[ ! -d "$WORKFLOWS_DIR" ]]; then
+  fail_line "Workflows directory not found: $WORKFLOWS_DIR"
+  failed=$((failed + 1))
+else
+  mapfile -t workflow_files < <(find "$WORKFLOWS_DIR" -mindepth 1 -maxdepth 1 -type f -name '*.md' | sort)
+  if [[ ${#workflow_files[@]} -eq 0 ]]; then
+    fail_line "No workflow templates found under: $WORKFLOWS_DIR"
+    failed=$((failed + 1))
+  else
+    echo "[INFO] Validating ${#workflow_files[@]} workflow template(s) in $WORKFLOWS_DIR"
+  fi
+
+  for workflow_file in "${workflow_files[@]}"; do
+    workflow_name="$(basename "$workflow_file")"
+    workflow_base="$(basename "$workflow_file" .md)"
+    workflow_failed=0
+
+    if [[ ! "$workflow_base" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+      fail_line "$workflow_name: workflow file name must use lowercase kebab-case"
+      workflow_failed=1
+    fi
+
+    for section in "${required_workflow_sections[@]}"; do
+      if ! grep -Eq "^## ${section}[[:space:]]*$" "$workflow_file"; then
+        fail_line "$workflow_name: missing required section '## $section'"
+        workflow_failed=1
+      fi
+    done
+
+    if [[ "$workflow_failed" -eq 1 ]]; then
+      failed=$((failed + 1))
+    else
+      echo "[PASS] $workflow_name workflow"
+      passed=$((passed + 1))
+    fi
+  done
 fi
 
 HARNESS_DIR="$REPO_ROOT/harnesses"

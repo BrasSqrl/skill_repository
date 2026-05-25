@@ -15,6 +15,7 @@ Write a concise continuation document that preserves current state, source refer
 - Use before ending a long session with incomplete work.
 - Use when another agent should pick up the task.
 - Use when context is large but existing artifacts already hold some details.
+- Use when a workflow `Context Continuity` checkpoint is needed before a phase change, large edit, validation pass, or context loss.
 
 ## When Not to Use
 
@@ -29,6 +30,7 @@ Write a concise continuation document that preserves current state, source refer
 - Commands run and validation results.
 - Existing artifacts that should be linked instead of duplicated.
 - Focus for the next session, if provided by the user.
+- Workflow name, current phase, completed steps, pending steps, blockers, risks, and exact next action when creating a continuity checkpoint.
 
 ## Workflow
 
@@ -36,9 +38,10 @@ Write a concise continuation document that preserves current state, source refer
 2. Reference existing durable artifacts by path or URL instead of copying them.
 3. Summarize current state, decisions, blockers, and next actions.
 4. Include suggested skills for the next agent.
-5. Redact secrets, tokens, credentials, and personal data.
-6. Save the handoff document to the OS temporary directory, not the workspace.
-7. Report the absolute path to the user.
+5. For workflow checkpoints, include objective, success criteria, files inspected or changed, commands run, validation results, assumptions, blockers, risks, exact next action, and recommended skills or subagents.
+6. Redact secrets, tokens, credentials, and personal data.
+7. Save the handoff document to the OS temporary directory, not the workspace, unless the user or active workflow explicitly requires a project-local generated-output location.
+8. Report the absolute path to the user.
 
 ## Quality Gates
 
@@ -47,6 +50,7 @@ Write a concise continuation document that preserves current state, source refer
 - Sensitive data is omitted or redacted.
 - The handoff names suggested next skills.
 - The file is saved outside the repository unless the user asked otherwise.
+- Workflow checkpoints identify the current phase and exact next action.
 
 ## Anti-Patterns
 

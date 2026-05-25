@@ -108,6 +108,14 @@ Do not use subagents for:
 
 When delegating to a subagent, provide objective, scope, required inputs, allowed actions, forbidden actions, expected output, and escalation conditions. The main agent owns final edits, final validation decisions, and final user-facing reporting.
 
+## Context Continuity
+
+For long-running workflows, create a checkpoint before starting a new phase, after major validation output, before large edits, when the harness warns about context limits, or when context pressure is noticeable.
+
+Use the `handoff` skill when available and review the handoff with `handoff-quality-review` before ending or transferring work. Save handoff artifacts outside the repository by default unless this project explicitly requires a project-local generated-output location.
+
+Continuity checkpoints must include workflow name and current phase, objective and success criteria, completed and pending steps, files inspected or changed, commands run and validation results, decisions, assumptions, blockers, risks, exact next action, and recommended skills or subagents for continuation.
+
 ## Forbidden Changes
 
 - `<files, directories, generated artifacts, or workflows agents must not edit>`

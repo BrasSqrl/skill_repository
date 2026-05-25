@@ -26,6 +26,14 @@ Use when assessing a proposed design, subsystem boundary, refactor direction, de
 - The recommendation distinguishes now-versus-later work.
 - ADRs are added only for durable decisions.
 
+## Context Continuity
+
+Treat this workflow as long-running when it spans multiple phases, uses subagents, runs validation, revises artifacts, changes multiple files, or may continue across turns. Create a checkpoint before starting a new phase, after major validation output, before large edits, when harness context warnings appear, or when context pressure is noticeable.
+
+Use `handoff` when available and run `handoff-quality-review` before ending or transferring work. Save handoff artifacts outside the repository by default unless this workflow already defines generated-output artifacts or the user requests project-local state.
+
+The checkpoint must include workflow name and current phase, objective and success criteria, completed and pending steps, files inspected or changed, commands run and validation results, decisions, assumptions, blockers, risks, exact next action, and recommended skills or subagents for continuation.
+
 ## Handoff Format
 
 Report current state, proposed direction, decision drivers, recommendation, rejected alternatives, validation gaps, and next implementation slices.
