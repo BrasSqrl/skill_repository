@@ -6,13 +6,13 @@ Run commands from the repository root:
 
 ```bash
 cd /path/to/ai_setup
-./scripts/validate-skills.sh
+bash ./scripts/validate-skills.sh
 ```
 
 ## Harness Defaults
 
 | Harness | Global Linux target |
-|---|---|
+| --- | --- |
 | Codex | `$CODEX_HOME/skills` when set, otherwise `$HOME/.codex/skills` |
 | Claude Code | `$HOME/.claude/skills` |
 | OpenCode | `$HOME/.config/opencode/skills` |
@@ -20,53 +20,77 @@ cd /path/to/ai_setup
 Project-local defaults:
 
 | Harness | Project target |
-|---|---|
+| --- | --- |
 | Claude Code | `<project>/.claude/skills` |
 | OpenCode | `<project>/.opencode/skills` |
 | Codex | No project default; provide `--target-path` |
 
 ## Example Commands
 
-Install all skills globally for Codex:
+List bundles:
 
 ```bash
-./scripts/install-skills.sh --harness codex --all
+bash ./scripts/install-skills.sh --list-bundles
 ```
 
-Install all skills globally for Claude Code:
+Install the starter bundle globally for Codex:
 
 ```bash
-./scripts/install-skills.sh --harness claude-code --all
+bash ./scripts/install-skills.sh --harness codex --bundle starter
 ```
 
-Install selected skills globally for OpenCode:
+Install a quality bundle for Claude Code:
 
 ```bash
-./scripts/install-skills.sh --harness opencode --skills context-engineering,test-driven-development
+bash ./scripts/install-skills.sh --harness claude-code --bundle quality
+```
+
+Install selected skills for OpenCode:
+
+```bash
+bash ./scripts/install-skills.sh --harness opencode --skills context-engineering,test-driven-development
 ```
 
 Install project-local skills for OpenCode:
 
 ```bash
-./scripts/install-skills.sh --harness opencode --scope project --project-path "/path/to/repo" --all
+bash ./scripts/install-skills.sh --harness opencode --scope project --project-path "/path/to/repo" --bundle starter
 ```
 
 Preview without copying:
 
 ```bash
-./scripts/install-skills.sh --harness opencode --all --dry-run
+bash ./scripts/install-skills.sh --harness opencode --bundle starter --dry-run
 ```
 
 Replace existing installed skills:
 
 ```bash
-./scripts/install-skills.sh --harness codex --all --force
+bash ./scripts/install-skills.sh --harness codex --bundle starter --force
 ```
 
 Install into an explicit skills directory:
 
 ```bash
-./scripts/install-skills.sh --target-path "/path/to/repo/.agent/skills" --all
+bash ./scripts/install-skills.sh --target-path "/path/to/repo/.agent/skills" --bundle starter
+```
+
+Bootstrap a target repo:
+
+```bash
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter
+```
+
+Dry-run bootstrap:
+
+```bash
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness claude-code --bundle starter --dry-run
+```
+
+Score skills:
+
+```bash
+bash ./scripts/score-skills.sh
 ```
 
 ## Executable Permissions
@@ -81,15 +105,16 @@ You can also invoke them through Bash without changing permissions:
 
 ```bash
 bash ./scripts/validate-skills.sh
-bash ./scripts/install-skills.sh --harness codex --all
+bash ./scripts/install-skills.sh --harness codex --bundle starter
 ```
 
 ## Path Notes
 
 - Quote paths that contain spaces.
 - Use `--harness` for known Codex, Claude Code, or OpenCode defaults.
+- Use `--bundle`, `--skills`, or `--all`; the installer requires exactly one install selector.
 - Use `--target-path` for a custom destination skills directory, not the target repo root.
-- Use `--project-path` only with `--scope project`.
+- Use `--project-path` only with `--scope project` or bootstrap.
 - The installer creates the target skills directory if needed.
 - Existing skill folders are not overwritten unless `--force` is provided.
 
@@ -102,6 +127,14 @@ Run `chmod +x ./scripts/*.sh` or invoke the script with `bash`.
 `No such file or directory`
 
 Run from the repository root or use an absolute path.
+
+`Specify exactly one selector: --all, --skills, or --bundle`
+
+Choose one install mode:
+
+```bash
+bash ./scripts/install-skills.sh --harness codex --bundle starter
+```
 
 `Target already contains skill folder`
 

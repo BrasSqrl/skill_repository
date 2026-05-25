@@ -3,11 +3,11 @@
 # Install skill folders into a harness-specific skills directory.
 #
 # Examples:
-#   ./scripts/install-skills.sh --harness codex --all
+#   ./scripts/install-skills.sh --harness codex --bundle starter
 #   ./scripts/install-skills.sh --harness claude-code --skills context-engineering,test-driven-development
 #   ./scripts/install-skills.sh --harness opencode --all --dry-run
-#   ./scripts/install-skills.sh --harness claude-code --scope project --project-path "/path/to/repo" --all
-#   ./scripts/install-skills.sh --target-path "/path/to/repo/.agent/skills" --all --force
+#   ./scripts/install-skills.sh --list-bundles
+#   ./scripts/install-skills.sh --list-skills
 
 set -u
 
@@ -19,17 +19,23 @@ HARNESS=""
 SCOPE="global"
 PROJECT_PATH=""
 SKILLS_ARG=""
+BUNDLE=""
 INSTALL_ALL=0
 DRY_RUN=0
 FORCE=0
+LIST_BUNDLES=0
+LIST_SKILLS=0
 
 usage() {
   cat <<'USAGE'
 Usage:
+  ./scripts/install-skills.sh --harness codex|claude-code|opencode --bundle NAME [--dry-run] [--force]
   ./scripts/install-skills.sh --harness codex|claude-code|opencode --all [--dry-run] [--force]
   ./scripts/install-skills.sh --harness codex|claude-code|opencode --skills skill-a,skill-b [--dry-run] [--force]
-  ./scripts/install-skills.sh --harness claude-code|opencode --scope project --project-path PATH --all
-  ./scripts/install-skills.sh --target-path PATH --all [--dry-run] [--force]
+  ./scripts/install-skills.sh --harness claude-code|opencode --scope project --project-path PATH --bundle starter
+  ./scripts/install-skills.sh --target-path PATH --bundle starter [--dry-run] [--force]
+  ./scripts/install-skills.sh --list-bundles
+  ./scripts/install-skills.sh --list-skills
 
 Options:
   --harness NAME       Install target profile: codex, claude-code, or opencode.
@@ -38,6 +44,9 @@ Options:
   --target-path PATH   Explicit skills directory. Overrides harness defaults.
   --all                Install every skill under ./skills.
   --skills LIST        Comma-separated skill names to install.
+  --bundle NAME        Install a named bundle from ./catalog/bundles.
+  --list-bundles       Print available bundles.
+  --list-skills        Print cataloged skills.
   --dry-run            Print planned actions without copying files.
   --force              Replace existing target skill folders.
   -h, --help           Show this help.
@@ -47,6 +56,13 @@ USAGE
 fail() {
   echo "[ERROR] $1" >&2
   exit 1
+}
+
+trim() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
 }
 
 validate_harness() {
@@ -63,47 +79,23 @@ validate_scope() {
   esac
 }
 
-global_target_path() {
-  case "$1" in
-    codex)
-      if [[ -n "${CODEX_HOME:-}" ]]; then
-        printf '%s/skills' "$CODEX_HOME"
-      else
-        printf '%s/.codex/skills' "$HOME"
-      fi
-      ;;
-    claude-code)
-      printf '%s/.claude/skills' "$HOME"
-      ;;
-    opencode)
-      printf '%s/.config/opencode/skills' "$HOME"
-      ;;
-    *)
-      fail "Unsupported harness: $1"
-      ;;
-  esac
+profile_value() {
+  local profile_path="$1"
+  local key="$2"
+  local line
+  line="$(grep -E "^${key}=" "$profile_path" | head -n 1 || true)"
+  printf '%s' "${line#*=}"
 }
 
-project_target_path() {
-  local harness_name="$1"
-  local project_path="$2"
-
-  [[ -n "$project_path" ]] || fail "Project scope requires --project-path unless --target-path is provided"
-
-  case "$harness_name" in
-    claude-code)
-      printf '%s/.claude/skills' "$project_path"
-      ;;
-    opencode)
-      printf '%s/.opencode/skills' "$project_path"
-      ;;
-    codex)
-      fail "Codex project scope has no default target. Use --target-path with the desired skills directory."
-      ;;
-    *)
-      fail "Unsupported harness: $harness_name"
-      ;;
-  esac
+join_portable_path() {
+  local base="$1"
+  local relative="$2"
+  relative="${relative//\\//}"
+  if [[ -z "$relative" ]]; then
+    printf '%s' "$base"
+  else
+    printf '%s/%s' "${base%/}" "${relative#/}"
+  fi
 }
 
 resolve_target_path() {
@@ -115,17 +107,60 @@ resolve_target_path() {
   validate_harness "$HARNESS"
   validate_scope "$SCOPE"
 
+  local profile_path="$REPO_ROOT/harnesses/$HARNESS.profile"
+  [[ -f "$profile_path" ]] || fail "Harness profile not found: $profile_path"
+
+  local profile_id
+  profile_id="$(profile_value "$profile_path" "id")"
+  [[ "$profile_id" == "$HARNESS" ]] || fail "Harness profile id '$profile_id' does not match '$HARNESS'"
+
   case "$SCOPE" in
     global)
-      TARGET_PATH="$(global_target_path "$HARNESS")"
+      local global_env global_suffix global_default env_value
+      global_env="$(profile_value "$profile_path" "global_env")"
+      global_suffix="$(profile_value "$profile_path" "global_suffix")"
+      global_default="$(profile_value "$profile_path" "global_default")"
+      if [[ -n "$global_env" ]]; then
+        env_value="${!global_env:-}"
+        if [[ -n "$env_value" ]]; then
+          TARGET_PATH="$(join_portable_path "$env_value" "$global_suffix")"
+          return 0
+        fi
+      fi
+      TARGET_PATH="$(join_portable_path "$HOME" "$global_default")"
       ;;
     project)
-      TARGET_PATH="$(project_target_path "$HARNESS" "$PROJECT_PATH")"
+      local supports_project project_subpath
+      supports_project="$(profile_value "$profile_path" "supports_project_default")"
+      project_subpath="$(profile_value "$profile_path" "project_subpath")"
+      [[ "$supports_project" == "true" ]] || fail "$(profile_value "$profile_path" "label") project scope has no default target. Use --target-path with the desired skills directory."
+      [[ -n "$PROJECT_PATH" ]] || fail "Project scope requires --project-path unless --target-path is provided"
+      TARGET_PATH="$(join_portable_path "$PROJECT_PATH" "$project_subpath")"
       ;;
     custom)
       fail "Custom scope requires --target-path"
       ;;
   esac
+}
+
+show_bundles() {
+  local file="$REPO_ROOT/catalog/bundles.tsv"
+  [[ -f "$file" ]] || fail "Bundle catalog not found: $file"
+  awk -F '\t' 'NR == 1 { next } { printf "%-24s %-24s %s\n", $1, $2, $4 }' "$file"
+}
+
+show_skills() {
+  local file="$REPO_ROOT/catalog/skills.tsv"
+  [[ -f "$file" ]] || fail "Skill catalog not found: $file"
+  awk -F '\t' 'NR == 1 { next } { printf "%-36s %-22s %-8s %-12s %s\n", $1, $2, $3, $4, $11 }' "$file"
+}
+
+bundle_skills() {
+  local bundle_name="$1"
+  [[ "$bundle_name" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || fail "Invalid bundle name '$bundle_name'. Bundle names must use lowercase kebab-case."
+  local bundle_path="$REPO_ROOT/catalog/bundles/$bundle_name.txt"
+  [[ -f "$bundle_path" ]] || fail "Bundle not found: $bundle_name"
+  grep -Ev '^[[:space:]]*(#|$)' "$bundle_path" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
 while [[ $# -gt 0 ]]; do
@@ -161,6 +196,19 @@ while [[ $# -gt 0 ]]; do
       SKILLS_ARG="$2"
       shift 2
       ;;
+    --bundle)
+      [[ $# -ge 2 ]] || fail "--bundle requires a value"
+      BUNDLE="$2"
+      shift 2
+      ;;
+    --list-bundles)
+      LIST_BUNDLES=1
+      shift
+      ;;
+    --list-skills)
+      LIST_SKILLS=1
+      shift
+      ;;
     --dry-run)
       DRY_RUN=1
       shift
@@ -179,26 +227,34 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "$LIST_BUNDLES" -eq 1 ]]; then
+  show_bundles
+  exit 0
+fi
+
+if [[ "$LIST_SKILLS" -eq 1 ]]; then
+  show_skills
+  exit 0
+fi
+
 resolve_target_path
 [[ -d "$SOURCE_PATH" ]] || fail "Source skills directory not found: $SOURCE_PATH"
 
-if [[ "$INSTALL_ALL" -eq 1 && -n "$SKILLS_ARG" ]]; then
-  fail "Use either --all or --skills, not both"
-fi
-
-if [[ "$INSTALL_ALL" -eq 0 && -z "$SKILLS_ARG" ]]; then
-  usage
-  fail "Specify --all or --skills"
-fi
+selector_count=0
+[[ "$INSTALL_ALL" -eq 1 ]] && selector_count=$((selector_count + 1))
+[[ -n "$SKILLS_ARG" ]] && selector_count=$((selector_count + 1))
+[[ -n "$BUNDLE" ]] && selector_count=$((selector_count + 1))
+[[ "$selector_count" -eq 1 ]] || { usage; fail "Specify exactly one selector: --all, --skills, or --bundle"; }
 
 selected_skills=()
 if [[ "$INSTALL_ALL" -eq 1 ]]; then
   mapfile -t selected_skills < <(find "$SOURCE_PATH" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
+elif [[ -n "$BUNDLE" ]]; then
+  mapfile -t selected_skills < <(bundle_skills "$BUNDLE")
 else
   IFS=',' read -r -a raw_skills <<< "$SKILLS_ARG"
   for raw_skill in "${raw_skills[@]}"; do
-    skill="${raw_skill#"${raw_skill%%[![:space:]]*}"}"
-    skill="${skill%"${skill##*[![:space:]]}"}"
+    skill="$(trim "$raw_skill")"
     [[ -n "$skill" ]] && selected_skills+=("$skill")
   done
 fi
@@ -215,6 +271,9 @@ echo "[INFO] Source: $SOURCE_PATH"
 if [[ -n "$HARNESS" ]]; then
   echo "[INFO] Harness: $HARNESS"
   echo "[INFO] Scope: $SCOPE"
+fi
+if [[ -n "$BUNDLE" ]]; then
+  echo "[INFO] Bundle: $BUNDLE"
 fi
 echo "[INFO] Target: $TARGET_PATH"
 echo "[INFO] Selected skills: ${selected_skills[*]}"

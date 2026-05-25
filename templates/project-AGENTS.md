@@ -81,6 +81,11 @@ Linux:
 - `<path>/`: `<purpose>`
 - `<path>/`: `<purpose>`
 
+## Installed Agent Skills
+
+- `<bundle or skill name>`: `<when agents should use it in this repo>`
+- Installed skill record: `docs/agents/installed-skills.md`
+
 ## Forbidden Changes
 
 - `<files, directories, generated artifacts, or workflows agents must not edit>`

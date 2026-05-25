@@ -1,0 +1,9 @@
+id=claude-code
+label=Claude Code
+global_env=
+global_suffix=
+global_default=.claude/skills
+project_subpath=.claude/skills
+supports_project_default=true
+skills_format=SKILL.md
+instructions_file=AGENTS.md

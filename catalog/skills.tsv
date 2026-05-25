@@ -1,0 +1,43 @@
+name	category	maturity	source	license	harnesses	upstream_repo	upstream_ref	upstream_path	import_mode	description
+agent-workflow-design	agent-orchestration	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Design repeatable AI coding-agent workflows, handoffs, validation loops, and skill sets.
+agent-evaluation	agent-orchestration	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Evaluate AI coding-agent behavior against repeatable tasks, rubrics, expected artifacts, and validation gates.
+api-backend-development	implementation	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Build or modify backend APIs, services, handlers, jobs, and server-side contracts.
+api-contract-testing	quality	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Verify API contracts, schemas, compatibility, and consumer-provider expectations.
+architecture-review	review	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Review architecture, module boundaries, coupling, data flow, and design tradeoffs.
+caveman	conversation	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Switch to ultra-compressed communication while preserving technical accuracy.
+ci-cd-pipeline-maintenance	delivery	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Maintain CI/CD pipelines, workflows, caches, gates, artifacts, and deployment checks.
+code-review-and-quality	review	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Review software changes for correctness, maintainability, regressions, and delivery risk.
+context-engineering	context	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Gather, compress, refresh, and preserve working context for agentic software tasks.
+database-data-workflow-development	implementation	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Develop database, migration, query, seed, ETL, reporting, and data workflow changes.
+debugging-and-error-recovery	diagnosis	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Reproduce, isolate, fix, and verify failing software behavior.
+dependency-environment-management	environment	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Manage dependencies, package managers, runtime versions, lockfiles, and setup drift.
+diagnose	diagnosis	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Run an intensive diagnosis loop for hard bugs, flaky failures, and performance regressions.
+documentation-and-adrs	delivery	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Create or update developer documentation and architecture decision records.
+error-message-triage	diagnosis	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Classify noisy compiler, test, install, linter, type-check, and runtime errors.
+frontend-ui-development	implementation	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Build or modify frontend UI, components, state, styling, accessibility, and interactions.
+grill-me	conversation	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Stress-test a plan or design by interviewing through one decision at a time.
+grill-with-docs	conversation	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Stress-test a plan against repository language and durable decision records.
+handoff	delivery	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Create a compact handoff document for another agent or future session.
+handoff-quality-review	agent-orchestration	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Review handoff artifacts for continuity, validation evidence, and missing context.
+improve-codebase-architecture	review	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Find deeper architecture improvement opportunities across a codebase.
+incremental-implementation	implementation	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Implement software changes in small, verified slices while preserving existing behavior.
+observability-and-monitoring	delivery	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Add or review logs, metrics, traces, dashboards, alerts, and production diagnosis signals.
+performance-profiling	diagnosis	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Measure, isolate, optimize, and verify performance bottlenecks and regressions.
+planning-and-task-breakdown	planning	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Convert software goals into scoped, ordered, verifiable implementation plans.
+prompt-regression-testing	agent-orchestration	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Test prompt, skill, and agent behavior against repeatable scenarios and expected checks.
+property-based-testing	quality	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Design invariant, round-trip, generator, and stateful tests beyond example cases.
+prototype	implementation	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Build a throwaway prototype to answer design, state, workflow, or UI questions.
+pull-request-prep	delivery	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Prepare software changes for review with validation evidence, risks, and reviewer notes.
+refactoring	implementation	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Improve internal software structure while preserving externally observable behavior.
+release-readiness	delivery	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Assess whether changes are ready to release, deploy, tag, publish, or hand off.
+repo-onboarding	context	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Map an unfamiliar repository's structure, stack, commands, conventions, and risks.
+security-review	security	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Review code or designs for security risks, unsafe defaults, and defensive mitigations.
+setup-agent-skills	agent-orchestration	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Set up project-local agent instructions and support docs for workflow skills.
+skill-review	agent-orchestration	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Review skill quality, trigger clarity, overlap, validation gates, and context cost.
+source-driven-development	implementation	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Ground implementation or review in authoritative code, tests, specs, schemas, or contracts.
+test-driven-development	quality	stable	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Drive software changes with a red-green-refactor loop and focused regression coverage.
+to-issues	product	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Convert a plan, spec, PRD, or conversation into independently executable issues.
+to-prd	product	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Synthesize current context into a product requirements document for implementation.
+triage	product	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Triage bugs, feature requests, and issue tracker work through label states.
+workflow-dry-run	agent-orchestration	draft	first-party	repo-tbd	codex,claude-code,opencode	none	none	none	original	Dry-run an agent workflow before execution to find missing context, gates, and risks.
+zoom-out	context	stable	third-party	MIT	codex,claude-code,opencode	unavailable	unavailable	unavailable	imported	Produce a higher-level map of unfamiliar code, modules, callers, and context.

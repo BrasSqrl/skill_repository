@@ -14,6 +14,7 @@ Each skill should help an AI coding agent perform a concrete engineering workflo
 - Write deterministic, operational guidance. Favor steps, checks, commands, decision rules, and expected outputs.
 - Validate before reporting work complete. Run the repository validation script when skill files or repository rules change.
 - Keep documentation scoped to this repository. Do not reference any specific downstream project.
+- Keep machine-readable metadata aligned with content. Update `catalog/skills.tsv`, bundle files, and harness/profile documentation when changing installable skills or installer behavior.
 
 ## Skill Format Rules
 
@@ -28,6 +29,16 @@ Each skill should help an AI coding agent perform a concrete engineering workflo
 - Use optional `assets/` only for reusable files copied or transformed by the skill.
 - Use optional nested `agents/` only for agent metadata or sub-agent instructions that directly support the skill.
 
+## Catalog And Bundle Rules
+
+- Every skill folder must have exactly one matching row in `catalog/skills.tsv`.
+- Every catalog row must point to an existing skill folder.
+- Catalog fields must stay dependency-free and parseable as TSV.
+- Add skills to bundles only when they should be installed together for a repeated workflow.
+- Every bundle listed in `catalog/bundles.tsv` must have a matching newline-delimited file under `catalog/bundles/`.
+- Harness defaults belong in `harnesses/*.profile`, not hardcoded documentation or installer branches.
+- Third-party or adapted skills must have license metadata in the catalog and attribution in `THIRD_PARTY_NOTICES.md`.
+
 ## Writing Standards
 
 - Forbid vague prompt advice such as "be careful", "think deeply", or "write good code" unless paired with concrete actions.
@@ -40,7 +51,7 @@ Each skill should help an AI coding agent perform a concrete engineering workflo
 
 ## Validation
 
-Run validation after changing skills, references, templates, scripts, or repository rules:
+Run validation after changing skills, references, templates, scripts, catalog files, harness profiles, workflows, or repository rules:
 
 ```powershell
 .\scripts\validate-skills.ps1
@@ -50,6 +61,18 @@ Linux alternative:
 
 ```bash
 ./scripts/validate-skills.sh
+```
+
+Run quality scoring after adding or rewriting skills:
+
+```powershell
+.\scripts\score-skills.ps1
+```
+
+Linux alternative:
+
+```bash
+./scripts/score-skills.sh
 ```
 
 If validation cannot be run, report that clearly and explain why.

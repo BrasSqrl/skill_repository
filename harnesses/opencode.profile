@@ -1,0 +1,9 @@
+id=opencode
+label=OpenCode
+global_env=
+global_suffix=
+global_default=.config/opencode/skills
+project_subpath=.opencode/skills
+supports_project_default=true
+skills_format=SKILL.md
+instructions_file=AGENTS.md

@@ -1,0 +1,7 @@
+frontend-ui-development
+prototype
+performance-profiling
+test-driven-development
+debugging-and-error-recovery
+code-review-and-quality
+pull-request-prep

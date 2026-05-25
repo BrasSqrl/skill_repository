@@ -3,21 +3,21 @@
 Install skill folders into a harness-specific skills directory.
 
 .DESCRIPTION
-Copies selected folders from ./skills into a target directory. By default,
-existing target skill folders are not overwritten. Use -Force to replace them.
-Use -Harness to install to a known agent harness location, or -TargetPath to
-provide an explicit destination.
+Copies selected folders from ./skills into a target directory. Skill selection
+can come from -All, -Skills, or -Bundle. Harness defaults are read from
+./harnesses/*.profile. By default, existing target skill folders are not
+overwritten. Use -Force to replace them.
 
 .EXAMPLES
-.\scripts\install-skills.ps1 -Harness codex -All
+.\scripts\install-skills.ps1 -Harness codex -Bundle starter
 
 .\scripts\install-skills.ps1 -Harness claude-code -Skills context-engineering,test-driven-development
 
 .\scripts\install-skills.ps1 -Harness opencode -All -DryRun
 
-.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\repo" -All
+.\scripts\install-skills.ps1 -ListBundles
 
-.\scripts\install-skills.ps1 -TargetPath "C:\path\to\repo\.agent\skills" -All -Force
+.\scripts\install-skills.ps1 -ListSkills
 #>
 
 [CmdletBinding()]
@@ -34,7 +34,13 @@ param(
 
     [string[]]$Skills,
 
+    [string]$Bundle,
+
     [switch]$All,
+
+    [switch]$ListBundles,
+
+    [switch]$ListSkills,
 
     [switch]$DryRun,
 
@@ -66,72 +72,101 @@ function Get-RepoRoot {
     return (Get-Location).Path
 }
 
-function Get-GlobalHarnessTargetPath {
-    param([string]$HarnessName)
+function Read-KeyValueFile {
+    param([string]$Path)
 
-    switch ($HarnessName) {
-        "codex" {
-            if ($env:CODEX_HOME) {
-                return (Join-Path $env:CODEX_HOME "skills")
-            }
-
-            return (Join-Path $HOME ".codex\skills")
-        }
-        "claude-code" {
-            return (Join-Path $HOME ".claude\skills")
-        }
-        "opencode" {
-            return (Join-Path $HOME ".config\opencode\skills")
-        }
-        default {
-            throw "Unsupported harness: $HarnessName"
-        }
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "Required profile file not found: $Path"
     }
+
+    $values = @{}
+    foreach ($line in Get-Content -LiteralPath $Path) {
+        $trimmed = $line.Trim()
+        if ([string]::IsNullOrWhiteSpace($trimmed) -or $trimmed.StartsWith("#")) {
+            continue
+        }
+
+        $parts = $trimmed -split "=", 2
+        if ($parts.Count -ne 2) {
+            throw "Invalid key=value line in ${Path}: $line"
+        }
+
+        $values[$parts[0].Trim()] = $parts[1].Trim()
+    }
+
+    return $values
 }
 
-function Get-ProjectHarnessTargetPath {
+function Get-HarnessProfile {
     param(
-        [string]$HarnessName,
-        [string]$RootPath
+        [string]$RepoRoot,
+        [string]$HarnessName
     )
 
-    if ([string]::IsNullOrWhiteSpace($RootPath)) {
-        throw "Project scope requires -ProjectPath unless -TargetPath is provided."
+    $profilePath = Join-Path $RepoRoot "harnesses\$HarnessName.profile"
+    $profile = Read-KeyValueFile -Path $profilePath
+    if ($profile["id"] -ne $HarnessName) {
+        throw "Harness profile id '$($profile["id"])' does not match '$HarnessName'"
     }
 
-    $projectFullPath = [System.IO.Path]::GetFullPath($RootPath)
+    return $profile
+}
 
-    switch ($HarnessName) {
-        "claude-code" {
-            return (Join-Path $projectFullPath ".claude\skills")
-        }
-        "opencode" {
-            return (Join-Path $projectFullPath ".opencode\skills")
-        }
-        "codex" {
-            throw "Codex project scope has no default target. Use -TargetPath with the desired skills directory."
-        }
-        default {
-            throw "Unsupported harness: $HarnessName"
-        }
+function Join-PortablePath {
+    param(
+        [string]$BasePath,
+        [string]$RelativePath
+    )
+
+    $parts = $RelativePath -split "[/\\]" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    $result = $BasePath
+    foreach ($part in $parts) {
+        $result = Join-Path $result $part
     }
+
+    return $result
 }
 
 function Resolve-InstallTargetPath {
+    param(
+        [string]$RepoRoot,
+        [string]$HarnessName
+    )
+
     if (-not [string]::IsNullOrWhiteSpace($TargetPath)) {
         return [System.IO.Path]::GetFullPath($TargetPath)
     }
 
-    if ([string]::IsNullOrWhiteSpace($Harness)) {
+    if ([string]::IsNullOrWhiteSpace($HarnessName)) {
         throw "Specify -TargetPath or provide -Harness codex, claude-code, or opencode."
     }
 
+    $profile = Get-HarnessProfile -RepoRoot $RepoRoot -HarnessName $HarnessName
+
     switch ($Scope) {
         "global" {
-            return [System.IO.Path]::GetFullPath((Get-GlobalHarnessTargetPath -HarnessName $Harness))
+            $globalEnv = $profile["global_env"]
+            if (-not [string]::IsNullOrWhiteSpace($globalEnv)) {
+                $envValue = [Environment]::GetEnvironmentVariable($globalEnv)
+                if (-not [string]::IsNullOrWhiteSpace($envValue)) {
+                    $suffix = $profile["global_suffix"]
+                    if ([string]::IsNullOrWhiteSpace($suffix)) {
+                        return [System.IO.Path]::GetFullPath($envValue)
+                    }
+                    return [System.IO.Path]::GetFullPath((Join-PortablePath -BasePath $envValue -RelativePath $suffix))
+                }
+            }
+
+            return [System.IO.Path]::GetFullPath((Join-PortablePath -BasePath $HOME -RelativePath $profile["global_default"]))
         }
         "project" {
-            return [System.IO.Path]::GetFullPath((Get-ProjectHarnessTargetPath -HarnessName $Harness -RootPath $ProjectPath))
+            if ($profile["supports_project_default"] -ne "true") {
+                throw "$($profile["label"]) project scope has no default target. Use -TargetPath with the desired skills directory."
+            }
+            if ([string]::IsNullOrWhiteSpace($ProjectPath)) {
+                throw "Project scope requires -ProjectPath unless -TargetPath is provided."
+            }
+            return [System.IO.Path]::GetFullPath((Join-PortablePath -BasePath $ProjectPath -RelativePath $profile["project_subpath"]))
         }
         "custom" {
             throw "Custom scope requires -TargetPath."
@@ -151,8 +186,7 @@ function Normalize-SkillList {
             continue
         }
 
-        $parts = $item -split ","
-        foreach ($part in $parts) {
+        foreach ($part in ($item -split ",")) {
             $skill = $part.Trim()
             if ($skill) {
                 $normalized += $skill
@@ -161,6 +195,27 @@ function Normalize-SkillList {
     }
 
     return @($normalized | Select-Object -Unique)
+}
+
+function Get-BundleSkills {
+    param(
+        [string]$RepoRoot,
+        [string]$BundleName
+    )
+
+    if ($BundleName -notmatch "^[a-z0-9]+(-[a-z0-9]+)*$") {
+        throw "Invalid bundle name '$BundleName'. Bundle names must use lowercase kebab-case."
+    }
+
+    $bundlePath = Join-Path $RepoRoot "catalog\bundles\$BundleName.txt"
+    if (-not (Test-Path -LiteralPath $bundlePath -PathType Leaf)) {
+        throw "Bundle not found: $BundleName"
+    }
+
+    return @(Get-Content -LiteralPath $bundlePath |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.StartsWith("#") } |
+        Select-Object -Unique)
 }
 
 function Test-ChildPath {
@@ -176,17 +231,54 @@ function Test-ChildPath {
         $childFull.StartsWith($parentFull + [System.IO.Path]::AltDirectorySeparatorChar, $comparison)
 }
 
+function Show-Bundles {
+    param([string]$RepoRoot)
+
+    $bundleCatalog = Join-Path $RepoRoot "catalog\bundles.tsv"
+    if (-not (Test-Path -LiteralPath $bundleCatalog -PathType Leaf)) {
+        throw "Bundle catalog not found: $bundleCatalog"
+    }
+
+    Import-Csv -LiteralPath $bundleCatalog -Delimiter "`t" |
+        Sort-Object id |
+        Format-Table id, label, recommendation -Wrap
+}
+
+function Show-Skills {
+    param([string]$RepoRoot)
+
+    $skillCatalog = Join-Path $RepoRoot "catalog\skills.tsv"
+    if (-not (Test-Path -LiteralPath $skillCatalog -PathType Leaf)) {
+        throw "Skill catalog not found: $skillCatalog"
+    }
+
+    Import-Csv -LiteralPath $skillCatalog -Delimiter "`t" |
+        Sort-Object name |
+        Format-Table name, category, maturity, source, license, description -Wrap
+}
+
 try {
-    if ($All -and $Skills -and $Skills.Count -gt 0) {
-        throw "Use either -All or -Skills, not both."
-    }
-
-    if (-not $All -and (-not $Skills -or $Skills.Count -eq 0)) {
-        throw "Specify -All or provide one or more names with -Skills."
-    }
-
     $repoRoot = Get-RepoRoot
     $sourcePath = Join-Path $repoRoot "skills"
+
+    if ($ListBundles) {
+        Show-Bundles -RepoRoot $repoRoot
+        exit 0
+    }
+
+    if ($ListSkills) {
+        Show-Skills -RepoRoot $repoRoot
+        exit 0
+    }
+
+    $selectorCount = 0
+    if ($All) { $selectorCount++ }
+    if ($Skills -and $Skills.Count -gt 0) { $selectorCount++ }
+    if (-not [string]::IsNullOrWhiteSpace($Bundle)) { $selectorCount++ }
+
+    if ($selectorCount -ne 1) {
+        throw "Specify exactly one selector: -All, -Skills, or -Bundle."
+    }
 
     if (-not (Test-Path -LiteralPath $sourcePath -PathType Container)) {
         throw "Source skills directory not found: $sourcePath"
@@ -194,6 +286,8 @@ try {
 
     if ($All) {
         $selectedSkills = @(Get-ChildItem -LiteralPath $sourcePath -Directory | Sort-Object Name | ForEach-Object { $_.Name })
+    } elseif (-not [string]::IsNullOrWhiteSpace($Bundle)) {
+        $selectedSkills = Get-BundleSkills -RepoRoot $repoRoot -BundleName $Bundle
     } else {
         $selectedSkills = Normalize-SkillList -RawSkills $Skills
     }
@@ -218,11 +312,14 @@ try {
         }
     }
 
-    $targetFullPath = Resolve-InstallTargetPath
+    $targetFullPath = Resolve-InstallTargetPath -RepoRoot $repoRoot -HarnessName $Harness
     Write-Info "Source: $sourcePath"
     if (-not [string]::IsNullOrWhiteSpace($Harness)) {
         Write-Info "Harness: $Harness"
         Write-Info "Scope: $Scope"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($Bundle)) {
+        Write-Info "Bundle: $Bundle"
     }
     Write-Info "Target: $targetFullPath"
     Write-Info "Selected skills: $($selectedSkills -join ', ')"

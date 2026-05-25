@@ -1,31 +1,53 @@
-# OpenAI-Style Agent Skills Repository
+# Portable Agent Skill Operating Kit
 
-Reusable, tool-agnostic skills for AI-assisted software development. Skills can be copied or installed into other repositories to guide coding agents through repeatable engineering workflows.
+Reusable, tool-agnostic skills for AI-assisted software development. This repository stores OpenAI-style skill folders, install bundles, harness profiles, workflow templates, and validation scripts so the same agent setup can be cloned and installed on any machine.
 
-This repository is Windows-first and Linux-second. Prefer PowerShell examples first, with Bash alternatives where useful.
+The repository is Windows-first and Linux-second. PowerShell examples are primary; Bash alternatives are provided for parity.
 
 ## Quick Start
 
-Validate the skill library:
+Validate the library:
 
 ```powershell
 .\scripts\validate-skills.ps1
 ```
 
-Windows double-click installer:
+List install bundles:
+
+```powershell
+.\scripts\install-skills.ps1 -ListBundles
+```
+
+Install the starter bundle for the current user:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness codex -Bundle starter
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter
+.\scripts\install-skills.ps1 -Harness opencode -Bundle starter
+```
+
+Use the Windows guided installer:
 
 ```text
 install-all-skills-windows.bat
 ```
 
-The double-click installer asks which harness to install for: Codex, Claude Code, or OpenCode. It then asks for global, project-local, or custom install scope and shows which skills are already installed before copying anything.
+The batch launcher asks for harness, install scope, bundle/all/individual skill selection, and overwrite confirmation.
 
-Install all skills for the current Windows user:
+Linux equivalents:
+
+```bash
+bash ./scripts/validate-skills.sh
+bash ./scripts/install-skills.sh --list-bundles
+bash ./scripts/install-skills.sh --harness codex --bundle starter
+```
+
+## Install Examples
+
+Install all skills:
 
 ```powershell
 .\scripts\install-skills.ps1 -Harness codex -All
-.\scripts\install-skills.ps1 -Harness claude-code -All
-.\scripts\install-skills.ps1 -Harness opencode -All
 ```
 
 Install selected skills:
@@ -34,171 +56,207 @@ Install selected skills:
 .\scripts\install-skills.ps1 -Harness codex -Skills context-engineering,test-driven-development
 ```
 
-Dry-run before copying to a harness default location:
+Install a bundle:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness opencode -All -DryRun
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle quality
+```
+
+Preview before copying:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle starter -DryRun
 ```
 
 Install into an explicit skills directory:
 
 ```powershell
-.\scripts\install-skills.ps1 -TargetPath "C:\path\to\repo\.agent\skills" -All
+.\scripts\install-skills.ps1 -TargetPath "C:\path\to\repo\.agent\skills" -Bundle starter
 ```
 
-Linux equivalents:
+Bash:
 
 ```bash
-./scripts/validate-skills.sh
-./scripts/install-skills.sh --harness codex --all
-./scripts/install-skills.sh --harness claude-code --skills context-engineering,test-driven-development
-./scripts/install-skills.sh --harness opencode --all --dry-run
+bash ./scripts/install-skills.sh --harness codex --all
+bash ./scripts/install-skills.sh --harness claude-code --bundle quality
+bash ./scripts/install-skills.sh --harness opencode --skills context-engineering,test-driven-development
+bash ./scripts/install-skills.sh --harness opencode --bundle starter --dry-run
 ```
 
-Default global targets:
+## Bootstrap A Target Repo
 
-| Harness | Windows target |
-|---|---|
-| Codex | `%CODEX_HOME%\skills` when set, otherwise `%USERPROFILE%\.codex\skills` |
-| Claude Code | `%USERPROFILE%\.claude\skills` |
-| OpenCode | `%USERPROFILE%\.config\opencode\skills` |
+Bootstrap installs a bundle, seeds `AGENTS.md` when missing, and writes `docs/agents/installed-skills.md` in the target repo.
 
-For practical harness workflows, see [docs/using-with-codex.md](docs/using-with-codex.md).
+```powershell
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter
+```
+
+Dry-run first:
+
+```powershell
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness opencode -Bundle starter -DryRun
+```
+
+Bash:
+
+```bash
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness claude-code --bundle starter
+```
+
+## Harness Targets
+
+| Harness | Global target | Project target |
+| --- | --- | --- |
+| Codex | `%CODEX_HOME%\skills` when set, otherwise `%USERPROFILE%\.codex\skills` | Use `-TargetPath` for explicit project-local installs |
+| Claude Code | `%USERPROFILE%\.claude\skills` | `<project>\.claude\skills` |
+| OpenCode | `%USERPROFILE%\.config\opencode\skills` | `<project>\.opencode\skills` |
+
+Harness defaults live in `harnesses/*.profile`.
+
+## Bundles
+
+| Bundle | Purpose |
+| --- | --- |
+| `starter` | Baseline skills for a new software repository. |
+| `backend` | Backend, API, data, observability, and performance workflows. |
+| `frontend` | Frontend UI, client behavior, and browser-facing delivery workflows. |
+| `quality` | Testing, review, verification, and skill quality workflows. |
+| `delivery` | PR, release, CI/CD, documentation, and handoff workflows. |
+| `security` | Security review, dependency, access, and risky-change workflows. |
+| `agent-orchestration` | Agent workflow, evaluation, handoff, and skill quality workflows. |
+| `all-software-dev` | Complete software-development skill set from this repository. |
+
+Bundle membership is stored in `catalog/bundles/*.txt`.
 
 ## Folder Structure
 
 ```text
 .
 |-- AGENTS.md
-|-- install-all-skills-windows.bat
 |-- README.md
+|-- THIRD_PARTY_NOTICES.md
+|-- install-all-skills-windows.bat
+|-- catalog/
+|   |-- skills.tsv
+|   |-- bundles.tsv
+|   `-- bundles/
 |-- docs/
+|-- harnesses/
 |-- scripts/
-|   |-- install-skills.ps1
+|   |-- bootstrap-agent-repo.ps1
+|   |-- bootstrap-agent-repo.sh
 |   |-- install-skills-interactive.ps1
+|   |-- install-skills.ps1
 |   |-- install-skills.sh
+|   |-- score-skills.ps1
+|   |-- score-skills.sh
 |   |-- validate-skills.ps1
 |   `-- validate-skills.sh
 |-- skills/
 |   `-- skill-name/
 |       |-- SKILL.md
 |       `-- references/
-`-- templates/
-    |-- project-AGENTS.md
-    `-- skill-template.md
+|-- templates/
+|   |-- project-AGENTS.md
+|   `-- skill-template.md
+`-- workflows/
 ```
 
 Each skill is a folder under `skills/` with a required `SKILL.md`. Optional `references/`, `scripts/`, `assets/`, and nested `agents/` folders may be added only when they directly support the skill.
 
 ## Recommended Starter Set
 
-For a new software repository, start with:
+Use the `starter` bundle for most new repositories. It includes onboarding, context gathering, planning, incremental implementation, test-driven development, debugging, review, PR prep, and release readiness.
 
-- `repo-onboarding`
-- `context-engineering`
-- `planning-and-task-breakdown`
-- `incremental-implementation`
-- `test-driven-development`
-- `debugging-and-error-recovery`
-- `code-review-and-quality`
-- `pull-request-prep`
+Add domain bundles when those workflows repeat:
 
-Add specialized skills for backend, frontend, database, security, architecture, dependency, documentation, or release work when those workflows become common.
+- `backend` for service, API, and data-heavy repos.
+- `frontend` for UI-heavy repos.
+- `quality` for test strategy, prompt regression, and review workflows.
+- `agent-orchestration` for multi-agent handoffs, evaluations, and workflow design.
 
 ## Skill Catalog
 
-### Context And Planning
+| Skill | Category | Purpose | When To Use |
+| --- | --- | --- | --- |
+| `agent-workflow-design` | agent-orchestration | Design repeatable AI coding-agent workflows, handoffs, validation loops, and skill sets. | Use when improving agent operating procedures or recurring AI-assisted development flows. |
+| `agent-evaluation` | agent-orchestration | Evaluate AI coding-agent behavior against repeatable tasks, rubrics, artifacts, and validation gates. | Use when comparing agents, skills, prompts, or orchestration patterns. |
+| `handoff-quality-review` | agent-orchestration | Review handoff artifacts for continuity, validation evidence, and restart readiness. | Use before another agent resumes work or after context compaction. |
+| `prompt-regression-testing` | agent-orchestration | Test prompt, skill, and agent behavior against repeatable fixtures. | Use when changing prompts, skills, workflows, or agent instructions. |
+| `setup-agent-skills` | agent-orchestration | Configure project-local agent workflow context. | Use before issue triage, PRD creation, or issue breakdown when tracker, labels, and domain docs are unclear. |
+| `skill-review` | agent-orchestration | Review skill quality, trigger clarity, overlap, validation, references, and license metadata. | Use when adding, importing, or revising skills. |
+| `workflow-dry-run` | agent-orchestration | Dry-run an agent workflow before execution to find missing inputs and weak gates. | Use before long or risky agent workflows. |
+| `context-engineering` | context | Gather, compress, refresh, and preserve working context. | Use when starting unfamiliar work, recovering context, preparing handoff, or identifying relevant files and commands. |
+| `repo-onboarding` | context | Map an unfamiliar repository's structure, stack, commands, conventions, and risks. | Use at the start of work in a new repo. |
+| `zoom-out` | context | Produce a higher-level map of unfamiliar code, modules, and callers. | Use when local code details need broader system context. |
+| `caveman` | conversation | Switch to ultra-compressed communication while preserving technical accuracy. | Use when the user asks for terse updates or fewer tokens. |
+| `grill-me` | conversation | Stress-test a plan or design through focused questions. | Use when the user wants to be grilled on a plan. |
+| `grill-with-docs` | conversation | Stress-test a plan against repository language and durable docs. | Use when terminology, context docs, or ADRs matter to a design. |
+| `ci-cd-pipeline-maintenance` | delivery | Maintain CI/CD workflows, caches, gates, artifacts, and deployment checks. | Use when pipeline behavior, automation, or release gates change. |
+| `documentation-and-adrs` | delivery | Create or update developer documentation and architecture decision records. | Use for guides, runbooks, ADRs, setup notes, or durable technical decisions. |
+| `handoff` | delivery | Create a compact continuation document for another agent or future session. | Use when context is about to be lost or work should transfer cleanly. |
+| `observability-and-monitoring` | delivery | Add or review logs, metrics, traces, dashboards, alerts, and diagnostics. | Use when runtime visibility or operational triage must improve. |
+| `pull-request-prep` | delivery | Prepare software changes for review with validation evidence and risks. | Use before opening, updating, or handing off a PR or review package. |
+| `release-readiness` | delivery | Assess release, deployment, tag, or publish readiness. | Use before release to check validation, versioning, rollback, docs, and known risks. |
+| `debugging-and-error-recovery` | diagnosis | Reproduce, isolate, fix, and verify failing software behavior. | Use when tests fail, builds break, runtime errors appear, or behavior is broken. |
+| `diagnose` | diagnosis | Run an intensive diagnosis loop for hard bugs and performance regressions. | Use when a fast deterministic feedback loop must be built before fixing. |
+| `error-message-triage` | diagnosis | Classify noisy errors and identify the first actionable failure. | Use before deeper debugging of compiler, test, install, linter, or runtime output. |
+| `performance-profiling` | diagnosis | Measure, isolate, optimize, and verify performance bottlenecks. | Use when performance regressions, slow queries, memory issues, or latency problems appear. |
+| `dependency-environment-management` | environment | Manage dependencies, package managers, runtime versions, lockfiles, and setup drift. | Use when installs fail, dependencies change, or local and CI environments differ. |
+| `api-backend-development` | implementation | Build or modify backend APIs, services, handlers, jobs, and server-side contracts. | Use for request handling, validation, auth hooks, service logic, jobs, and backend integrations. |
+| `database-data-workflow-development` | implementation | Develop schema, migration, query, seed, ETL, reporting, and data workflow changes. | Use when modifying data models, migrations, indexes, fixtures, analytics queries, or data integrity checks. |
+| `frontend-ui-development` | implementation | Build or modify frontend UI, components, state flows, styling, accessibility, and interactions. | Use for screens, components, forms, client state, responsive layout, and UI tests. |
+| `incremental-implementation` | implementation | Implement changes in small, validated slices while preserving behavior. | Use when applying a scoped feature, bug fix, or maintenance change. |
+| `prototype` | implementation | Build a throwaway prototype to answer a design, state, workflow, or UI question. | Use when a quick prototype can validate an idea before production implementation. |
+| `refactoring` | implementation | Improve internal structure while preserving externally observable behavior. | Use when simplifying, reorganizing, decoupling, extracting, or consolidating code. |
+| `source-driven-development` | implementation | Ground implementation or review in authoritative code, specs, schemas, or contracts. | Use when correctness depends on source material rather than inference. |
+| `planning-and-task-breakdown` | planning | Convert goals into scoped, ordered, verifiable work slices. | Use for ambiguous, multi-step, risky, or cross-cutting requests before coding. |
+| `to-issues` | product | Convert a plan, spec, PRD, or conversation into executable issues. | Use when a plan needs vertical-slice implementation tickets. |
+| `to-prd` | product | Synthesize current context into a product requirements document. | Use when the user wants a PRD or feature brief from existing discussion and repo context. |
+| `triage` | product | Triage bugs, feature requests, and issue tracker work through label states. | Use when classifying issues or preparing agent-ready issue briefs. |
+| `api-contract-testing` | quality | Verify API contracts, schemas, compatibility, and consumer-provider expectations. | Use when API behavior or compatibility must be validated. |
+| `property-based-testing` | quality | Design invariant, round-trip, generator, and stateful property tests. | Use when examples are insufficient to cover broad input spaces. |
+| `test-driven-development` | quality | Drive changes with a red-green-refactor loop. | Use when behavior needs focused tests before implementation. |
+| `architecture-review` | review | Review architecture, module boundaries, coupling, data flow, and design tradeoffs. | Use before large refactors, cross-cutting implementation, or design decisions. |
+| `code-review-and-quality` | review | Review changes for correctness, regressions, maintainability, missing tests, and delivery risk. | Use for code review, quality passes, diff inspection, and pre-merge risk assessment. |
+| `improve-codebase-architecture` | review | Find deeper architecture improvement opportunities across a codebase. | Use when the goal is architecture discovery, testability, locality, or agent navigability. |
+| `security-review` | security | Review code or designs for security risks and unsafe defaults. | Use for auth, permissions, secrets, user input, sensitive data, network calls, or dependency exposure. |
 
-| Skill | Purpose | When To Use |
-|---|---|---|
-| `context-engineering` | Build the smallest accurate context set needed for a task. | Use when starting unfamiliar work, recovering context, preparing handoff, or identifying relevant files and commands. |
-| `repo-onboarding` | Map an unfamiliar repository's structure, stack, commands, conventions, and risks. | Use at the start of work in a new repo or when setup, test, lint, and build commands are unknown. |
-| `zoom-out` | Produce a higher-level map of unfamiliar code and callers. | Use when local code details need broader system context before planning or debugging. |
-| `planning-and-task-breakdown` | Convert goals into scoped, ordered, verifiable work slices. | Use for ambiguous, multi-step, risky, or cross-cutting requests before coding. |
-| `agent-workflow-design` | Design repeatable AI coding-agent workflows, handoffs, validation loops, and skill sets. | Use when improving agent operating procedures or recurring AI-assisted development flows. |
-| `setup-agent-skills` | Configure project-local agent workflow context. | Use before issue triage, PRD creation, or issue breakdown when tracker, labels, and domain docs are unclear. |
+The canonical machine-readable catalog is `catalog/skills.tsv`.
 
-### Implementation Workflows
+## Validation And Scoring
 
-| Skill | Purpose | When To Use |
-|---|---|---|
-| `incremental-implementation` | Implement changes in small, validated slices while preserving existing behavior. | Use when applying a scoped feature, bug fix, or maintenance change. |
-| `test-driven-development` | Drive changes with a red-green-refactor loop. | Use when the user requests TDD or when behavior needs focused tests before implementation. |
-| `source-driven-development` | Ground implementation in authoritative code, specs, schemas, or contracts. | Use when correctness depends on tracing behavior to source material rather than inference. |
-| `api-backend-development` | Build or modify backend services, APIs, endpoints, handlers, and server-side contracts. | Use for request handling, validation, authorization hooks, service logic, jobs, and backend integration behavior. |
-| `frontend-ui-development` | Build or modify frontend UI, components, state flows, styling, accessibility, and interactions. | Use for screens, components, forms, client state, responsive layout, browser-facing behavior, and UI tests. |
-| `database-data-workflow-development` | Develop schema, migration, query, seed, ETL, reporting, and data workflow changes. | Use when modifying data models, migrations, indexes, fixtures, analytics queries, or data integrity checks. |
-| `prototype` | Build a throwaway prototype to answer a design, state, workflow, or UI question. | Use when a quick prototype can validate an idea before production implementation. |
-
-### Diagnosis And Environment
-
-| Skill | Purpose | When To Use |
-|---|---|---|
-| `error-message-triage` | Classify noisy errors and identify the first actionable failure. | Use for compiler, test, stack trace, install, linter, type-check, or runtime output before deeper debugging. |
-| `debugging-and-error-recovery` | Reproduce, isolate, fix, and verify failing behavior. | Use when tests fail, builds break, runtime errors appear, or a user reports broken behavior. |
-| `diagnose` | Run an intensive diagnosis loop for hard bugs, flaky failures, and performance regressions. | Use when a fast deterministic feedback loop must be built before fixing. |
-| `dependency-environment-management` | Manage dependencies, package managers, runtime versions, lockfiles, and setup drift. | Use when installs fail, dependencies change, or local and CI environments behave differently. |
-
-### Review And Quality
-
-| Skill | Purpose | When To Use |
-|---|---|---|
-| `code-review-and-quality` | Review changes for correctness, regressions, maintainability, missing tests, and delivery risk. | Use for code review, quality passes, diff inspection, and pre-merge risk assessment. |
-| `security-review` | Review code or designs for security risks and defensive mitigations. | Use for auth, permissions, secrets, cryptography, user input, sensitive data, network calls, or dependency exposure. |
-| `architecture-review` | Assess architecture, boundaries, coupling, data flow, dependency direction, and tradeoffs. | Use before large refactors, cross-cutting implementation, or design decisions. |
-| `improve-codebase-architecture` | Find deeper architecture improvement opportunities across a codebase. | Use when the goal is architecture discovery, testability, locality, or agent navigability. |
-| `refactoring` | Improve internal structure while preserving externally observable behavior. | Use when simplifying, reorganizing, decoupling, extracting, consolidating, or reducing technical debt. |
-
-### Delivery And Documentation
-
-| Skill | Purpose | When To Use |
-|---|---|---|
-| `documentation-and-adrs` | Create or update developer documentation and architecture decision records. | Use for docs, README updates, guides, runbooks, ADRs, setup notes, or durable technical decisions. |
-| `handoff` | Create a compact continuation document for another agent or future session. | Use when context is about to be lost or work should transfer cleanly. |
-| `pull-request-prep` | Prepare a reviewer-ready change summary with validation evidence and risks. | Use before opening, updating, or handing off a pull request or equivalent code review package. |
-| `release-readiness` | Assess whether changes are ready to release, deploy, tag, or publish. | Use before release to check validation, versioning, changelogs, migrations, rollback, docs, and known risks. |
-
-### Issue And Product Workflows
-
-| Skill | Purpose | When To Use |
-|---|---|---|
-| `triage` | Triage bugs, feature requests, and issue tracker work through label states. | Use when classifying issues, requesting information, or preparing agent-ready issue briefs. |
-| `to-issues` | Convert a plan, spec, or PRD into independently executable implementation issues. | Use when a plan needs vertical-slice implementation tickets. |
-| `to-prd` | Synthesize known context into a product requirements document. | Use when the user wants a PRD or feature brief from existing discussion and repo context. |
-
-### Conversation And Design Facilitation
-
-| Skill | Purpose | When To Use |
-|---|---|---|
-| `caveman` | Switch to ultra-compressed communication while preserving technical accuracy. | Use when the user asks for caveman mode, fewer tokens, or terse updates. |
-| `grill-me` | Stress-test a plan by asking one decision-focused question at a time. | Use when the user wants to be grilled on a plan or design. |
-| `grill-with-docs` | Stress-test a plan against domain docs and ADRs while updating durable docs. | Use when terminology, `CONTEXT.md`, or ADRs matter to a design. |
-
-## Updating Installed Skills
-
-Re-run the installer with `-Force` or `--force` to replace existing installed skill folders:
-
-```powershell
-.\scripts\install-skills.ps1 -Harness codex -All -Force
-```
-
-```bash
-./scripts/install-skills.sh --harness codex --all --force
-```
-
-Use `-TargetPath` or `--target-path` when installing into a custom skills directory.
-
-## Validation
-
-Validation checks skill folders, required `SKILL.md` files, YAML frontmatter, required fields, useful descriptions, and required operational sections.
+Validation checks skill folders, `SKILL.md` frontmatter, required sections, catalog entries, bundle membership, harness profiles, reference links, and third-party notice traceability.
 
 ```powershell
 .\scripts\validate-skills.ps1
 ```
 
 ```bash
-./scripts/validate-skills.sh
+bash ./scripts/validate-skills.sh
 ```
+
+Quality scoring is advisory:
+
+```powershell
+.\scripts\score-skills.ps1
+```
+
+```bash
+bash ./scripts/score-skills.sh
+```
+
+## Documentation
+
+- [Usage guide](docs/usage-guide.md)
+- [Windows setup](docs/windows-setup.md)
+- [Linux setup](docs/linux-setup.md)
+- [Using with Codex, Claude Code, OpenCode, or another agent](docs/using-with-codex.md)
+- [Orchestration guide](docs/orchestration-guide.md)
+- [Skill authoring guide](docs/skill-authoring-guide.md)
+- [Skill quality rubric](docs/skill-quality-rubric.md)
+- [Curation policy](docs/curation-policy.md)
+- [Release checklist](docs/release-checklist.md)
 
 ## Release Readiness
 

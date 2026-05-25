@@ -1,0 +1,9 @@
+id	label	purpose	recommendation
+starter	Starter Core	Default baseline for a new software repo	Install first when setting up an unfamiliar project.
+backend	Backend And Data	Backend, API, data, observability, and performance workflows	Install for service or API-heavy repos.
+frontend	Frontend	Frontend UI, client behavior, and browser-facing delivery workflows	Install for web UI repos.
+quality	Quality Engineering	Testing, review, and verification workflows	Install when correctness and regression control matter.
+delivery	Delivery	PR, release, CI/CD, documentation, and handoff workflows	Install for team delivery and release work.
+security	Security	Security review, dependency, access, and risky-change workflows	Install for security-sensitive repos.
+agent-orchestration	Agent Orchestration	Agent workflow, evaluation, handoff, and skill quality workflows	Install when coordinating AI agents.
+all-software-dev	All Software Development	Complete software-development skill set from this repository	Install only when broad coverage is preferred.

@@ -1,0 +1,9 @@
+id=codex
+label=Codex
+global_env=CODEX_HOME
+global_suffix=skills
+global_default=.codex/skills
+project_subpath=
+supports_project_default=false
+skills_format=SKILL.md
+instructions_file=AGENTS.md

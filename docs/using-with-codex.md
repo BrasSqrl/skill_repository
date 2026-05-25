@@ -6,22 +6,28 @@ The repository keeps one canonical `skills/` source. The installer only changes 
 
 ## 1. Install Skills
 
-From this repository, install all skills globally for a harness:
+From this repository, install the starter bundle globally for a harness:
 
 Windows:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness codex -All
-.\scripts\install-skills.ps1 -Harness claude-code -All
-.\scripts\install-skills.ps1 -Harness opencode -All
+.\scripts\install-skills.ps1 -Harness codex -Bundle starter
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter
+.\scripts\install-skills.ps1 -Harness opencode -Bundle starter
 ```
 
 Linux:
 
 ```bash
-./scripts/install-skills.sh --harness codex --all
-./scripts/install-skills.sh --harness claude-code --all
-./scripts/install-skills.sh --harness opencode --all
+bash ./scripts/install-skills.sh --harness codex --bundle starter
+bash ./scripts/install-skills.sh --harness claude-code --bundle starter
+bash ./scripts/install-skills.sh --harness opencode --bundle starter
+```
+
+List available bundles:
+
+```powershell
+.\scripts\install-skills.ps1 -ListBundles
 ```
 
 Install selected skills:
@@ -41,7 +47,7 @@ Linux:
 Use dry-run first when installing into a location that may already contain skills:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness claude-code -All -DryRun
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -DryRun
 ```
 
 ## 2. Where Skills Go
@@ -65,16 +71,30 @@ Project-local defaults:
 Project-local install example:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\target-repo" -All
+.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\target-repo" -Bundle starter
 ```
 
 Custom target example:
 
 ```powershell
-.\scripts\install-skills.ps1 -TargetPath "C:\path\to\target-repo\.agent\skills" -All
+.\scripts\install-skills.ps1 -TargetPath "C:\path\to\target-repo\.agent\skills" -Bundle starter
 ```
 
 ## 3. Create Or Update Target `AGENTS.md`
+
+Use bootstrap when you want the installer to seed project instructions and record installed skills:
+
+```powershell
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\target-repo" -Harness claude-code -Bundle starter
+```
+
+Bash:
+
+```bash
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/target-repo --harness opencode --bundle starter
+```
+
+Use manual copy when you only want the template:
 
 Copy the template when the target repo does not already have agent instructions:
 
@@ -137,6 +157,15 @@ The agent should choose based on the skill descriptions, then load only the skil
 
 Use more than one skill when the work naturally changes phase.
 
+For repeatable flows, start from the workflow templates in `workflows/`:
+
+- `feature-development.md`
+- `bug-diagnosis.md`
+- `pull-request-review.md`
+- `release-prep.md`
+- `architecture-review.md`
+- `agent-skill-development.md`
+
 Common combinations:
 
 - `repo-onboarding` -> `context-engineering` for first work in a repo.
@@ -149,7 +178,7 @@ Common combinations:
 Prompt pattern:
 
 ```text
-Use repo-onboarding first. Then use context-engineering to identify the files and commands needed for the requested change. Stop before editing and show the plan.
+Use the feature-development workflow from this skill repository. Load only the skills needed for this task, then proceed through the workflow gates.
 ```
 
 ## 7. Example Workflows

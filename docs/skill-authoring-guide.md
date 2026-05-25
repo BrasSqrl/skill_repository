@@ -130,6 +130,26 @@ Put this in `references/`:
 
 Do not duplicate the same guidance in both places. `SKILL.md` should tell the agent when to open a reference file.
 
+## Catalog And Bundle Metadata
+
+When adding a skill, update `catalog/skills.tsv` in the same change. Required fields are:
+
+- `name`
+- `category`
+- `maturity`
+- `source`
+- `license`
+- `harnesses`
+- `upstream_repo`
+- `upstream_ref`
+- `upstream_path`
+- `import_mode`
+- `description`
+
+Use `repo-tbd` for original first-party skills until this repository has a root license. Use a concrete license value for third-party or adapted material.
+
+Add the skill to bundle files under `catalog/bundles/` only when it should be installed with that workflow set. Do not add a skill to `starter` unless it is broadly useful in most software repositories.
+
 ## Review Checklist
 
 Use this checklist before adding or changing a skill:
@@ -149,4 +169,11 @@ Use this checklist before adding or changing a skill:
 - Language is tool-agnostic.
 - Windows-first commands are provided when commands are needed.
 - Linux alternatives are included where useful.
+- `catalog/skills.tsv` has one matching row.
+- Relevant bundle files are updated intentionally.
+- Third-party or adapted content is tracked in `THIRD_PARTY_NOTICES.md`.
 - Validation scripts pass, or any inability to run them is documented.
+- Skill quality scoring has been reviewed:
+  ```powershell
+  .\scripts\score-skills.ps1
+  ```
