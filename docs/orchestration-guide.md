@@ -31,6 +31,13 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Use `workflows/release-prep.md` before release or deployment.
 - Use `workflows/architecture-review.md` before broad design changes.
 - Use `workflows/agent-skill-development.md` when adding or revising skills.
+- Use `workflows/bug-reproduction-loop.md` when a failure must be reproduced before implementation.
+- Use `workflows/feature-quality-loop.md` when a feature needs test strategy, validation, and independent review.
+- Use `workflows/backend-change-loop.md` for backend, API, integration, and contract-sensitive changes.
+- Use `workflows/data-change-loop.md` for schema, migration, backfill, and data workflow changes.
+- Use `workflows/dependency-upgrade-loop.md` for dependency upgrades, runtime changes, install failures, and environment drift.
+- Use `workflows/release-gate-loop.md` before publish, tag, deploy, or release handoff.
+- Use `workflows/agent-skill-quality-loop.md` when adding or revising skills, subagents, bundles, or workflow templates.
 
 ## Skill Combination Rules
 
@@ -49,6 +56,14 @@ Use subagents at phase boundaries where isolated context or independent review r
 - Use `architecture-reviewer` before broad refactors or cross-module design changes.
 - Use `validation-runner` for noisy test, lint, build, type-check, or CI output.
 - Use `release-reviewer` before tagging, publishing, deploying, or handing off a release candidate.
+- Use `bug-reproducer` before implementation when a failure needs a minimal reproduction.
+- Use `test-strategist` before implementation when the smallest useful test plan is unclear.
+- Use `dependency-auditor` when manifests, lockfiles, runtime pins, or environment drift matter.
+- Use `ci-pipeline-reviewer` when workflow files, checks, caches, matrices, artifacts, or release gates change.
+- Use `api-contract-reviewer` when request, response, schema, webhook, SDK, or consumer compatibility may change.
+- Use `database-migration-reviewer` when migrations, indexes, backfills, destructive operations, or deploy ordering are involved.
+- Use `frontend-accessibility-reviewer` when UI changes affect keyboard flow, semantics, focus, contrast, responsiveness, or screen-reader behavior.
+- Use `documentation-reviewer` when docs, ADRs, examples, setup commands, or release notes may drift from source behavior.
 
 Do not use subagents for small local edits, tightly coupled implementation loops, or tasks where a handoff would add more cost than clarity.
 

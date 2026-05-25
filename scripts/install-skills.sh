@@ -244,7 +244,10 @@ default_agent_bundle() {
   local bundle="$2"
   if [[ "$mode" == "bundle" ]]; then
     case "$bundle" in
-      starter|backend|frontend|quality) printf 'starter-review' ;;
+      starter) printf 'starter-review' ;;
+      backend) printf 'backend-review' ;;
+      frontend) printf 'frontend-review' ;;
+      quality) printf 'testing-review' ;;
       security) printf 'security-review' ;;
       delivery) printf 'delivery-review' ;;
       agent-orchestration|all-software-dev) printf 'all-agents' ;;

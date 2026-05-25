@@ -49,6 +49,8 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] Windows batch flow reaches optional subagent selection, installed status, and overwrite prompts.
 - [ ] Agent listing tested on Windows and Linux.
 - [ ] Agent bundle install tested for Claude Code and OpenCode.
+- [ ] Default agent-bundle mapping tested: `backend` -> `backend-review`, `frontend` -> `frontend-review`, and `quality` -> `testing-review`.
+- [ ] New specialist agent bundles tested: `testing-review`, `backend-review`, `data-review`, `ci-review`, `frontend-review`, and `documentation-review`.
 - [ ] Codex `-IncludeAgents` dry run reports guidance-only behavior.
 - [ ] Existing native agent files are blocked without force mode.
 - [ ] Force mode replaces only files inside the resolved native agent target.
@@ -78,6 +80,7 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] No project-specific assumptions remain.
 - [ ] Examples are accurate and match implemented script options.
 - [ ] Workflow templates include trigger, ordered skills, phase outputs, validation gates, handoff format, and escalation rules.
+- [ ] Workflow loop templates reference subagents only for discovery, reproduction, review, audit, validation, and strategy.
 - [ ] Subagent definitions include trigger descriptions, permission boundaries, forbidden actions, output format, and escalation rules.
 
 ## Repository Review

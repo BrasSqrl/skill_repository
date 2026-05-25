@@ -56,6 +56,7 @@ List bundles:
 ```powershell
 .\scripts\install-skills.ps1 -ListBundles
 .\scripts\install-skills.ps1 -ListAgentBundles
+.\scripts\install-skills.ps1 -ListAgents
 ```
 
 Install the starter bundle globally for Codex:
@@ -90,10 +91,19 @@ Install starter skills with the recommended subagent bundle:
 .\scripts\install-skills.ps1 -Harness opencode -Bundle starter -IncludeAgents
 ```
 
+Install bundles with their mapped specialist subagent bundles:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle backend -IncludeAgents
+.\scripts\install-skills.ps1 -Harness opencode -Bundle frontend -IncludeAgents
+.\scripts\install-skills.ps1 -Harness opencode -Bundle quality -IncludeAgents
+```
+
 Install an explicit subagent bundle:
 
 ```powershell
 .\scripts\install-skills.ps1 -Harness opencode -Bundle security -IncludeAgents -AgentBundle security-review
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents -AgentBundle all-agents -DryRun
 ```
 
 Install selected subagents:

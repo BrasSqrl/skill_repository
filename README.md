@@ -180,9 +180,67 @@ Bundle membership is stored in `catalog/bundles/*.txt`.
 | `security-review` | Security-focused review plus validation support. |
 | `delivery-review` | Validation, release readiness, and review agents. |
 | `architecture-review` | Architecture, repo discovery, code review, and validation agents. |
+| `testing-review` | Failure reproduction, test strategy, validation, and code review agents. |
+| `backend-review` | API contract, code quality, security, and validation agents. |
+| `data-review` | Database migration, validation, and release readiness agents. |
+| `ci-review` | CI pipeline, dependency, validation, and release readiness agents. |
+| `frontend-review` | Frontend accessibility, code quality, and validation agents. |
+| `documentation-review` | Documentation drift and release handoff review agents. |
 | `all-agents` | Complete subagent set from this repository. |
 
 Agent bundle membership is stored in `catalog/agent-bundles/*.txt`.
+
+Default `-IncludeAgents` mappings:
+
+| Skill bundle | Default agent bundle |
+| --- | --- |
+| `starter` | `starter-review` |
+| `backend` | `backend-review` |
+| `frontend` | `frontend-review` |
+| `quality` | `testing-review` |
+| `delivery` | `delivery-review` |
+| `security` | `security-review` |
+| `agent-orchestration` | `all-agents` |
+| `all-software-dev` | `all-agents` |
+
+## Subagent Catalog
+
+| Subagent | Permission | Purpose |
+| --- | --- | --- |
+| `repo-scout` | read-only | Map repository structure, commands, conventions, relevant files, and risks. |
+| `code-reviewer` | read-only | Review code changes for correctness, regressions, maintainability, missing tests, and delivery risk. |
+| `security-reviewer` | read-only | Review authentication, authorization, secrets, input handling, data exposure, dependency risk, and unsafe defaults. |
+| `architecture-reviewer` | read-only | Review architecture, module boundaries, coupling, data flow, dependency direction, scalability constraints, and tradeoffs. |
+| `validation-runner` | validation-only | Run or review tests, lint, build, type checks, and targeted verification commands. |
+| `release-reviewer` | read-only | Review release readiness, validation evidence, changelog, versioning, migrations, rollback notes, docs, and known risks. |
+| `bug-reproducer` | validation-only | Isolate failing behavior and return minimal reproduction commands and evidence. |
+| `test-strategist` | read-only | Propose the smallest useful test plan for a feature, fix, refactor, or risky change. |
+| `dependency-auditor` | read-only | Inspect manifests, lockfiles, runtime versions, upgrade risk, and environment drift. |
+| `ci-pipeline-reviewer` | validation-only | Inspect CI config, failed checks, caches, matrices, artifacts, and release gates. |
+| `api-contract-reviewer` | read-only | Review API, schema, webhook, SDK, and consumer compatibility changes. |
+| `database-migration-reviewer` | read-only | Review migrations, rollback paths, indexes, backfills, destructive operations, and deploy ordering. |
+| `frontend-accessibility-reviewer` | read-only | Review keyboard flow, semantics, focus, contrast, responsiveness, and screen-reader risk. |
+| `documentation-reviewer` | read-only | Review README, docs, ADRs, examples, setup commands, and release notes for drift. |
+
+The canonical machine-readable subagent catalog is `catalog/agents.tsv`.
+
+## Workflow Templates
+
+| Workflow | Use When |
+| --- | --- |
+| `feature-development.md` | Implementing a scoped feature or behavior change. |
+| `bug-diagnosis.md` | Diagnosing failures and regressions. |
+| `pull-request-review.md` | Reviewing diffs or PR-ready changes. |
+| `release-prep.md` | Preparing a release or deployment handoff. |
+| `architecture-review.md` | Reviewing design, boundaries, and tradeoffs. |
+| `agent-skill-development.md` | Adding or revising skills. |
+| `bug-reproduction-loop.md` | Reproducing a failure before implementation. |
+| `feature-quality-loop.md` | Combining test strategy, implementation, validation, and review for a feature. |
+| `backend-change-loop.md` | Reviewing backend, API, security, and contract changes. |
+| `data-change-loop.md` | Reviewing schema, migration, backfill, and data workflow changes. |
+| `dependency-upgrade-loop.md` | Managing dependency, runtime, install, or environment changes. |
+| `release-gate-loop.md` | Running a release gate across validation, CI, docs, security, and release readiness. |
+| `agent-skill-quality-loop.md` | Reviewing skills, subagents, bundles, and workflow templates for publication. |
 
 ## Folder Structure
 

@@ -239,7 +239,10 @@ function Get-DefaultAgentBundle {
 
     if ($SelectionMode -eq "bundle") {
         switch ($SkillBundle) {
-            { $_ -in @("starter", "backend", "frontend", "quality") } { return "starter-review" }
+            "starter" { return "starter-review" }
+            "backend" { return "backend-review" }
+            "frontend" { return "frontend-review" }
+            "quality" { return "testing-review" }
             "security" { return "security-review" }
             "delivery" { return "delivery-review" }
             { $_ -in @("agent-orchestration", "all-software-dev") } { return "all-agents" }

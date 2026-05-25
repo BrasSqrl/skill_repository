@@ -83,6 +83,25 @@ Codex currently uses portable guidance in this repository because no confirmed n
 - Use `architecture-reviewer` for boundaries, coupling, dependency direction, data flow, and design tradeoffs.
 - Use `validation-runner` for tests, lint, build, type checks, and noisy validation output.
 - Use `release-reviewer` for release readiness, changelog, versioning, rollback, migration, documentation, and known-risk review.
+- Use `bug-reproducer` when the main agent needs a minimal reproduction, exact command, exit code, and evidence before fixing a failure.
+- Use `test-strategist` when the smallest useful test scope is unclear for a feature, bug fix, refactor, or risky change.
+- Use `dependency-auditor` for manifest, lockfile, runtime, package manager, upgrade, and environment drift review.
+- Use `ci-pipeline-reviewer` for CI failures, workflow edits, cache or matrix changes, artifacts, and release gates.
+- Use `api-contract-reviewer` for API, schema, webhook, SDK, OpenAPI, and consumer compatibility changes.
+- Use `database-migration-reviewer` for migrations, indexes, backfills, destructive data operations, rollback, and deploy ordering.
+- Use `frontend-accessibility-reviewer` for UI changes that affect keyboard navigation, semantics, focus, contrast, responsiveness, or screen-reader behavior.
+- Use `documentation-reviewer` for README, docs, ADRs, examples, setup commands, usage guides, and release notes.
+
+## Agent Bundle Selection
+
+- Use `starter-review` for a small default set: repo discovery, code review, validation, and release review.
+- Use `testing-review` for bugs, regression fixes, and quality-focused validation loops.
+- Use `backend-review` for backend, API, integration, and service changes.
+- Use `data-review` for schema, migration, backfill, and data workflow changes.
+- Use `ci-review` for CI failures, pipeline edits, dependency delivery risk, and release gate automation.
+- Use `frontend-review` for user-facing UI and interaction changes.
+- Use `documentation-review` for documentation-heavy changes and release notes.
+- Use `all-agents` only when broad subagent coverage is more useful than a concise harness suggestion list.
 
 ## Chaining Pattern
 

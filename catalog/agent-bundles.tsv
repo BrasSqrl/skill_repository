@@ -3,4 +3,10 @@ starter-review	Starter Review	General read-only discovery, review, validation, a
 security-review	Security Review	Security-focused review plus validation support	Install for security-sensitive repositories or release gates.
 delivery-review	Delivery Review	Validation, release readiness, and review agents	Install for PR, CI/CD, release, and handoff workflows.
 architecture-review	Architecture Review	Architecture, repo discovery, code review, and validation agents	Install before large design or refactoring work.
+testing-review	Testing Review	Failure reproduction, test strategy, validation, and code review agents	Install for bug fixes, risky changes, and quality-focused validation.
+backend-review	Backend Review	API contract, code quality, security, and validation agents	Install for backend service, API, or integration-heavy changes.
+data-review	Data Review	Database migration, validation, and release readiness agents	Install for schema, migration, backfill, and data workflow changes.
+ci-review	CI Review	CI pipeline, dependency, validation, and release readiness agents	Install for pipeline failures, workflow edits, or dependency-related delivery risk.
+frontend-review	Frontend Review	Frontend accessibility, code quality, and validation agents	Install for user-facing UI and interaction changes.
+documentation-review	Documentation Review	Documentation drift and release handoff review agents	Install for documentation-heavy changes and release note checks.
 all-agents	All Agents	Complete subagent set from this repository	Install when broad subagent coverage is preferred.

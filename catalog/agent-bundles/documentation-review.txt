@@ -1,0 +1,2 @@
+documentation-reviewer
+release-reviewer

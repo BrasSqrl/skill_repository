@@ -4,3 +4,11 @@ security-reviewer
 architecture-reviewer
 validation-runner
 release-reviewer
+bug-reproducer
+test-strategist
+dependency-auditor
+ci-pipeline-reviewer
+api-contract-reviewer
+database-migration-reviewer
+frontend-accessibility-reviewer
+documentation-reviewer

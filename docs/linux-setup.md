@@ -48,6 +48,7 @@ List bundles:
 ```bash
 bash ./scripts/install-skills.sh --list-bundles
 bash ./scripts/install-skills.sh --list-agent-bundles
+bash ./scripts/install-skills.sh --list-agents
 ```
 
 Install the starter bundle globally for Codex:
@@ -82,10 +83,19 @@ bash ./scripts/install-skills.sh --harness claude-code --bundle starter --includ
 bash ./scripts/install-skills.sh --harness opencode --bundle starter --include-agents
 ```
 
+Install bundles with their mapped specialist subagent bundles:
+
+```bash
+bash ./scripts/install-skills.sh --harness opencode --bundle backend --include-agents
+bash ./scripts/install-skills.sh --harness opencode --bundle frontend --include-agents
+bash ./scripts/install-skills.sh --harness opencode --bundle quality --include-agents
+```
+
 Install an explicit subagent bundle:
 
 ```bash
 bash ./scripts/install-skills.sh --harness opencode --bundle security --include-agents --agent-bundle security-review
+bash ./scripts/install-skills.sh --harness claude-code --bundle starter --include-agents --agent-bundle all-agents --dry-run
 ```
 
 Install selected subagents:

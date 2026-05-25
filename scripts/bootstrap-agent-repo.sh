@@ -88,7 +88,10 @@ bundle_agents() {
 
 default_agent_bundle() {
   case "$1" in
-    starter|backend|frontend|quality) printf 'starter-review' ;;
+    starter) printf 'starter-review' ;;
+    backend) printf 'backend-review' ;;
+    frontend) printf 'frontend-review' ;;
+    quality) printf 'testing-review' ;;
     security) printf 'security-review' ;;
     delivery) printf 'delivery-review' ;;
     agent-orchestration|all-software-dev) printf 'all-agents' ;;
