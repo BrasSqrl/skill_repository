@@ -1,0 +1,4 @@
+interface:
+  display_name: "Setup Agent Skills"
+  short_description: "Configure shared skill context"
+  default_prompt: "Use $setup-agent-skills to configure this repo for the engineering skills."

@@ -1,0 +1,243 @@
+# Using With Codex, Claude Code, OpenCode, Or Another Agent
+
+This guide shows how to use this skill library with Codex, Claude Code, OpenCode, or another AI coding agent that can read skill folders containing `SKILL.md`.
+
+The repository keeps one canonical `skills/` source. The installer only changes where those folders are copied.
+
+## 1. Install Skills
+
+From this repository, install all skills globally for a harness:
+
+Windows:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness codex -All
+.\scripts\install-skills.ps1 -Harness claude-code -All
+.\scripts\install-skills.ps1 -Harness opencode -All
+```
+
+Linux:
+
+```bash
+./scripts/install-skills.sh --harness codex --all
+./scripts/install-skills.sh --harness claude-code --all
+./scripts/install-skills.sh --harness opencode --all
+```
+
+Install selected skills:
+
+Windows:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness codex -Skills repo-onboarding,context-engineering,debugging-and-error-recovery
+```
+
+Linux:
+
+```bash
+./scripts/install-skills.sh --harness opencode --skills repo-onboarding,context-engineering,debugging-and-error-recovery
+```
+
+Use dry-run first when installing into a location that may already contain skills:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -All -DryRun
+```
+
+## 2. Where Skills Go
+
+Global defaults:
+
+| Harness | Default target |
+|---|---|
+| Codex | `$CODEX_HOME/skills` when set, otherwise `~/.codex/skills` |
+| Claude Code | `~/.claude/skills` |
+| OpenCode | `~/.config/opencode/skills` |
+
+Project-local defaults:
+
+| Harness | Project target |
+|---|---|
+| Claude Code | `<project>/.claude/skills` |
+| OpenCode | `<project>/.opencode/skills` |
+| Codex | Use an explicit custom skills directory |
+
+Project-local install example:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\target-repo" -All
+```
+
+Custom target example:
+
+```powershell
+.\scripts\install-skills.ps1 -TargetPath "C:\path\to\target-repo\.agent\skills" -All
+```
+
+## 3. Create Or Update Target `AGENTS.md`
+
+Copy the template when the target repo does not already have agent instructions:
+
+Windows:
+
+```powershell
+Copy-Item .\templates\project-AGENTS.md "C:\path\to\target-repo\AGENTS.md"
+```
+
+Linux:
+
+```bash
+cp ./templates/project-AGENTS.md /path/to/target-repo/AGENTS.md
+```
+
+Then fill in project-specific facts:
+
+- setup commands
+- test commands
+- lint and build commands
+- important directories
+- forbidden changes
+- secrets and security rules
+- validation checklist
+- installed skills and when the repo expects agents to use them
+
+Keep reusable workflow guidance in skills. Keep project-specific facts in `AGENTS.md`.
+
+## 4. Ask The Agent To Use Installed Skills
+
+Name the skill when you know the right one:
+
+```text
+Use the repo-onboarding skill to inspect this repository and summarize the stack, commands, important directories, and risks.
+```
+
+```text
+Use the debugging-and-error-recovery skill to diagnose this failing test. Reproduce it first, then identify the smallest fix and validation.
+```
+
+If the harness supports explicit skill syntax, use that syntax. If not, plain language is enough: ask it to use the named skill folder or workflow.
+
+## 5. Ask The Agent To Choose The Right Skill
+
+When the right workflow is unclear, ask the agent to select one:
+
+```text
+Choose the most relevant installed skill for this task, explain the choice briefly, then follow it.
+Task: the install command fails on Windows but works on Linux.
+```
+
+```text
+Select the right skill or combination of skills for this request. Keep the plan short, then proceed.
+Request: add a small API field and update tests.
+```
+
+The agent should choose based on the skill descriptions, then load only the skills needed for the task.
+
+## 6. Combine Skills In A Workflow
+
+Use more than one skill when the work naturally changes phase.
+
+Common combinations:
+
+- `repo-onboarding` -> `context-engineering` for first work in a repo.
+- `error-message-triage` -> `debugging-and-error-recovery` for noisy failures.
+- `planning-and-task-breakdown` -> `incremental-implementation` for multi-step changes.
+- `test-driven-development` -> `incremental-implementation` for behavior-first implementation.
+- `code-review-and-quality` -> `pull-request-prep` before review handoff.
+- `security-review` -> `release-readiness` for high-risk releases.
+
+Prompt pattern:
+
+```text
+Use repo-onboarding first. Then use context-engineering to identify the files and commands needed for the requested change. Stop before editing and show the plan.
+```
+
+## 7. Example Workflows
+
+### Onboarding A Repo
+
+```text
+Use the repo-onboarding skill. Inspect this repository and produce a concise onboarding summary with stack, setup, test, lint, build, important directories, agent rules, and risks.
+```
+
+Follow-up:
+
+```text
+Now use context-engineering to prepare task context for adding a small feature to the API layer. Identify relevant files and validation commands before editing.
+```
+
+### Debugging A Failing Test
+
+```text
+Use error-message-triage on this failure output first, then use debugging-and-error-recovery to reproduce and fix the root cause. Preserve existing user changes.
+```
+
+After triage:
+
+```text
+Proceed with the debugging-and-error-recovery workflow. Add regression coverage if practical and report before/after validation.
+```
+
+### Implementing A Small Feature
+
+```text
+Use planning-and-task-breakdown to create a short implementation plan, then use incremental-implementation to make the smallest verified change. Run the targeted tests.
+```
+
+If behavior needs test-first work:
+
+```text
+Use test-driven-development for this feature. Show the red test result, implement the minimal change, then rerun the focused tests.
+```
+
+### Reviewing A Pull Request
+
+```text
+Use code-review-and-quality to review the current diff. Focus on correctness, regressions, missing tests, and maintainability. Findings first, ordered by severity.
+```
+
+For security-sensitive changes:
+
+```text
+Use security-review for the auth and data-access changes in this diff. Report concrete findings with severity, confidence, evidence, recommendation, and verification.
+```
+
+### Preparing A Release
+
+```text
+Use release-readiness to assess this release candidate. Check validation, versioning, changelog, migrations, rollback, documentation, and known risks. Give a go/no-go recommendation.
+```
+
+If a review package is needed first:
+
+```text
+Use pull-request-prep to prepare reviewer notes from the final diff, then use release-readiness for the release checklist.
+```
+
+## 8. Good Prompt Examples
+
+```text
+Use the context-engineering skill. Build a compact task context for fixing the failing Windows test run. Include relevant files, commands, facts, assumptions, and blockers.
+```
+
+```text
+Choose the best installed skill for this task: dependency installation fails only on Linux. Explain the selected skill in one sentence, then follow it.
+```
+
+```text
+Use source-driven-development with the OpenAPI spec and existing tests as the authority. Implement only the behavior required by those sources.
+```
+
+```text
+Use test-driven-development and debugging-and-error-recovery together. First write a failing regression test for the reported bug, then fix the confirmed cause.
+```
+
+```text
+Use architecture-review before implementation. Compare two options, identify tradeoffs, recommend the smallest safe design move, and list validation needed.
+```
+
+```text
+Use pull-request-prep. Inspect the final diff, run available validation, and produce a concise title, summary, validation list, risks, and reviewer notes.
+```
+
+Good prompts name the skill, provide the task, define the expected output, and ask for validation evidence.

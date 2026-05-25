@@ -1,0 +1,4 @@
+interface:
+  display_name: "To PRD"
+  short_description: "Synthesize a PRD from context"
+  default_prompt: "Use $to-prd to turn this conversation into a PRD for the project issue tracker."
