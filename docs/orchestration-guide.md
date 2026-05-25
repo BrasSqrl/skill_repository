@@ -37,6 +37,7 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Use `workflows/data-change-loop.md` for schema, migration, backfill, and data workflow changes.
 - Use `workflows/dependency-upgrade-loop.md` for dependency upgrades, runtime changes, install failures, and environment drift.
 - Use `workflows/release-gate-loop.md` before publish, tag, deploy, or release handoff.
+- Use `workflows/model-methodology-documentation.md` to draft evidence-backed model methodology or technical model documentation from an extracted `llm_documentation_package/`.
 - Use `workflows/agent-skill-quality-loop.md` when adding or revising skills, subagents, bundles, or workflow templates.
 
 ## Skill Combination Rules

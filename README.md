@@ -240,6 +240,7 @@ The canonical machine-readable subagent catalog is `catalog/agents.tsv`.
 | `data-change-loop.md` | Reviewing schema, migration, backfill, and data workflow changes. |
 | `dependency-upgrade-loop.md` | Managing dependency, runtime, install, or environment changes. |
 | `release-gate-loop.md` | Running a release gate across validation, CI, docs, security, and release readiness. |
+| `model-methodology-documentation.md` | Draft evidence-backed model methodology or technical model documentation from an extracted `llm_documentation_package/`. |
 | `agent-skill-quality-loop.md` | Reviewing skills, subagents, bundles, and workflow templates for publication. |
 
 ## Folder Structure
