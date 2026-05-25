@@ -8,11 +8,13 @@ the project AGENTS.md template when the target repo does not already have one,
 and writes docs/agents/installed-skills.md with the installed bundle details.
 
 .EXAMPLES
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\work\app" -Harness claude-code -Bundle starter
+$TargetRepo = "<target-repo>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter
 
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\work\app" -Harness codex -Scope global -Bundle starter -DryRun
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness codex -Scope global -Bundle starter -DryRun
 
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\work\app" -Harness opencode -Scope custom -TargetPath "C:\tools\opencode-skills" -Bundle quality
+$SkillTarget = "<target-skills-dir>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness opencode -Scope custom -TargetPath $SkillTarget -Bundle quality
 #>
 
 [CmdletBinding()]

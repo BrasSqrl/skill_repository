@@ -56,9 +56,10 @@ Use this checklist before publishing or tagging this skill library.
 ## Bootstrap Checks
 
 - [ ] Bootstrap dry-run tested:
-  ```powershell
-  .\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter -DryRun
-  ```
+```powershell
+  $TargetRepo = "<target-repo>"
+  .\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter -DryRun
+```
 - [ ] Bootstrap writes `docs/agents/installed-skills.md`.
 - [ ] Existing target `AGENTS.md` is preserved unless force mode is used.
 - [ ] Project-local bootstrap tested for Claude Code and OpenCode.

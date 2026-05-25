@@ -30,9 +30,7 @@ Canonical subagents are curated under the same standard. They must provide isola
 
 ## Third-Party Content
 
-Imported or adapted skills must keep their applicable license files or notices. Clean-room rewrites may cite inspiration in `THIRD_PARTY_NOTICES.md` only when useful, but must not copy protected expression.
-
-For permissive sources such as MIT-licensed repositories, preserve attribution and license text for imported content. For share-alike sources, do not adapt content unless the repository intentionally accepts the license obligations.
+Imported or adapted skills must be MIT-licensed, listed in `THIRD_PARTY_NOTICES.md`, and stored with the required license file or notice. Do not add third-party content with a different license without explicit approval and a documented reason.
 
 ## Maturity Levels
 

@@ -88,13 +88,15 @@ Subagent defaults:
 Project-local install example:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\target-repo" -Bundle starter
+$TargetRepo = "<target-repo>"
+.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath $TargetRepo -Bundle starter
 ```
 
 Custom target example:
 
 ```powershell
-.\scripts\install-skills.ps1 -TargetPath "C:\path\to\target-repo\.agent\skills" -Bundle starter
+$SkillTarget = "<target-skills-dir>"
+.\scripts\install-skills.ps1 -TargetPath $SkillTarget -Bundle starter
 ```
 
 ## 3. Create Or Update Target `AGENTS.md`
@@ -102,15 +104,17 @@ Custom target example:
 Use bootstrap when you want the installer to seed project instructions and record installed skills:
 
 ```powershell
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\target-repo" -Harness claude-code -Bundle starter
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\target-repo" -Harness claude-code -Bundle starter -IncludeAgents
+$TargetRepo = "<target-repo>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Bash:
 
 ```bash
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/target-repo --harness opencode --bundle starter
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/target-repo --harness opencode --bundle starter --include-agents
+TARGET_REPO="<target-repo>"
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness opencode --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness opencode --bundle starter --include-agents
 ```
 
 Use manual copy when you only want the template:
@@ -120,13 +124,15 @@ Copy the template when the target repo does not already have agent instructions:
 Windows:
 
 ```powershell
-Copy-Item .\templates\project-AGENTS.md "C:\path\to\target-repo\AGENTS.md"
+$TargetRepo = "<target-repo>"
+Copy-Item .\templates\project-AGENTS.md (Join-Path $TargetRepo "AGENTS.md")
 ```
 
 Linux:
 
 ```bash
-cp ./templates/project-AGENTS.md /path/to/target-repo/AGENTS.md
+TARGET_REPO="<target-repo>"
+cp ./templates/project-AGENTS.md "$TARGET_REPO/AGENTS.md"
 ```
 
 Then fill in project-specific facts:

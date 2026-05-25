@@ -98,7 +98,8 @@ Preview before copying:
 Install into an explicit skills directory:
 
 ```powershell
-.\scripts\install-skills.ps1 -TargetPath "C:\path\to\repo\.agent\skills" -Bundle starter
+$SkillTarget = "<target-skills-dir>"
+.\scripts\install-skills.ps1 -TargetPath $SkillTarget -Bundle starter
 ```
 
 Bash:
@@ -116,21 +117,24 @@ bash ./scripts/install-skills.sh --harness opencode --bundle starter --include-a
 Bootstrap installs a bundle, seeds `AGENTS.md` when missing, and writes `docs/agents/installed-skills.md` in the target repo.
 
 ```powershell
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter -IncludeAgents
+$TargetRepo = "<target-repo>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Dry-run first:
 
 ```powershell
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness opencode -Bundle starter -DryRun
+$TargetRepo = "<target-repo>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness opencode -Bundle starter -DryRun
 ```
 
 Bash:
 
 ```bash
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness claude-code --bundle starter
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter --include-agents
+TARGET_REPO="<target-repo>"
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness claude-code --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness opencode --bundle starter --include-agents
 ```
 
 ## Harness Targets

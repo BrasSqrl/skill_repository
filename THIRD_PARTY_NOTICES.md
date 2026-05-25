@@ -1,8 +1,6 @@
 # Third-Party Notices
 
-This repository is released under the root MIT license in `LICENSE`. It also includes some skills that were imported from MIT-licensed third-party material before this repository was created. Keep this file aligned with `catalog/skills.tsv`.
-
-The MIT license allows commercial use, copying, modification, distribution, and sublicensing when the copyright and permission notice are included with copies or substantial portions of the material. Keep the per-skill `LICENSE` files unless a skill is replaced by a clean-room implementation or separate permission is obtained.
+This repository is released under the root MIT license in `LICENSE`. It also includes imported MIT-licensed skills that retain per-skill `LICENSE` files. Keep this file aligned with `catalog/skills.tsv`.
 
 For imported skills whose upstream repository, ref, or path was not captured before import, `catalog/skills.tsv` uses `not-recorded`. This is an accepted traceability limitation for the current imported MIT-licensed set. Do not replace `not-recorded` with guessed upstream metadata.
 
@@ -22,14 +20,3 @@ For imported skills whose upstream repository, ref, or path was not captured bef
 | `to-prd` | MIT | `skills/to-prd/LICENSE` | Upstream URL not recorded |
 | `triage` | MIT | `skills/triage/LICENSE` | Upstream URL not recorded |
 | `zoom-out` | MIT | `skills/zoom-out/LICENSE` | Upstream URL not recorded |
-
-## Inspiration-Only Sources
-
-The following external projects informed the roadmap and candidate skill ideas. Content should not be copied from them unless the resulting license obligations are intentionally accepted and recorded here.
-
-| Source | Notes |
-|---|---|
-| `trailofbits/skills` | Security and testing skill ideas; repository license observed as CC-BY-SA-4.0 during research. Use as inspiration unless share-alike obligations are accepted. |
-| `secondsky/claude-skills` | API, auth, and framework skill ideas; MIT source at time of research. |
-| `daymade/claude-code-skills` | Agent workflow, evaluation, i18n, and GitHub operation skill ideas; MIT source at time of research. |
-| `Mindrally/skills` | Broad software engineering skill discovery source; inspect individual files and license metadata before direct adaptation. |

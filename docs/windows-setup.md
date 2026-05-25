@@ -5,7 +5,7 @@
 Run commands from the repository root:
 
 ```powershell
-cd C:\path\to\ai_setup
+cd <repo-root>
 .\scripts\validate-skills.ps1
 ```
 
@@ -79,7 +79,8 @@ Install selected skills for OpenCode:
 Install project-local skills for Claude Code:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\repo" -Bundle starter
+$TargetRepo = "<target-repo>"
+.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath $TargetRepo -Bundle starter
 ```
 
 Install starter skills with the recommended subagent bundle:
@@ -116,20 +117,23 @@ Replace existing installed skills:
 Install into an explicit skills directory:
 
 ```powershell
-.\scripts\install-skills.ps1 -TargetPath "C:\path\to\repo\.agent\skills" -Bundle starter
+$SkillTarget = "<target-skills-dir>"
+.\scripts\install-skills.ps1 -TargetPath $SkillTarget -Bundle starter
 ```
 
 Bootstrap a target repo:
 
 ```powershell
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter -IncludeAgents
+$TargetRepo = "<target-repo>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Dry-run bootstrap:
 
 ```powershell
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness opencode -Bundle starter -DryRun
+$TargetRepo = "<target-repo>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness opencode -Bundle starter -DryRun
 ```
 
 Score skills:
@@ -197,7 +201,9 @@ Use `-TargetPath` with `-Scope custom`, or use a harness global/project scope.
 Provide both paths when installing skills and native subagents into custom directories:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness claude-code -Scope custom -TargetPath "C:\agent\skills" -Bundle starter -IncludeAgents -AgentTargetPath "C:\agent\agents"
+$SkillTarget = "<target-skills-dir>"
+$AgentTarget = "<target-agents-dir>"
+.\scripts\install-skills.ps1 -Harness claude-code -Scope custom -TargetPath $SkillTarget -Bundle starter -IncludeAgents -AgentTargetPath $AgentTarget
 ```
 
 `Cannot bind parameter 'Skills'`

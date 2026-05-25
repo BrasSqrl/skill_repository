@@ -20,15 +20,17 @@ Use manual copy when you want exact control over what enters a target repository
 Windows:
 
 ```powershell
-New-Item -ItemType Directory -Force "C:\path\to\repo\.agent\skills"
-Copy-Item -Recurse .\skills\context-engineering "C:\path\to\repo\.agent\skills\"
+$SkillTarget = "<target-skills-dir>"
+New-Item -ItemType Directory -Force $SkillTarget
+Copy-Item -Recurse .\skills\context-engineering $SkillTarget
 ```
 
 Linux:
 
 ```bash
-mkdir -p /path/to/repo/.agent/skills
-cp -R ./skills/context-engineering /path/to/repo/.agent/skills/
+SKILL_TARGET="<target-skills-dir>"
+mkdir -p "$SKILL_TARGET"
+cp -R ./skills/context-engineering "$SKILL_TARGET/"
 ```
 
 Common targets:
@@ -96,8 +98,9 @@ Install all skills:
 Project-local install:
 
 ```powershell
-.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\repo" -Bundle starter
-.\scripts\install-skills.ps1 -Harness opencode -Scope project -ProjectPath "C:\path\to\repo" -Bundle starter
+$TargetRepo = "<target-repo>"
+.\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath $TargetRepo -Bundle starter
+.\scripts\install-skills.ps1 -Harness opencode -Scope project -ProjectPath $TargetRepo -Bundle starter
 ```
 
 Dry-run and force:
@@ -125,15 +128,17 @@ Use bootstrap when setting up a target repo. It installs a bundle, creates `AGEN
 Windows:
 
 ```powershell
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter
-.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter -IncludeAgents
+$TargetRepo = "<target-repo>"
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath $TargetRepo -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Linux:
 
 ```bash
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter --include-agents
+TARGET_REPO="<target-repo>"
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness opencode --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness opencode --bundle starter --include-agents
 ```
 
 Use `-DryRun` or `--dry-run` first when the target already has agent instructions.

@@ -5,7 +5,7 @@
 Run commands from the repository root:
 
 ```bash
-cd /path/to/ai_setup
+cd <repo-root>
 bash ./scripts/validate-skills.sh
 ```
 
@@ -71,7 +71,8 @@ bash ./scripts/install-skills.sh --harness opencode --skills context-engineering
 Install project-local skills for OpenCode:
 
 ```bash
-bash ./scripts/install-skills.sh --harness opencode --scope project --project-path "/path/to/repo" --bundle starter
+TARGET_REPO="<target-repo>"
+bash ./scripts/install-skills.sh --harness opencode --scope project --project-path "$TARGET_REPO" --bundle starter
 ```
 
 Install starter skills with the recommended subagent bundle:
@@ -108,20 +109,23 @@ bash ./scripts/install-skills.sh --harness codex --bundle starter --force
 Install into an explicit skills directory:
 
 ```bash
-bash ./scripts/install-skills.sh --target-path "/path/to/repo/.agent/skills" --bundle starter
+SKILL_TARGET="<target-skills-dir>"
+bash ./scripts/install-skills.sh --target-path "$SKILL_TARGET" --bundle starter
 ```
 
 Bootstrap a target repo:
 
 ```bash
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter --include-agents
+TARGET_REPO="<target-repo>"
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness opencode --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness opencode --bundle starter --include-agents
 ```
 
 Dry-run bootstrap:
 
 ```bash
-bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness claude-code --bundle starter --dry-run
+TARGET_REPO="<target-repo>"
+bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness claude-code --bundle starter --dry-run
 ```
 
 Score skills:
@@ -192,7 +196,9 @@ Use `--target-path` with `--scope custom`, or use a harness global/project scope
 Provide both paths when installing skills and native subagents into custom directories:
 
 ```bash
-bash ./scripts/install-skills.sh --harness claude-code --scope custom --target-path /tmp/agent-skills --bundle starter --include-agents --agent-target-path /tmp/agent-files
+SKILL_TARGET="<target-skills-dir>"
+AGENT_TARGET="<target-agents-dir>"
+bash ./scripts/install-skills.sh --harness claude-code --scope custom --target-path "$SKILL_TARGET" --bundle starter --include-agents --agent-target-path "$AGENT_TARGET"
 ```
 
 `Unknown argument`
