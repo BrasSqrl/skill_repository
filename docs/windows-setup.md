@@ -15,7 +15,7 @@ Use the double-click guided installer:
 install-all-skills-windows.bat
 ```
 
-The batch launcher opens an interactive PowerShell menu. It asks for harness, scope, bundle/all/individual skill selection, shows installed status, and warns before overwriting.
+The batch launcher opens an interactive PowerShell menu. It asks for harness, scope, bundle/all/individual skill selection, optional subagent installation, installed status, and overwrite confirmation.
 
 ## Harness Defaults
 
@@ -25,6 +25,14 @@ The batch launcher opens an interactive PowerShell menu. It asks for harness, sc
 | Claude Code | `%USERPROFILE%\.claude\skills` |
 | OpenCode | `%USERPROFILE%\.config\opencode\skills` |
 
+Subagent defaults:
+
+| Harness | Global Windows target |
+| --- | --- |
+| Codex | Guidance only during bootstrap |
+| Claude Code | `%USERPROFILE%\.claude\agents` |
+| OpenCode | `%USERPROFILE%\.config\opencode\agents` |
+
 Project-local defaults:
 
 | Harness | Project target |
@@ -33,12 +41,21 @@ Project-local defaults:
 | OpenCode | `<project>\.opencode\skills` |
 | Codex | No project default; provide `-TargetPath` |
 
+Project-local subagent defaults:
+
+| Harness | Project target |
+| --- | --- |
+| Claude Code | `<project>\.claude\agents` |
+| OpenCode | `<project>\.opencode\agents` |
+| Codex | Guidance only during bootstrap |
+
 ## Example Commands
 
 List bundles:
 
 ```powershell
 .\scripts\install-skills.ps1 -ListBundles
+.\scripts\install-skills.ps1 -ListAgentBundles
 ```
 
 Install the starter bundle globally for Codex:
@@ -65,6 +82,25 @@ Install project-local skills for Claude Code:
 .\scripts\install-skills.ps1 -Harness claude-code -Scope project -ProjectPath "C:\path\to\repo" -Bundle starter
 ```
 
+Install starter skills with the recommended subagent bundle:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents
+.\scripts\install-skills.ps1 -Harness opencode -Bundle starter -IncludeAgents
+```
+
+Install an explicit subagent bundle:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle security -IncludeAgents -AgentBundle security-review
+```
+
+Install selected subagents:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents -Agents code-reviewer,validation-runner
+```
+
 Preview without copying:
 
 ```powershell
@@ -87,6 +123,7 @@ Bootstrap a target repo:
 
 ```powershell
 .\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Dry-run bootstrap:
@@ -99,6 +136,7 @@ Score skills:
 
 ```powershell
 .\scripts\score-skills.ps1
+.\scripts\score-agents.ps1
 ```
 
 ## Execution Policy
@@ -119,9 +157,10 @@ The batch launcher already invokes PowerShell with `-ExecutionPolicy Bypass` for
 - Use `-Harness` for known Codex, Claude Code, or OpenCode defaults.
 - Use `-Bundle`, `-Skills`, or `-All`; the installer requires exactly one install selector.
 - Use `-TargetPath` for a custom destination skills directory, not the target repo root.
+- Use `-AgentTargetPath` when `-Scope custom` and `-IncludeAgents` are used with a native-agent harness.
 - Use `-ProjectPath` only with `-Scope project` or bootstrap.
 - The installer creates the target skills directory if needed.
-- Existing skill folders are not overwritten unless `-Force` is provided.
+- Existing skill folders and native agent files are not overwritten unless `-Force` is provided.
 
 ## Troubleshooting
 
@@ -145,9 +184,21 @@ Choose one install mode:
 
 Use `-Force` only if replacing the installed skill is intended. The batch installer also lets you skip already-installed selected skills.
 
+`Target already contains agent file`
+
+Use `-Force` only if replacing the installed subagent is intended. The batch installer also lets you skip already-installed selected subagents.
+
 `Custom scope requires -TargetPath`
 
 Use `-TargetPath` with `-Scope custom`, or use a harness global/project scope.
+
+`Custom scope with -IncludeAgents requires -AgentTargetPath`
+
+Provide both paths when installing skills and native subagents into custom directories:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Scope custom -TargetPath "C:\agent\skills" -Bundle starter -IncludeAgents -AgentTargetPath "C:\agent\agents"
+```
 
 `Cannot bind parameter 'Skills'`
 

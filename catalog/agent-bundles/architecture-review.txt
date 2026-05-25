@@ -1,0 +1,4 @@
+repo-scout
+architecture-reviewer
+code-reviewer
+validation-runner

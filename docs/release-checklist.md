@@ -17,6 +17,14 @@ Use this checklist before publishing or tagging this skill library.
   ```powershell
   .\scripts\score-skills.ps1
   ```
+- [ ] Agent quality scoring reviewed:
+  ```powershell
+  .\scripts\score-agents.ps1
+  ```
+- [ ] Bash agent quality scoring reviewed:
+  ```bash
+  ./scripts/score-agents.sh
+  ```
 
 ## Installer Checks
 
@@ -38,6 +46,12 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] Selected-skill install tested on Windows and Linux.
 - [ ] Installer refuses to overwrite existing skills without force mode.
 - [ ] Windows batch flow reaches harness, scope, bundle/all/individual, and overwrite prompts.
+- [ ] Windows batch flow reaches optional subagent selection, installed status, and overwrite prompts.
+- [ ] Agent listing tested on Windows and Linux.
+- [ ] Agent bundle install tested for Claude Code and OpenCode.
+- [ ] Codex `-IncludeAgents` dry run reports guidance-only behavior.
+- [ ] Existing native agent files are blocked without force mode.
+- [ ] Force mode replaces only files inside the resolved native agent target.
 
 ## Bootstrap Checks
 
@@ -49,6 +63,9 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] Existing target `AGENTS.md` is preserved unless force mode is used.
 - [ ] Project-local bootstrap tested for Claude Code and OpenCode.
 - [ ] Codex bootstrap tested with global or custom skill target.
+- [ ] Codex bootstrap with agents writes `docs/agents/subagent-orchestration.md` and `docs/agents/available-subagents.md`.
+- [ ] Claude Code bootstrap with agents writes `.claude/agents/*.md`.
+- [ ] OpenCode bootstrap with agents writes `.opencode/agents/*.md`.
 
 ## Skill Content Review
 
@@ -60,20 +77,25 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] No project-specific assumptions remain.
 - [ ] Examples are accurate and match implemented script options.
 - [ ] Workflow templates include trigger, ordered skills, phase outputs, validation gates, handoff format, and escalation rules.
+- [ ] Subagent definitions include trigger descriptions, permission boundaries, forbidden actions, output format, and escalation rules.
 
 ## Repository Review
 
 - [ ] Folder structure is clean.
 - [ ] README skill catalog matches the `skills/` directory.
 - [ ] `catalog/skills.tsv` has one row per skill.
+- [ ] `catalog/agents.tsv` has one row per canonical subagent.
 - [ ] Every bundle file points only to existing skills.
+- [ ] Every agent bundle file points only to existing subagents.
 - [ ] Harness profiles are present for Codex, Claude Code, and OpenCode.
+- [ ] Harness profiles declare native or guidance-only subagent support.
 - [ ] Third-party skills are listed in `THIRD_PARTY_NOTICES.md` and retain local license files.
 - [ ] Windows-first instructions are present.
 - [ ] Linux alternatives are present.
 - [ ] Templates are copyable and do not contain accidental unfinished placeholders.
-- [ ] License decision documented.
+- [ ] Root `LICENSE` is present and catalog license metadata matches the release license for first-party content.
 
 ## License
 
-- [ ] TODO: Choose and add a public license before publication.
+- [ ] MIT license decision is documented in `LICENSE`.
+- [ ] Imported MIT-licensed skills retain per-skill `LICENSE` files and entries in `THIRD_PARTY_NOTICES.md`.

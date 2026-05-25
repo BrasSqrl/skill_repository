@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This repository provides reusable AI coding-agent skills, bundles, harness profiles, and workflow templates for software-development work. Copy or install selected skills into another repository so agents have durable guidance for recurring workflows.
+This repository provides reusable AI coding-agent skills, canonical subagents, bundles, harness profiles, and workflow templates for software-development work. Copy or install selected skills into another repository so agents have durable guidance for recurring workflows.
 
-Skills are tool-agnostic. A target repository can use them with any agent system that reads skill folders containing `SKILL.md`.
+Skills are tool-agnostic. A target repository can use them with any agent system that reads skill folders containing `SKILL.md`. Subagents are optional and install only when requested.
 
 ## Manual Copy Workflow
 
@@ -39,6 +39,14 @@ Common targets:
 | Claude Code | `~/.claude/skills` | `<project>/.claude/skills` |
 | OpenCode | `~/.config/opencode/skills` | `<project>/.opencode/skills` |
 
+Subagent targets:
+
+| Harness | Global target | Project target |
+| --- | --- | --- |
+| Codex | Guidance only | Guidance only |
+| Claude Code | `~/.claude/agents` | `<project>/.claude/agents` |
+| OpenCode | `~/.config/opencode/agents` | `<project>/.opencode/agents` |
+
 ## Script-Based Workflow
 
 Use the installer when you want repeatable copying with source checks, bundle support, dry-run support, and no-overwrite protection.
@@ -48,6 +56,8 @@ List bundles and skills:
 ```powershell
 .\scripts\install-skills.ps1 -ListBundles
 .\scripts\install-skills.ps1 -ListSkills
+.\scripts\install-skills.ps1 -ListAgentBundles
+.\scripts\install-skills.ps1 -ListAgents
 ```
 
 Install by bundle:
@@ -56,6 +66,19 @@ Install by bundle:
 .\scripts\install-skills.ps1 -Harness codex -Bundle starter
 .\scripts\install-skills.ps1 -Harness claude-code -Bundle quality
 .\scripts\install-skills.ps1 -Harness opencode -Bundle agent-orchestration
+```
+
+Install skills with the mapped default subagent bundle:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents
+.\scripts\install-skills.ps1 -Harness opencode -Bundle security -IncludeAgents
+```
+
+Install explicit subagents:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents -Agents code-reviewer,validation-runner
 ```
 
 Install selected skills:
@@ -88,9 +111,11 @@ Linux:
 
 ```bash
 bash ./scripts/install-skills.sh --list-bundles
+bash ./scripts/install-skills.sh --list-agent-bundles
 bash ./scripts/install-skills.sh --harness codex --bundle starter
 bash ./scripts/install-skills.sh --harness claude-code --skills context-engineering,test-driven-development
 bash ./scripts/install-skills.sh --harness opencode --bundle starter --dry-run
+bash ./scripts/install-skills.sh --harness opencode --bundle starter --include-agents
 ```
 
 ## Bootstrap Workflow
@@ -101,12 +126,14 @@ Windows:
 
 ```powershell
 .\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Linux:
 
 ```bash
 bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter --include-agents
 ```
 
 Use `-DryRun` or `--dry-run` first when the target already has agent instructions.
@@ -130,6 +157,14 @@ Add bundles by repo shape:
 - `security` for auth, permissions, secrets, dependencies, and risk review.
 - `agent-orchestration` for multi-agent workflows, evaluation, and handoff quality.
 
+Recommended first subagent set:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents
+```
+
+Use subagents when independent context, read-only review, validation, security review, architecture review, or release review reduces risk. Do not install subagents by default for tiny repos where the main agent can handle all work with a small context window.
+
 ## Updating Installed Skills
 
 Use force mode to replace previously installed folders. The installer replaces whole skill folders, so review target customizations first.
@@ -138,12 +173,14 @@ Windows:
 
 ```powershell
 .\scripts\install-skills.ps1 -Harness codex -Bundle starter -Force
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents -Force
 ```
 
 Linux:
 
 ```bash
 bash ./scripts/install-skills.sh --harness codex --bundle starter --force
+bash ./scripts/install-skills.sh --harness claude-code --bundle starter --include-agents --force
 ```
 
 ## Customizing Skills For A Target Repo
@@ -156,6 +193,7 @@ Good target customizations:
 - Important directories and ownership boundaries.
 - Security rules and forbidden files.
 - Installed bundles and local workflow expectations.
+- Subagent rules, installed agent bundles, and permission boundaries.
 - Project-specific validation checklist.
 
 Avoid putting these into reusable skills:
@@ -169,6 +207,7 @@ Avoid putting these into reusable skills:
 
 - Install `starter` first, then add bundles as needs repeat.
 - Prefer bundles over installing every skill.
+- Install subagents only when independent review or validation is useful.
 - Avoid copying unused references manually.
 - Keep target `AGENTS.md` project-specific and keep skills reusable.
 - Remove skills that do not trigger or improve agent behavior.
@@ -182,6 +221,7 @@ Windows:
 ```powershell
 .\scripts\validate-skills.ps1
 .\scripts\score-skills.ps1
+.\scripts\score-agents.ps1
 ```
 
 Linux:
@@ -189,6 +229,7 @@ Linux:
 ```bash
 bash ./scripts/validate-skills.sh
 bash ./scripts/score-skills.sh
+bash ./scripts/score-agents.sh
 ```
 
 Validation returns a nonzero exit code on failure. Scoring is advisory.

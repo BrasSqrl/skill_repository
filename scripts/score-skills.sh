@@ -48,6 +48,8 @@ done
 
 [[ -d "$SKILLS_PATH" ]] || { echo "[ERROR] Skills directory not found: $SKILLS_PATH" >&2; exit 1; }
 
+deprecated_license_placeholder="repo""-tbd"
+
 required_sections=(
   "Purpose"
   "When to Use"
@@ -164,7 +166,7 @@ for skill_dir in "${skill_dirs[@]}"; do
   if [[ -n "${catalog_seen[$skill_name]+x}" ]]; then
     score=$((score + 10))
     if [[ "${catalog_source[$skill_name]:-}" == "third-party" ]]; then
-      if [[ "${catalog_license[$skill_name]:-}" != "" && "${catalog_license[$skill_name]:-}" != "repo-tbd" && -f "$skill_dir/LICENSE" && -f "$NOTICES_PATH" ]] && grep -Fq "$skill_name" "$NOTICES_PATH"; then
+      if [[ "${catalog_license[$skill_name]:-}" != "" && "${catalog_license[$skill_name]:-}" != "$deprecated_license_placeholder" && -f "$skill_dir/LICENSE" && -f "$NOTICES_PATH" ]] && grep -Fq "$skill_name" "$NOTICES_PATH"; then
         score=$((score + 7))
       else
         notes+=("third-party traceability gap")

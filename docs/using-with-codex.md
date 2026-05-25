@@ -4,6 +4,8 @@ This guide shows how to use this skill library with Codex, Claude Code, OpenCode
 
 The repository keeps one canonical `skills/` source. The installer only changes where those folders are copied.
 
+It also keeps one canonical `agents/` source. Subagents are opt-in: Claude Code and OpenCode receive native Markdown agent files, while Codex receives portable subagent orchestration guidance during bootstrap.
+
 ## 1. Install Skills
 
 From this repository, install the starter bundle globally for a harness:
@@ -50,6 +52,13 @@ Use dry-run first when installing into a location that may already contain skill
 .\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -DryRun
 ```
 
+Install skills with the recommended subagent bundle:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents
+.\scripts\install-skills.ps1 -Harness opencode -Bundle starter -IncludeAgents
+```
+
 ## 2. Where Skills Go
 
 Global defaults:
@@ -67,6 +76,14 @@ Project-local defaults:
 | Claude Code | `<project>/.claude/skills` |
 | OpenCode | `<project>/.opencode/skills` |
 | Codex | Use an explicit custom skills directory |
+
+Subagent defaults:
+
+| Harness | Global target | Project target |
+|---|---|---|
+| Codex | Guidance only | Guidance only |
+| Claude Code | `~/.claude/agents` | `<project>/.claude/agents` |
+| OpenCode | `~/.config/opencode/agents` | `<project>/.opencode/agents` |
 
 Project-local install example:
 
@@ -86,12 +103,14 @@ Use bootstrap when you want the installer to seed project instructions and recor
 
 ```powershell
 .\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\target-repo" -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\target-repo" -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Bash:
 
 ```bash
 bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/target-repo --harness opencode --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/target-repo --harness opencode --bundle starter --include-agents
 ```
 
 Use manual copy when you only want the template:
@@ -120,6 +139,7 @@ Then fill in project-specific facts:
 - secrets and security rules
 - validation checklist
 - installed skills and when the repo expects agents to use them
+- installed subagents and when independent delegation is expected
 
 Keep reusable workflow guidance in skills. Keep project-specific facts in `AGENTS.md`.
 
@@ -181,6 +201,18 @@ Prompt pattern:
 Use the feature-development workflow from this skill repository. Load only the skills needed for this task, then proceed through the workflow gates.
 ```
 
+Subagent prompt pattern:
+
+```text
+Use the code-reviewer subagent for an independent read-only review of the current diff. Return findings with evidence, validation gaps, risks, and recommended next action.
+```
+
+Ask for subagent selection when the role is unclear:
+
+```text
+Choose whether this task should stay in the main conversation or use a subagent. If a subagent helps, name the subagent, explain the reason in one sentence, and provide the handoff.
+```
+
 ## 7. Example Workflows
 
 ### Onboarding A Repo
@@ -225,16 +257,34 @@ Use test-driven-development for this feature. Show the red test result, implemen
 Use code-review-and-quality to review the current diff. Focus on correctness, regressions, missing tests, and maintainability. Findings first, ordered by severity.
 ```
 
+Independent review:
+
+```text
+Use the code-reviewer subagent to review the current diff without editing files. Then summarize which findings should be fixed before handoff.
+```
+
 For security-sensitive changes:
 
 ```text
 Use security-review for the auth and data-access changes in this diff. Report concrete findings with severity, confidence, evidence, recommendation, and verification.
 ```
 
+Independent security review:
+
+```text
+Use the security-reviewer subagent for a read-only security pass over the auth and data-access changes. Escalate blockers instead of editing files.
+```
+
 ### Preparing A Release
 
 ```text
 Use release-readiness to assess this release candidate. Check validation, versioning, changelog, migrations, rollback, documentation, and known risks. Give a go/no-go recommendation.
+```
+
+Independent release review:
+
+```text
+Use the release-reviewer subagent to inspect release readiness evidence and return blockers, risks, and the next validation step.
 ```
 
 If a review package is needed first:

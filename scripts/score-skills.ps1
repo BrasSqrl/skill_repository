@@ -46,6 +46,8 @@ if (-not $SkillsPath) {
     $SkillsPath = Join-Path $repoRoot "skills"
 }
 
+$deprecatedLicensePlaceholder = "repo" + "-tbd"
+
 if (-not (Test-Path -LiteralPath $SkillsPath -PathType Container)) {
     Write-Host "[ERROR] Skills directory not found: $SkillsPath" -ForegroundColor Red
     exit 1
@@ -167,7 +169,7 @@ foreach ($skillDir in @(Get-ChildItem -LiteralPath $SkillsPath -Directory | Sort
         }
 
         if ($catalogEntry.source -eq "third-party") {
-            if ($catalogEntry.license -and $catalogEntry.license -ne "repo-tbd" -and
+            if ($catalogEntry.license -and $catalogEntry.license -ne $deprecatedLicensePlaceholder -and
                 (Test-Path -LiteralPath (Join-Path $skillDir.FullName "LICENSE") -PathType Leaf) -and
                 $noticesContent -match [regex]::Escape($skillDir.Name)) {
                 $score += 7

@@ -17,6 +17,14 @@ bash ./scripts/validate-skills.sh
 | Claude Code | `$HOME/.claude/skills` |
 | OpenCode | `$HOME/.config/opencode/skills` |
 
+Subagent defaults:
+
+| Harness | Global Linux target |
+| --- | --- |
+| Codex | Guidance only during bootstrap |
+| Claude Code | `$HOME/.claude/agents` |
+| OpenCode | `$HOME/.config/opencode/agents` |
+
 Project-local defaults:
 
 | Harness | Project target |
@@ -25,12 +33,21 @@ Project-local defaults:
 | OpenCode | `<project>/.opencode/skills` |
 | Codex | No project default; provide `--target-path` |
 
+Project-local subagent defaults:
+
+| Harness | Project target |
+| --- | --- |
+| Claude Code | `<project>/.claude/agents` |
+| OpenCode | `<project>/.opencode/agents` |
+| Codex | Guidance only during bootstrap |
+
 ## Example Commands
 
 List bundles:
 
 ```bash
 bash ./scripts/install-skills.sh --list-bundles
+bash ./scripts/install-skills.sh --list-agent-bundles
 ```
 
 Install the starter bundle globally for Codex:
@@ -57,6 +74,25 @@ Install project-local skills for OpenCode:
 bash ./scripts/install-skills.sh --harness opencode --scope project --project-path "/path/to/repo" --bundle starter
 ```
 
+Install starter skills with the recommended subagent bundle:
+
+```bash
+bash ./scripts/install-skills.sh --harness claude-code --bundle starter --include-agents
+bash ./scripts/install-skills.sh --harness opencode --bundle starter --include-agents
+```
+
+Install an explicit subagent bundle:
+
+```bash
+bash ./scripts/install-skills.sh --harness opencode --bundle security --include-agents --agent-bundle security-review
+```
+
+Install selected subagents:
+
+```bash
+bash ./scripts/install-skills.sh --harness claude-code --bundle starter --include-agents --agents code-reviewer,validation-runner
+```
+
 Preview without copying:
 
 ```bash
@@ -79,6 +115,7 @@ Bootstrap a target repo:
 
 ```bash
 bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter --include-agents
 ```
 
 Dry-run bootstrap:
@@ -91,6 +128,7 @@ Score skills:
 
 ```bash
 bash ./scripts/score-skills.sh
+bash ./scripts/score-agents.sh
 ```
 
 ## Executable Permissions
@@ -114,9 +152,10 @@ bash ./scripts/install-skills.sh --harness codex --bundle starter
 - Use `--harness` for known Codex, Claude Code, or OpenCode defaults.
 - Use `--bundle`, `--skills`, or `--all`; the installer requires exactly one install selector.
 - Use `--target-path` for a custom destination skills directory, not the target repo root.
+- Use `--agent-target-path` when `--scope custom` and `--include-agents` are used with a native-agent harness.
 - Use `--project-path` only with `--scope project` or bootstrap.
 - The installer creates the target skills directory if needed.
-- Existing skill folders are not overwritten unless `--force` is provided.
+- Existing skill folders and native agent files are not overwritten unless `--force` is provided.
 
 ## Troubleshooting
 
@@ -140,9 +179,21 @@ bash ./scripts/install-skills.sh --harness codex --bundle starter
 
 Use `--force` only if replacing the installed skill is intended.
 
+`Target already contains agent file`
+
+Use `--force` only if replacing the installed subagent is intended.
+
 `Custom scope requires --target-path`
 
 Use `--target-path` with `--scope custom`, or use a harness global/project scope.
+
+`Custom scope with --include-agents requires --agent-target-path`
+
+Provide both paths when installing skills and native subagents into custom directories:
+
+```bash
+bash ./scripts/install-skills.sh --harness claude-code --scope custom --target-path /tmp/agent-skills --bundle starter --include-agents --agent-target-path /tmp/agent-files
+```
 
 `Unknown argument`
 

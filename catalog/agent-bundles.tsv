@@ -1,0 +1,6 @@
+id	label	purpose	recommendation
+starter-review	Starter Review	General read-only discovery, review, validation, and release handoff agents	Install with starter or general software-development bundles.
+security-review	Security Review	Security-focused review plus validation support	Install for security-sensitive repositories or release gates.
+delivery-review	Delivery Review	Validation, release readiness, and review agents	Install for PR, CI/CD, release, and handoff workflows.
+architecture-review	Architecture Review	Architecture, repo discovery, code review, and validation agents	Install before large design or refactoring work.
+all-agents	All Agents	Complete subagent set from this repository	Install when broad subagent coverage is preferred.

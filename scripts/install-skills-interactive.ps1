@@ -102,6 +102,29 @@ function Resolve-GlobalTargetPath {
     return [System.IO.Path]::GetFullPath((Join-PortablePath -BasePath $HOME -RelativePath $Profile["global_default"]))
 }
 
+function Resolve-GlobalAgentTargetPath {
+    param([hashtable]$Profile)
+
+    if ($Profile["agent_support"] -ne "native") {
+        return $null
+    }
+
+    $agentEnv = $Profile["agent_global_env"]
+    if (-not [string]::IsNullOrWhiteSpace($agentEnv)) {
+        $envValue = [Environment]::GetEnvironmentVariable($agentEnv)
+        if (-not [string]::IsNullOrWhiteSpace($envValue)) {
+            $suffix = $Profile["agent_global_suffix"]
+            if ([string]::IsNullOrWhiteSpace($suffix)) {
+                return [System.IO.Path]::GetFullPath($envValue)
+            }
+
+            return [System.IO.Path]::GetFullPath((Join-PortablePath -BasePath $envValue -RelativePath $suffix))
+        }
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-PortablePath -BasePath $HOME -RelativePath $Profile["agent_global_default"]))
+}
+
 function Get-HarnessProfiles {
     param([string]$RepoRoot)
 
@@ -113,7 +136,7 @@ function Get-HarnessProfiles {
     $profiles = New-Object System.Collections.Generic.List[object]
     foreach ($profileFile in @(Get-ChildItem -LiteralPath $profileDir -Filter "*.profile" | Sort-Object Name)) {
         $profile = Read-KeyValueFile -Path $profileFile.FullName
-        foreach ($requiredKey in @("id", "label", "global_default", "supports_project_default", "project_subpath")) {
+        foreach ($requiredKey in @("id", "label", "global_default", "supports_project_default", "project_subpath", "agent_support", "agent_global_default", "agent_project_subpath", "supports_agent_project_default")) {
             if (-not $profile.ContainsKey($requiredKey)) {
                 throw "Harness profile '$($profileFile.Name)' is missing '$requiredKey'"
             }
@@ -125,6 +148,10 @@ function Get-HarnessProfiles {
             GlobalTarget = Resolve-GlobalTargetPath -Profile $profile
             ProjectSubpath = $profile["project_subpath"]
             SupportsProjectDefault = ($profile["supports_project_default"] -eq "true")
+            AgentSupport = $profile["agent_support"]
+            GlobalAgentTarget = Resolve-GlobalAgentTargetPath -Profile $profile
+            AgentProjectSubpath = $profile["agent_project_subpath"]
+            SupportsAgentProjectDefault = ($profile["supports_agent_project_default"] -eq "true")
         })
     }
 
@@ -148,6 +175,28 @@ function Get-Bundles {
     return @(Import-Csv -LiteralPath $bundleCatalog -Delimiter "`t" | Sort-Object id)
 }
 
+function Get-AgentBundles {
+    param([string]$RepoRoot)
+
+    $agentBundleCatalog = Join-Path $RepoRoot "catalog\agent-bundles.tsv"
+    if (-not (Test-Path -LiteralPath $agentBundleCatalog -PathType Leaf)) {
+        throw "Agent bundle catalog not found: $agentBundleCatalog"
+    }
+
+    return @(Import-Csv -LiteralPath $agentBundleCatalog -Delimiter "`t" | Sort-Object id)
+}
+
+function Get-Agents {
+    param([string]$RepoRoot)
+
+    $agentCatalog = Join-Path $RepoRoot "catalog\agents.tsv"
+    if (-not (Test-Path -LiteralPath $agentCatalog -PathType Leaf)) {
+        throw "Agent catalog not found: $agentCatalog"
+    }
+
+    return @(Import-Csv -LiteralPath $agentCatalog -Delimiter "`t" | Sort-Object name)
+}
+
 function Get-BundleSkills {
     param(
         [string]$RepoRoot,
@@ -163,6 +212,42 @@ function Get-BundleSkills {
         ForEach-Object { $_.Trim() } |
         Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.StartsWith("#") } |
         Select-Object -Unique)
+}
+
+function Get-AgentBundleAgents {
+    param(
+        [string]$RepoRoot,
+        [string]$BundleId
+    )
+
+    $bundlePath = Join-Path $RepoRoot "catalog\agent-bundles\$BundleId.txt"
+    if (-not (Test-Path -LiteralPath $bundlePath -PathType Leaf)) {
+        throw "Agent bundle file not found: $bundlePath"
+    }
+
+    return @(Get-Content -LiteralPath $bundlePath |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.StartsWith("#") } |
+        Select-Object -Unique)
+}
+
+function Get-DefaultAgentBundle {
+    param(
+        [string]$SelectionMode,
+        [string]$SkillBundle
+    )
+
+    if ($SelectionMode -eq "bundle") {
+        switch ($SkillBundle) {
+            { $_ -in @("starter", "backend", "frontend", "quality") } { return "starter-review" }
+            "security" { return "security-review" }
+            "delivery" { return "delivery-review" }
+            { $_ -in @("agent-orchestration", "all-software-dev") } { return "all-agents" }
+            default { return "starter-review" }
+        }
+    }
+
+    return "starter-review"
 }
 
 function Select-Harness {
@@ -260,6 +345,8 @@ function Select-InstallTarget {
                     HarnessLabel = $Profile.Label
                     Scope = "global"
                     TargetPath = Convert-ToFullPath -Path $Profile.GlobalTarget
+                    AgentTargetPath = $Profile.GlobalAgentTarget
+                    AgentSupport = $Profile.AgentSupport
                     ProjectPath = $null
                 }
             }
@@ -272,16 +359,24 @@ function Select-InstallTarget {
                         HarnessLabel = $Profile.Label
                         Scope = "custom"
                         TargetPath = $targetPath
+                        AgentTargetPath = $null
+                        AgentSupport = $Profile.AgentSupport
                         ProjectPath = $null
                     }
                 }
 
                 $projectRoot = Read-RequiredPath -Prompt "Project root"
+                $agentProjectTarget = $null
+                if ($Profile.AgentSupport -eq "native" -and $Profile.SupportsAgentProjectDefault) {
+                    $agentProjectTarget = Join-PortablePath -BasePath $projectRoot -RelativePath $Profile.AgentProjectSubpath
+                }
                 return [pscustomobject]@{
                     HarnessId = $Profile.Id
                     HarnessLabel = $Profile.Label
                     Scope = "project"
                     TargetPath = Join-PortablePath -BasePath $projectRoot -RelativePath $Profile.ProjectSubpath
+                    AgentTargetPath = $agentProjectTarget
+                    AgentSupport = $Profile.AgentSupport
                     ProjectPath = $projectRoot
                 }
             }
@@ -292,6 +387,8 @@ function Select-InstallTarget {
                     HarnessLabel = $Profile.Label
                     Scope = "custom"
                     TargetPath = $targetPath
+                    AgentTargetPath = $null
+                    AgentSupport = $Profile.AgentSupport
                     ProjectPath = $null
                 }
             }
@@ -313,6 +410,37 @@ function Get-InstalledStatus {
     }
 
     return "not installed"
+}
+
+function Get-InstalledAgentStatus {
+    param(
+        [string]$TargetPath,
+        [string]$AgentName
+    )
+
+    if ([string]::IsNullOrWhiteSpace($TargetPath)) {
+        return "guidance only"
+    }
+
+    if (Test-Path -LiteralPath (Join-Path $TargetPath "$AgentName.md") -PathType Leaf) {
+        return "installed"
+    }
+
+    return "not installed"
+}
+
+function Resolve-InteractiveAgentTarget {
+    param([pscustomobject]$InstallTarget)
+
+    if ($InstallTarget.AgentSupport -ne "native") {
+        return $null
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($InstallTarget.AgentTargetPath)) {
+        return $InstallTarget.AgentTargetPath
+    }
+
+    return (Read-RequiredPath -Prompt "$($InstallTarget.HarnessLabel) native agent directory")
 }
 
 function Select-Bundle {
@@ -504,6 +632,247 @@ function Select-InstallPackage {
     }
 }
 
+function Select-AgentBundle {
+    param(
+        [array]$AgentBundles,
+        [string]$DefaultBundle
+    )
+
+    while ($true) {
+        Write-Host ""
+        Write-Host "Available agent bundles:"
+        Write-Host ""
+        for ($i = 0; $i -lt $AgentBundles.Count; $i++) {
+            $number = $i + 1
+            $bundle = $AgentBundles[$i]
+            Write-Host ("  {0,2}. {1,-22} {2}" -f $number, $bundle.id, $bundle.label)
+            Write-Host ("      {0}" -f $bundle.recommendation)
+        }
+        Write-Host "  q. Quit"
+        Write-Host ""
+
+        $choice = Read-Host "Agent bundle [$DefaultBundle]"
+        if ([string]::IsNullOrWhiteSpace($choice)) {
+            $choice = $DefaultBundle
+        }
+
+        if ($choice -match "^(?i:q|quit)$") {
+            return $null
+        }
+
+        if ($choice -match "^\d+$") {
+            $index = [int]$choice
+            if ($index -ge 1 -and $index -le $AgentBundles.Count) {
+                return $AgentBundles[$index - 1]
+            }
+        }
+
+        $matchingBundle = $AgentBundles | Where-Object { $_.id -eq $choice } | Select-Object -First 1
+        if ($matchingBundle) {
+            return $matchingBundle
+        }
+
+        Write-ErrorLine "Invalid agent bundle selection."
+    }
+}
+
+function Select-IndividualAgents {
+    param(
+        [array]$Agents,
+        [string]$AgentTargetPath
+    )
+
+    while ($true) {
+        Write-Host ""
+        Write-Host "Available subagents:"
+        Write-Host ""
+
+        for ($i = 0; $i -lt $Agents.Count; $i++) {
+            $number = $i + 1
+            $name = $Agents[$i].name
+            $status = Get-InstalledAgentStatus -TargetPath $AgentTargetPath -AgentName $name
+            Write-Host ("  {0,2}. {1} [{2}]" -f $number, $name, $status)
+        }
+
+        Write-Host ""
+        Write-Host "Enter one of:"
+        Write-Host "  1,3,5                       install by number"
+        Write-Host "  code-reviewer,validation-runner"
+        Write-Host "  q                           quit"
+        Write-Host ""
+
+        $choice = Read-Host "Agents to install"
+        if ([string]::IsNullOrWhiteSpace($choice)) {
+            Write-WarnLine "No agents selected."
+            continue
+        }
+
+        if ($choice -match "^(?i:q|quit)$") {
+            return $null
+        }
+
+        $selected = New-Object System.Collections.Generic.List[string]
+        $invalid = New-Object System.Collections.Generic.List[string]
+        $tokens = $choice -split "[,\s]+" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+
+        foreach ($token in $tokens) {
+            if ($token -match "^\d+$") {
+                $index = [int]$token
+                if ($index -ge 1 -and $index -le $Agents.Count) {
+                    $agentName = $Agents[$index - 1].name
+                    if (-not $selected.Contains($agentName)) {
+                        $selected.Add($agentName)
+                    }
+                } else {
+                    $invalid.Add($token)
+                }
+                continue
+            }
+
+            $matchingAgent = $Agents | Where-Object { $_.name -eq $token } | Select-Object -First 1
+            if ($matchingAgent) {
+                if (-not $selected.Contains($matchingAgent.name)) {
+                    $selected.Add($matchingAgent.name)
+                }
+            } else {
+                $invalid.Add($token)
+            }
+        }
+
+        if ($invalid.Count -gt 0) {
+            Write-ErrorLine "Invalid selection(s): $($invalid -join ', ')"
+            Write-Host "Choose numbers from the list or exact agent names."
+            continue
+        }
+
+        if ($selected.Count -eq 0) {
+            Write-WarnLine "No valid agents selected."
+            continue
+        }
+
+        return @($selected)
+    }
+}
+
+function Select-AgentPackage {
+    param(
+        [array]$Agents,
+        [array]$AgentBundles,
+        [pscustomobject]$SkillSelection,
+        [pscustomobject]$InstallTarget,
+        [string]$RepoRoot,
+        [string]$AgentTargetPath
+    )
+
+    $defaultAgentBundle = Get-DefaultAgentBundle -SelectionMode $SkillSelection.Mode -SkillBundle $SkillSelection.Bundle
+
+    while ($true) {
+        Write-Host ""
+        Write-Host "Choose subagents to install:"
+        if ($InstallTarget.AgentSupport -eq "native") {
+            Write-Host "  Native agent target: $AgentTargetPath"
+        } else {
+            Write-Host "  $($InstallTarget.HarnessLabel) will receive portable guidance docs only during bootstrap."
+        }
+        Write-Host ""
+        Write-Host "  1. Recommended agent bundle ($defaultAgentBundle)"
+        Write-Host "  2. Different agent bundle"
+        Write-Host "  3. All subagents"
+        Write-Host "  4. Individual subagents"
+        Write-Host "  5. Skip subagents"
+        Write-Host ""
+
+        $choice = Read-Host "Subagent selection [1]"
+        if ([string]::IsNullOrWhiteSpace($choice)) {
+            $choice = "1"
+        }
+
+        switch ($choice) {
+            "1" {
+                return [pscustomobject]@{
+                    IncludeAgents = $true
+                    Mode = "bundle"
+                    Bundle = $defaultAgentBundle
+                    Agents = @(Get-AgentBundleAgents -RepoRoot $RepoRoot -BundleId $defaultAgentBundle)
+                    AgentTargetPath = $AgentTargetPath
+                }
+            }
+            "2" {
+                $bundle = Select-AgentBundle -AgentBundles $AgentBundles -DefaultBundle $defaultAgentBundle
+                if ($null -eq $bundle) {
+                    return $null
+                }
+                return [pscustomobject]@{
+                    IncludeAgents = $true
+                    Mode = "bundle"
+                    Bundle = $bundle.id
+                    Agents = @(Get-AgentBundleAgents -RepoRoot $RepoRoot -BundleId $bundle.id)
+                    AgentTargetPath = $AgentTargetPath
+                }
+            }
+            "3" {
+                return [pscustomobject]@{
+                    IncludeAgents = $true
+                    Mode = "agents"
+                    Bundle = $null
+                    Agents = @($Agents | ForEach-Object { $_.name })
+                    AgentTargetPath = $AgentTargetPath
+                }
+            }
+            "4" {
+                $selectedAgents = Select-IndividualAgents -Agents $Agents -AgentTargetPath $AgentTargetPath
+                if ($null -eq $selectedAgents) {
+                    return $null
+                }
+                return [pscustomobject]@{
+                    IncludeAgents = $true
+                    Mode = "agents"
+                    Bundle = $null
+                    Agents = $selectedAgents
+                    AgentTargetPath = $AgentTargetPath
+                }
+            }
+            "5" {
+                return [pscustomobject]@{
+                    IncludeAgents = $false
+                    Mode = "none"
+                    Bundle = $null
+                    Agents = @()
+                    AgentTargetPath = $AgentTargetPath
+                }
+            }
+            default {
+                Write-ErrorLine "Invalid subagent selection."
+            }
+        }
+    }
+}
+
+function Show-SelectedAgentStatus {
+    param(
+        [string[]]$SelectedAgents,
+        [string]$AgentTargetPath,
+        [pscustomobject]$InstallTarget
+    )
+
+    if ($SelectedAgents.Count -eq 0) {
+        return
+    }
+
+    Write-Host ""
+    Write-Host "Selected subagent status:"
+    Write-Host ""
+    foreach ($agent in $SelectedAgents) {
+        $status = Get-InstalledAgentStatus -TargetPath $AgentTargetPath -AgentName $agent
+        Write-Host ("  {0,-28} [{1}]" -f $agent, $status)
+    }
+
+    if ($InstallTarget.AgentSupport -ne "native") {
+        Write-Host ""
+        Write-WarnLine "$($InstallTarget.HarnessLabel) has no confirmed native subagent install target in this repo. Direct installer runs will not copy agent files."
+    }
+}
+
 function Show-SelectedSkillStatus {
     param(
         [string[]]$SelectedSkills,
@@ -556,6 +925,8 @@ try {
 
     $profiles = Get-HarnessProfiles -RepoRoot $repoRoot
     $bundles = Get-Bundles -RepoRoot $repoRoot
+    $agentBundles = Get-AgentBundles -RepoRoot $repoRoot
+    $agents = Get-Agents -RepoRoot $repoRoot
 
     $profile = Select-Harness -Profiles $profiles
     if ($null -eq $profile) {
@@ -605,6 +976,67 @@ try {
         }
     }
 
+    $agentSelection = [pscustomobject]@{
+        IncludeAgents = $false
+        Mode = "none"
+        Bundle = $null
+        Agents = @()
+        AgentTargetPath = $null
+    }
+
+    Write-Host ""
+    $includeAgentsAnswer = Read-Host "Install subagents too? [y/N]"
+    if ($includeAgentsAnswer -match "^(?i:y|yes)$") {
+        $agentTargetPath = Resolve-InteractiveAgentTarget -InstallTarget $installTarget
+        $agentSelection = Select-AgentPackage -Agents $agents -AgentBundles $agentBundles -SkillSelection $selection -InstallTarget $installTarget -RepoRoot $repoRoot -AgentTargetPath $agentTargetPath
+        if ($null -eq $agentSelection) {
+            Write-Info "Cancelled."
+            exit 1
+        }
+
+        if ($agentSelection.IncludeAgents) {
+            Show-SelectedAgentStatus -SelectedAgents $agentSelection.Agents -AgentTargetPath $agentSelection.AgentTargetPath -InstallTarget $installTarget
+
+            $alreadyInstalledAgents = @()
+            if (-not [string]::IsNullOrWhiteSpace($agentSelection.AgentTargetPath)) {
+                $alreadyInstalledAgents = @($agentSelection.Agents | Where-Object {
+                    Test-Path -LiteralPath (Join-Path $agentSelection.AgentTargetPath "$_.md") -PathType Leaf
+                })
+            }
+
+            if ($alreadyInstalledAgents.Count -gt 0) {
+                Write-Host ""
+                Write-WarnLine "These selected subagents are already installed in the target:"
+                Write-Host "  $($alreadyInstalledAgents -join ', ')"
+                Write-Host ""
+                $overwriteAgents = Read-Host "Overwrite already installed selected subagents? [y/N]"
+                if ($overwriteAgents -match "^(?i:y|yes)$") {
+                    $force = $true
+                } else {
+                    $remainingAgents = @($agentSelection.Agents | Where-Object { $alreadyInstalledAgents -notcontains $_ })
+                    if ($remainingAgents.Count -eq 0) {
+                        Write-Info "Skipping subagent install after preserving already installed subagents."
+                        $agentSelection = [pscustomobject]@{
+                            IncludeAgents = $false
+                            Mode = "none"
+                            Bundle = $null
+                            Agents = @()
+                            AgentTargetPath = $agentSelection.AgentTargetPath
+                        }
+                    } else {
+                        $agentSelection = [pscustomobject]@{
+                            IncludeAgents = $true
+                            Mode = "agents"
+                            Bundle = $null
+                            Agents = $remainingAgents
+                            AgentTargetPath = $agentSelection.AgentTargetPath
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Write-Host ""
     Write-Host "Installing:"
     if ($selection.Mode -eq "bundle") {
@@ -616,6 +1048,16 @@ try {
     }
     Write-Host "Into:"
     Write-Host "  $($installTarget.TargetPath)"
+    if ($agentSelection.IncludeAgents) {
+        if ($agentSelection.Bundle) {
+            Write-Host "  agent bundle: $($agentSelection.Bundle)"
+        } else {
+            Write-Host "  agents: $($agentSelection.Agents -join ', ')"
+        }
+        if ($agentSelection.AgentTargetPath) {
+            Write-Host "  agent target: $($agentSelection.AgentTargetPath)"
+        }
+    }
     if ($force) {
         Write-WarnLine "Overwrite mode enabled."
     }
@@ -640,6 +1082,18 @@ try {
 
     if ($force) {
         $arguments += "-Force"
+    }
+
+    if ($agentSelection.IncludeAgents) {
+        $arguments += "-IncludeAgents"
+        if ($agentSelection.Bundle) {
+            $arguments += @("-AgentBundle", $agentSelection.Bundle)
+        } else {
+            $arguments += @("-Agents", ($agentSelection.Agents -join ","))
+        }
+        if ($agentSelection.AgentTargetPath) {
+            $arguments += @("-AgentTargetPath", $agentSelection.AgentTargetPath)
+        }
     }
 
     & powershell.exe @arguments

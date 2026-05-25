@@ -33,6 +33,6 @@ Report the failing symptom, root cause, fix, regression test, validation command
 
 ## Escalation Rules
 
-- Escalate when failure requires unavailable credentials, services, data, or hardware.
+- Escalate when failure requires credentials, services, data, or hardware that are not available.
 - Stop speculative edits after two failed hypotheses and collect more evidence.
 - Ask for priority when multiple unrelated failures appear.

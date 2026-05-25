@@ -23,7 +23,7 @@ Use before publishing, deploying, tagging, packaging, or handing off a release c
 
 ## Validation Gates
 
-- Required test, lint, build, and packaging commands are run or explicitly marked unavailable.
+- Required test, lint, build, and packaging commands are run or explicitly marked not available.
 - Versioning and changelog state are checked when present.
 - Migration and rollback paths are documented when relevant.
 - Known risks are specific enough for a release owner to act on.

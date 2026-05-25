@@ -19,6 +19,18 @@ Use this rubric to review new and changed skills before publishing or installing
 | Catalog metadata | `catalog/skills.tsv` is complete and bundle placement is intentional. |
 | License traceability | Imported or adapted material has notices and license metadata. |
 
+## Subagent Scoring Areas
+
+| Area | What To Check |
+| --- | --- |
+| Description specificity | The description states the role and delegation trigger. |
+| Permission boundary | The agent is read-only or validation-only unless deliberately approved otherwise. |
+| Required inputs | The invoking agent knows what to include in the handoff. |
+| Allowed and forbidden actions | The agent knows what it may inspect, run, or refuse. |
+| Output format | The agent returns compact evidence, risks, and next action. |
+| Referenced skills | Every skill named in frontmatter exists. |
+| Catalog metadata | `catalog/agents.tsv` and agent bundle membership are complete. |
+
 ## Review Checklist
 
 - The skill name uses lowercase kebab-case and matches its folder.
@@ -46,3 +58,15 @@ Linux alternative:
 ```
 
 Scores are advisory. Validation failures must still be fixed before publishing.
+
+Score canonical subagents:
+
+```powershell
+.\scripts\score-agents.ps1
+```
+
+Linux alternative:
+
+```bash
+./scripts/score-agents.sh
+```

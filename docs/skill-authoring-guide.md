@@ -146,7 +146,7 @@ When adding a skill, update `catalog/skills.tsv` in the same change. Required fi
 - `import_mode`
 - `description`
 
-Use `repo-tbd` for original first-party skills until this repository has a root license. Use a concrete license value for third-party or adapted material.
+Use `MIT` for original first-party skills covered by this repository's root license. Use a concrete license value and notice entry for third-party or adapted material.
 
 Add the skill to bundle files under `catalog/bundles/` only when it should be installed with that workflow set. Do not add a skill to `starter` unless it is broadly useful in most software repositories.
 

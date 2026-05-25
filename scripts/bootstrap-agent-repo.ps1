@@ -30,6 +30,14 @@ param(
 
     [string]$TargetPath,
 
+    [string]$AgentTargetPath,
+
+    [switch]$IncludeAgents,
+
+    [string[]]$Agents,
+
+    [string]$AgentBundle,
+
     [switch]$DryRun,
 
     [switch]$Force
@@ -85,6 +93,158 @@ function Get-BundleSkills {
         Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.StartsWith("#") })
 }
 
+function Normalize-NameList {
+    param([string[]]$RawNames)
+
+    $normalized = @()
+    foreach ($item in $RawNames) {
+        if ([string]::IsNullOrWhiteSpace($item)) {
+            continue
+        }
+
+        foreach ($part in ($item -split ",")) {
+            $name = $part.Trim()
+            if ($name) {
+                $normalized += $name
+            }
+        }
+    }
+
+    return @($normalized | Select-Object -Unique)
+}
+
+function Get-AgentBundleAgents {
+    param(
+        [string]$RepoRoot,
+        [string]$BundleName
+    )
+
+    $bundlePath = Join-Path $RepoRoot "catalog\agent-bundles\$BundleName.txt"
+    if (-not (Test-Path -LiteralPath $bundlePath -PathType Leaf)) {
+        throw "Agent bundle not found: $BundleName"
+    }
+
+    return @(Get-Content -LiteralPath $bundlePath |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.StartsWith("#") } |
+        Select-Object -Unique)
+}
+
+function Get-DefaultAgentBundle {
+    param([string]$SkillBundle)
+
+    switch ($SkillBundle) {
+        { $_ -in @("starter", "backend", "frontend", "quality") } { return "starter-review" }
+        "security" { return "security-review" }
+        "delivery" { return "delivery-review" }
+        { $_ -in @("agent-orchestration", "all-software-dev") } { return "all-agents" }
+        default { return "starter-review" }
+    }
+}
+
+function Resolve-SelectedAgents {
+    param(
+        [string]$RepoRoot,
+        [string[]]$ExplicitAgents,
+        [string]$ExplicitAgentBundle,
+        [string]$SkillBundle
+    )
+
+    if ($ExplicitAgents -and $ExplicitAgents.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace($ExplicitAgentBundle)) {
+        throw "Specify only one agent selector: -Agents or -AgentBundle."
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($ExplicitAgentBundle)) {
+        return [pscustomobject]@{
+            Bundle = $ExplicitAgentBundle
+            Agents = @(Get-AgentBundleAgents -RepoRoot $RepoRoot -BundleName $ExplicitAgentBundle)
+        }
+    }
+
+    if ($ExplicitAgents -and $ExplicitAgents.Count -gt 0) {
+        return [pscustomobject]@{
+            Bundle = $null
+            Agents = @(Normalize-NameList -RawNames $ExplicitAgents)
+        }
+    }
+
+    $defaultBundle = Get-DefaultAgentBundle -SkillBundle $SkillBundle
+    return [pscustomobject]@{
+        Bundle = $defaultBundle
+        Agents = @(Get-AgentBundleAgents -RepoRoot $RepoRoot -BundleName $defaultBundle)
+    }
+}
+
+function Write-CodexAgentGuidance {
+    param(
+        [string]$RepoRoot,
+        [string]$ProjectPath,
+        [string[]]$SelectedAgents,
+        [switch]$DryRun,
+        [switch]$Force
+    )
+
+    $targetDir = Join-Path $ProjectPath "docs\agents"
+    $guideSource = Join-Path $RepoRoot "docs\subagent-orchestration-guide.md"
+    $guideTarget = Join-Path $targetDir "subagent-orchestration.md"
+    $availableTarget = Join-Path $targetDir "available-subagents.md"
+    $agentCatalog = Join-Path $RepoRoot "catalog\agents.tsv"
+
+    if ($DryRun) {
+        Write-Info "Dry run: would write Codex subagent guidance docs under $targetDir"
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $targetDir -PathType Container)) {
+        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+    }
+
+    if (Test-Path -LiteralPath $guideTarget -PathType Leaf) {
+        if ($Force) {
+            Copy-Item -LiteralPath $guideSource -Destination $guideTarget -Force
+            Write-WarnLine "Replaced existing Codex subagent orchestration guide."
+        } else {
+            Write-Info "Preserved existing Codex subagent orchestration guide: $guideTarget"
+        }
+    } else {
+        Copy-Item -LiteralPath $guideSource -Destination $guideTarget
+        Write-Ok "Wrote Codex subagent orchestration guide: $guideTarget"
+    }
+
+    $catalogRows = @(Import-Csv -LiteralPath $agentCatalog -Delimiter "`t")
+    $lines = @(
+        "# Available Subagents",
+        "",
+        "Codex does not have a confirmed native subagent file target in this repository. Use these definitions as portable delegation guidance.",
+        "",
+        "## Installed Guidance Set",
+        ""
+    )
+
+    foreach ($agentName in $SelectedAgents) {
+        $row = $catalogRows | Where-Object { $_.name -eq $agentName } | Select-Object -First 1
+        if ($row) {
+            $lines += ("- ``{0}``: {1}" -f $row.name, $row.description)
+        } else {
+            $lines += ("- ``{0}``" -f $agentName)
+        }
+    }
+
+    $lines += @(
+        "",
+        "## Invocation Pattern",
+        "",
+        "Ask the main agent to delegate using the named role, required inputs, forbidden actions, and expected output format from the source agent definition."
+    )
+
+    if ((Test-Path -LiteralPath $availableTarget -PathType Leaf) -and -not $Force) {
+        Write-Info "Preserved existing available subagents doc: $availableTarget"
+    } else {
+        Set-Content -LiteralPath $availableTarget -Value $lines -Encoding UTF8
+        Write-Ok "Wrote available subagents doc: $availableTarget"
+    }
+}
+
 function Resolve-BootstrapScope {
     param(
         [string]$HarnessName,
@@ -117,6 +277,10 @@ try {
     $agentsPath = Join-Path $projectFullPath "AGENTS.md"
     $effectiveScope = Resolve-BootstrapScope -HarnessName $Harness -RequestedScope $Scope -RequestedTargetPath $TargetPath
     $bundleSkills = Get-BundleSkills -RepoRoot $repoRoot -BundleName $Bundle
+    $agentSelection = $null
+    if ($IncludeAgents) {
+        $agentSelection = Resolve-SelectedAgents -RepoRoot $repoRoot -ExplicitAgents $Agents -ExplicitAgentBundle $AgentBundle -SkillBundle $Bundle
+    }
 
     if (-not (Test-Path -LiteralPath $projectFullPath -PathType Container)) {
         throw "Project path not found: $projectFullPath"
@@ -137,6 +301,9 @@ try {
     if ($TargetPath) {
         Write-Info "Target override: $([System.IO.Path]::GetFullPath($TargetPath))"
     }
+    if ($IncludeAgents) {
+        Write-Info "Include agents: $($agentSelection.Agents -join ', ')"
+    }
 
     $installerArgs = @{
         Harness = $Harness
@@ -147,6 +314,18 @@ try {
 
     if ($TargetPath) {
         $installerArgs["TargetPath"] = $TargetPath
+    }
+    if ($AgentTargetPath) {
+        $installerArgs["AgentTargetPath"] = $AgentTargetPath
+    }
+    if ($IncludeAgents) {
+        $installerArgs["IncludeAgents"] = $true
+        if ($AgentBundle) {
+            $installerArgs["AgentBundle"] = $AgentBundle
+        }
+        if ($Agents -and $Agents.Count -gt 0) {
+            $installerArgs["Agents"] = $Agents
+        }
     }
 
     if ($DryRun) {
@@ -176,6 +355,9 @@ try {
         }
 
         Write-Info "Dry run: would write $recordPath"
+        if ($IncludeAgents -and $Harness -eq "codex") {
+            Write-CodexAgentGuidance -RepoRoot $repoRoot -ProjectPath $projectFullPath -SelectedAgents $agentSelection.Agents -DryRun:$DryRun -Force:$Force
+        }
         Write-Ok "Bootstrap dry run completed."
         exit 0
     }
@@ -196,6 +378,10 @@ try {
         New-Item -ItemType Directory -Path $recordDir -Force | Out-Null
     }
 
+    if ($IncludeAgents -and $Harness -eq "codex") {
+        Write-CodexAgentGuidance -RepoRoot $repoRoot -ProjectPath $projectFullPath -SelectedAgents $agentSelection.Agents -Force:$Force
+    }
+
     $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     $record = @(
         "# Installed Agent Skills",
@@ -213,6 +399,21 @@ try {
 
     foreach ($skill in $bundleSkills) {
         $record += "- ``$skill``"
+    }
+
+    if ($IncludeAgents) {
+        $record += @(
+            "",
+            "## Agents",
+            ""
+        )
+        foreach ($agent in $agentSelection.Agents) {
+            $record += "- ``$agent``"
+        }
+        if ($agentSelection.Bundle) {
+            $record += ""
+            $record += "- Agent bundle: ``$($agentSelection.Bundle)``"
+        }
     }
 
     $record += @(

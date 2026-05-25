@@ -1,8 +1,10 @@
 # Third-Party Notices
 
-This repository includes some skills that were imported from MIT-licensed third-party material before this repository was created. Keep this file aligned with `catalog/skills.tsv`.
+This repository is released under the root MIT license in `LICENSE`. It also includes some skills that were imported from MIT-licensed third-party material before this repository was created. Keep this file aligned with `catalog/skills.tsv`.
 
 The MIT license allows commercial use, copying, modification, distribution, and sublicensing when the copyright and permission notice are included with copies or substantial portions of the material. Keep the per-skill `LICENSE` files unless a skill is replaced by a clean-room implementation or separate permission is obtained.
+
+For imported skills whose upstream repository, ref, or path was not captured before import, `catalog/skills.tsv` uses `not-recorded`. This is an accepted traceability limitation for the current imported MIT-licensed set. Do not replace `not-recorded` with guessed upstream metadata.
 
 ## Imported MIT-Licensed Skills
 

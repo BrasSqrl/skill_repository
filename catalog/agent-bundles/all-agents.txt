@@ -1,0 +1,6 @@
+repo-scout
+code-reviewer
+security-reviewer
+architecture-reviewer
+validation-runner
+release-reviewer

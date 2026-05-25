@@ -1,6 +1,6 @@
 # Portable Agent Skill Operating Kit
 
-Reusable, tool-agnostic skills for AI-assisted software development. This repository stores OpenAI-style skill folders, install bundles, harness profiles, workflow templates, and validation scripts so the same agent setup can be cloned and installed on any machine.
+Reusable, tool-agnostic skills and subagent definitions for AI-assisted software development. This repository stores OpenAI-style skill folders, canonical subagents, install bundles, harness profiles, workflow templates, and validation scripts so the same agent setup can be cloned and installed on any machine.
 
 The repository is Windows-first and Linux-second. PowerShell examples are primary; Bash alternatives are provided for parity.
 
@@ -16,6 +16,7 @@ List install bundles:
 
 ```powershell
 .\scripts\install-skills.ps1 -ListBundles
+.\scripts\install-skills.ps1 -ListAgentBundles
 ```
 
 Install the starter bundle for the current user:
@@ -26,19 +27,27 @@ Install the starter bundle for the current user:
 .\scripts\install-skills.ps1 -Harness opencode -Bundle starter
 ```
 
+Install the starter bundle with the recommended subagent bundle:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents
+.\scripts\install-skills.ps1 -Harness opencode -Bundle starter -IncludeAgents
+```
+
 Use the Windows guided installer:
 
 ```text
 install-all-skills-windows.bat
 ```
 
-The batch launcher asks for harness, install scope, bundle/all/individual skill selection, and overwrite confirmation.
+The batch launcher asks for harness, install scope, bundle/all/individual skill selection, optional subagent installation, installed status, and overwrite confirmation.
 
 Linux equivalents:
 
 ```bash
 bash ./scripts/validate-skills.sh
 bash ./scripts/install-skills.sh --list-bundles
+bash ./scripts/install-skills.sh --list-agent-bundles
 bash ./scripts/install-skills.sh --harness codex --bundle starter
 ```
 
@@ -62,6 +71,24 @@ Install a bundle:
 .\scripts\install-skills.ps1 -Harness claude-code -Bundle quality
 ```
 
+Install a bundle and its mapped default subagent bundle:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle quality -IncludeAgents
+```
+
+Install an explicit subagent bundle:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle security -IncludeAgents -AgentBundle security-review
+```
+
+Install explicit subagents:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents -Agents code-reviewer,validation-runner
+```
+
 Preview before copying:
 
 ```powershell
@@ -81,6 +108,7 @@ bash ./scripts/install-skills.sh --harness codex --all
 bash ./scripts/install-skills.sh --harness claude-code --bundle quality
 bash ./scripts/install-skills.sh --harness opencode --skills context-engineering,test-driven-development
 bash ./scripts/install-skills.sh --harness opencode --bundle starter --dry-run
+bash ./scripts/install-skills.sh --harness opencode --bundle starter --include-agents
 ```
 
 ## Bootstrap A Target Repo
@@ -89,6 +117,7 @@ Bootstrap installs a bundle, seeds `AGENTS.md` when missing, and writes `docs/ag
 
 ```powershell
 .\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter
+.\scripts\bootstrap-agent-repo.ps1 -ProjectPath "C:\path\to\repo" -Harness claude-code -Bundle starter -IncludeAgents
 ```
 
 Dry-run first:
@@ -101,6 +130,7 @@ Bash:
 
 ```bash
 bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness claude-code --bundle starter
+bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness opencode --bundle starter --include-agents
 ```
 
 ## Harness Targets
@@ -112,6 +142,16 @@ bash ./scripts/bootstrap-agent-repo.sh --project-path /path/to/repo --harness cl
 | OpenCode | `%USERPROFILE%\.config\opencode\skills` | `<project>\.opencode\skills` |
 
 Harness defaults live in `harnesses/*.profile`.
+
+## Subagent Targets
+
+Subagents are opt-in. Claude Code and OpenCode receive native Markdown agent files. Codex receives portable orchestration guidance during bootstrap because this repository does not encode a confirmed native Codex subagent file target.
+
+| Harness | Global agent target | Project agent target | Behavior |
+| --- | --- | --- | --- |
+| Codex | Guidance only | Guidance only | Bootstrap writes `docs/agents/subagent-orchestration.md` and `docs/agents/available-subagents.md`. |
+| Claude Code | `%USERPROFILE%\.claude\agents` | `<project>\.claude\agents` | Native Markdown subagents. |
+| OpenCode | `%USERPROFILE%\.config\opencode\agents` | `<project>\.opencode\agents` | Native Markdown agents with `mode: subagent`. |
 
 ## Bundles
 
@@ -128,6 +168,18 @@ Harness defaults live in `harnesses/*.profile`.
 
 Bundle membership is stored in `catalog/bundles/*.txt`.
 
+## Agent Bundles
+
+| Bundle | Purpose |
+| --- | --- |
+| `starter-review` | General read-only discovery, code review, validation, and release handoff agents. |
+| `security-review` | Security-focused review plus validation support. |
+| `delivery-review` | Validation, release readiness, and review agents. |
+| `architecture-review` | Architecture, repo discovery, code review, and validation agents. |
+| `all-agents` | Complete subagent set from this repository. |
+
+Agent bundle membership is stored in `catalog/agent-bundles/*.txt`.
+
 ## Folder Structure
 
 ```text
@@ -136,10 +188,14 @@ Bundle membership is stored in `catalog/bundles/*.txt`.
 |-- README.md
 |-- THIRD_PARTY_NOTICES.md
 |-- install-all-skills-windows.bat
+|-- agents/
 |-- catalog/
 |   |-- skills.tsv
 |   |-- bundles.tsv
-|   `-- bundles/
+|   |-- agents.tsv
+|   |-- agent-bundles.tsv
+|   |-- bundles/
+|   `-- agent-bundles/
 |-- docs/
 |-- harnesses/
 |-- scripts/
@@ -150,6 +206,8 @@ Bundle membership is stored in `catalog/bundles/*.txt`.
 |   |-- install-skills.sh
 |   |-- score-skills.ps1
 |   |-- score-skills.sh
+|   |-- score-agents.ps1
+|   |-- score-agents.sh
 |   |-- validate-skills.ps1
 |   `-- validate-skills.sh
 |-- skills/
@@ -158,7 +216,8 @@ Bundle membership is stored in `catalog/bundles/*.txt`.
 |       `-- references/
 |-- templates/
 |   |-- project-AGENTS.md
-|   `-- skill-template.md
+|   |-- skill-template.md
+|   `-- subagent-template.md
 `-- workflows/
 ```
 
@@ -240,10 +299,12 @@ Quality scoring is advisory:
 
 ```powershell
 .\scripts\score-skills.ps1
+.\scripts\score-agents.ps1
 ```
 
 ```bash
 bash ./scripts/score-skills.sh
+bash ./scripts/score-agents.sh
 ```
 
 ## Documentation
@@ -253,6 +314,7 @@ bash ./scripts/score-skills.sh
 - [Linux setup](docs/linux-setup.md)
 - [Using with Codex, Claude Code, OpenCode, or another agent](docs/using-with-codex.md)
 - [Orchestration guide](docs/orchestration-guide.md)
+- [Subagent orchestration guide](docs/subagent-orchestration-guide.md)
 - [Skill authoring guide](docs/skill-authoring-guide.md)
 - [Skill quality rubric](docs/skill-quality-rubric.md)
 - [Curation policy](docs/curation-policy.md)

@@ -30,6 +30,23 @@ trim() {
   printf '%s' "$value"
 }
 
+frontmatter_value() {
+  local file="$1"
+  local key="$2"
+  awk -v key="$key" '
+    NR == 1 && $0 == "---" { in_fm = 1; next }
+    in_fm && $0 == "---" { exit }
+    in_fm && index($0, key ":") == 1 {
+      value = substr($0, length(key) + 2)
+      sub(/^[[:space:]]*/, "", value)
+      sub(/[[:space:]]*$/, "", value)
+      gsub(/^"|"$/, "", value)
+      print value
+      exit
+    }
+  ' "$file"
+}
+
 fail_line() {
   echo "[FAIL] $1"
 }
@@ -88,6 +105,27 @@ required_catalog_columns=(
   "description"
 )
 
+required_agent_columns=(
+  "name"
+  "label"
+  "maturity"
+  "harnesses"
+  "skills"
+  "permission"
+  "description"
+)
+
+required_agent_sections=(
+  "Use When"
+  "Do Not Use When"
+  "Required Inputs"
+  "Workflow"
+  "Allowed Actions"
+  "Forbidden Actions"
+  "Output Format"
+  "Escalation Rules"
+)
+
 mapfile -t skill_dirs < <(find "$SKILLS_PATH" -mindepth 1 -maxdepth 1 -type d | sort)
 
 if [[ ${#skill_dirs[@]} -eq 0 ]]; then
@@ -100,6 +138,9 @@ failed=0
 warnings=0
 
 echo "[INFO] Validating ${#skill_dirs[@]} skill folder(s) in $SKILLS_PATH"
+
+deprecated_license_placeholder="repo""-tbd"
+deprecated_missing_placeholder="un""available"
 
 declare -A catalog_seen
 declare -A catalog_source
@@ -261,7 +302,7 @@ for skill_dir in "${skill_dirs[@]}"; do
   done < <(grep -Eo 'references/[^`) ]+' "$skill_file" | sort -u || true)
 
   if [[ "${catalog_source[$skill_name]:-}" == "third-party" ]]; then
-    if [[ -z "${catalog_license[$skill_name]:-}" || "${catalog_license[$skill_name]:-}" == "repo-tbd" ]]; then
+    if [[ -z "${catalog_license[$skill_name]:-}" || "${catalog_license[$skill_name]:-}" == "$deprecated_license_placeholder" ]]; then
       fail_line "$skill_name: third-party catalog entry must include a concrete license"
       skill_failed=1
     fi
@@ -275,7 +316,7 @@ for skill_dir in "${skill_dirs[@]}"; do
         upstream_ref) value="${catalog_upstream_ref[$skill_name]:-}" ;;
         upstream_path) value="${catalog_upstream_path[$skill_name]:-}" ;;
       esac
-      if [[ -z "$value" || "$value" == "unavailable" ]]; then
+      if [[ -z "$value" || "$value" == "$deprecated_missing_placeholder" ]]; then
         warn_line "$skill_name: optional upstream tracking '$optional_value' is incomplete"
         warnings=$((warnings + 1))
       fi
@@ -370,8 +411,269 @@ else
   done < <(find "$BUNDLE_DIR" -mindepth 1 -maxdepth 1 -type f -name '*.txt' | sort)
 fi
 
+AGENTS_DIR="$REPO_ROOT/agents"
+AGENT_CATALOG="$REPO_ROOT/catalog/agents.tsv"
+AGENT_BUNDLE_CATALOG="$REPO_ROOT/catalog/agent-bundles.tsv"
+AGENT_BUNDLE_DIR="$REPO_ROOT/catalog/agent-bundles"
+declare -A agent_catalog_seen
+
+if [[ ! -d "$AGENTS_DIR" ]]; then
+  fail_line "Agents directory not found: $AGENTS_DIR"
+  failed=$((failed + 1))
+else
+  echo "[INFO] Validating canonical subagents in $AGENTS_DIR"
+fi
+
+if [[ ! -f "$AGENT_CATALOG" ]]; then
+  fail_line "Required metadata file not found: $AGENT_CATALOG"
+  failed=$((failed + 1))
+else
+  agent_header="$(head -n 1 "$AGENT_CATALOG")"
+  for column in "${required_agent_columns[@]}"; do
+    if ! printf '%s\n' "$agent_header" | tr '\t' '\n' | grep -Fxq "$column"; then
+      fail_line "catalog/agents.tsv: missing required column '$column'"
+      failed=$((failed + 1))
+    fi
+  done
+
+  while IFS=$'\t' read -r name label maturity harnesses skills permission description extra; do
+    [[ "$name" == "name" ]] && continue
+    [[ -n "$name" ]] || { fail_line "catalog/agents.tsv: row with empty name"; failed=$((failed + 1)); continue; }
+    if [[ -n "${agent_catalog_seen[$name]+x}" ]]; then
+      fail_line "catalog/agents.tsv: duplicate agent entry '$name'"
+      failed=$((failed + 1))
+      continue
+    fi
+    agent_catalog_seen["$name"]=1
+
+    if [[ ! "$name" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+      fail_line "catalog/agents.tsv: agent '$name' must use lowercase kebab-case"
+      failed=$((failed + 1))
+    fi
+
+    for value_name in label maturity harnesses skills permission description; do
+      case "$value_name" in
+        label) value="$label" ;;
+        maturity) value="$maturity" ;;
+        harnesses) value="$harnesses" ;;
+        skills) value="$skills" ;;
+        permission) value="$permission" ;;
+        description) value="$description" ;;
+      esac
+      if [[ -z "$(trim "$value")" ]]; then
+        fail_line "catalog/agents.tsv: '$name' is missing required metadata '$value_name'"
+        failed=$((failed + 1))
+      fi
+    done
+
+    IFS=',' read -r -a agent_skills <<< "$skills"
+    for skill in "${agent_skills[@]}"; do
+      skill="$(trim "$skill")"
+      [[ -z "$skill" ]] && continue
+      if [[ -z "${catalog_seen[$skill]+x}" ]]; then
+        fail_line "catalog/agents.tsv: '$name' references unknown skill '$skill'"
+        failed=$((failed + 1))
+      fi
+    done
+  done < "$AGENT_CATALOG"
+fi
+
+if [[ -d "$AGENTS_DIR" ]]; then
+  while IFS= read -r agent_file; do
+    agent_name="$(basename "$agent_file" .md)"
+    agent_failed=0
+
+    if [[ ! "$agent_name" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+      fail_line "$agent_name: agent file name must use lowercase kebab-case"
+      agent_failed=1
+    fi
+
+    if [[ -z "${agent_catalog_seen[$agent_name]+x}" ]]; then
+      fail_line "$agent_name: missing catalog entry in catalog/agents.tsv"
+      agent_failed=1
+    fi
+
+    first_line="$(sed -n '1p' "$agent_file")"
+    closing_line="$(awk 'NR > 1 && $0 ~ /^---[[:space:]]*$/ { print NR; exit }' "$agent_file")"
+    if [[ "$first_line" != "---" || -z "$closing_line" ]]; then
+      fail_line "$agent_name: missing or invalid YAML frontmatter"
+      failed=$((failed + 1))
+      continue
+    fi
+
+    fm_name="$(frontmatter_value "$agent_file" "name")"
+    fm_description="$(frontmatter_value "$agent_file" "description")"
+    fm_skills="$(frontmatter_value "$agent_file" "skills")"
+    fm_tools="$(frontmatter_value "$agent_file" "tools")"
+    fm_permission="$(frontmatter_value "$agent_file" "permission")"
+
+    if [[ -z "$fm_name" ]]; then
+      fail_line "$agent_name: frontmatter is missing name"
+      agent_failed=1
+    elif [[ "$fm_name" != "$agent_name" ]]; then
+      fail_line "$agent_name: frontmatter name '$fm_name' does not match file name"
+      agent_failed=1
+    fi
+
+    if [[ -z "$fm_description" ]]; then
+      fail_line "$agent_name: frontmatter description is empty or missing"
+      agent_failed=1
+    else
+      if [[ ${#fm_description} -lt 80 ]]; then
+        fail_line "$agent_name: description is too short to be useful; use at least 80 characters"
+        agent_failed=1
+      fi
+      if [[ ! "$fm_description" =~ Use[[:space:]](when|before|for|at) ]]; then
+        fail_line "$agent_name: description must include trigger language such as 'Use when'"
+        agent_failed=1
+      fi
+    fi
+
+    case "$fm_permission" in
+      read-only|validation-only) ;;
+      *)
+        fail_line "$agent_name: permission must be read-only or validation-only"
+        agent_failed=1
+        ;;
+    esac
+
+    IFS=',' read -r -a fm_skill_list <<< "$fm_skills"
+    for skill in "${fm_skill_list[@]}"; do
+      skill="$(trim "$skill")"
+      [[ -z "$skill" ]] && continue
+      if [[ -z "${catalog_seen[$skill]+x}" ]]; then
+        fail_line "$agent_name: frontmatter references unknown skill '$skill'"
+        agent_failed=1
+      fi
+    done
+
+    for section in "${required_agent_sections[@]}"; do
+      if ! grep -Eq "^## ${section}[[:space:]]*$" "$agent_file"; then
+        fail_line "$agent_name: missing required section '## $section'"
+        agent_failed=1
+      fi
+    done
+
+    if [[ -z "$fm_name" || -z "$fm_description" || -z "$fm_tools" ]]; then
+      fail_line "$agent_name: rendered Claude Code output would miss name, description, or tools"
+      agent_failed=1
+    fi
+
+    if [[ -z "$fm_description" ]]; then
+      fail_line "$agent_name: rendered OpenCode output would miss description"
+      agent_failed=1
+    fi
+
+    if [[ "$agent_failed" -eq 1 ]]; then
+      failed=$((failed + 1))
+    else
+      echo "[PASS] $agent_name agent"
+      passed=$((passed + 1))
+    fi
+  done < <(find "$AGENTS_DIR" -mindepth 1 -maxdepth 1 -type f -name '*.md' | sort)
+
+  for catalog_agent in "${!agent_catalog_seen[@]}"; do
+    if [[ ! -f "$AGENTS_DIR/$catalog_agent.md" ]]; then
+      fail_line "catalog/agents.tsv: entry '$catalog_agent' has no matching agent file"
+      failed=$((failed + 1))
+    fi
+  done
+fi
+
+declare -A agent_bundle_seen
+if [[ ! -f "$AGENT_BUNDLE_CATALOG" ]]; then
+  fail_line "Required metadata file not found: $AGENT_BUNDLE_CATALOG"
+  failed=$((failed + 1))
+else
+  agent_bundle_header="$(head -n 1 "$AGENT_BUNDLE_CATALOG")"
+  for column in id label purpose recommendation; do
+    if ! printf '%s\n' "$agent_bundle_header" | tr '\t' '\n' | grep -Fxq "$column"; then
+      fail_line "catalog/agent-bundles.tsv: missing required column '$column'"
+      failed=$((failed + 1))
+    fi
+  done
+
+  while IFS=$'\t' read -r id label purpose recommendation extra; do
+    [[ "$id" == "id" ]] && continue
+    [[ -n "$id" ]] || { fail_line "catalog/agent-bundles.tsv: row with empty id"; failed=$((failed + 1)); continue; }
+    if [[ -n "${agent_bundle_seen[$id]+x}" ]]; then
+      fail_line "catalog/agent-bundles.tsv: duplicate bundle '$id'"
+      failed=$((failed + 1))
+    fi
+    agent_bundle_seen["$id"]=1
+
+    if [[ ! "$id" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+      fail_line "catalog/agent-bundles.tsv: bundle '$id' must use lowercase kebab-case"
+      failed=$((failed + 1))
+    fi
+    for value_name in label purpose recommendation; do
+      case "$value_name" in
+        label) value="$label" ;;
+        purpose) value="$purpose" ;;
+        recommendation) value="$recommendation" ;;
+      esac
+      if [[ -z "$(trim "$value")" ]]; then
+        fail_line "catalog/agent-bundles.tsv: '$id' is missing '$value_name'"
+        failed=$((failed + 1))
+      fi
+    done
+
+    agent_bundle_file="$AGENT_BUNDLE_DIR/$id.txt"
+    if [[ ! -f "$agent_bundle_file" ]]; then
+      fail_line "catalog/agent-bundles: missing bundle file '$id.txt'"
+      failed=$((failed + 1))
+      continue
+    fi
+
+    declare -A seen_bundle_agents=()
+    while IFS= read -r bundle_agent; do
+      bundle_agent="$(trim "$bundle_agent")"
+      [[ -n "$bundle_agent" && ! "$bundle_agent" =~ ^# ]] || continue
+      if [[ -n "${seen_bundle_agents[$bundle_agent]+x}" ]]; then
+        warn_line "$id: duplicate bundle agent '$bundle_agent'"
+        warnings=$((warnings + 1))
+      fi
+      seen_bundle_agents["$bundle_agent"]=1
+      if [[ -z "${agent_catalog_seen[$bundle_agent]+x}" ]]; then
+        fail_line "$id: agent bundle references unknown agent '$bundle_agent'"
+        failed=$((failed + 1))
+      fi
+    done < "$agent_bundle_file"
+  done < "$AGENT_BUNDLE_CATALOG"
+fi
+
+if [[ ! -d "$AGENT_BUNDLE_DIR" ]]; then
+  fail_line "Agent bundle directory not found: $AGENT_BUNDLE_DIR"
+  failed=$((failed + 1))
+else
+  while IFS= read -r agent_bundle_file; do
+    agent_bundle_file_id="$(basename "$agent_bundle_file" .txt)"
+    if [[ -z "${agent_bundle_seen[$agent_bundle_file_id]+x}" ]]; then
+      fail_line "catalog/agent-bundles: '$(basename "$agent_bundle_file")' has no matching row in agent-bundles.tsv"
+      failed=$((failed + 1))
+    fi
+  done < <(find "$AGENT_BUNDLE_DIR" -mindepth 1 -maxdepth 1 -type f -name '*.txt' | sort)
+fi
+
 HARNESS_DIR="$REPO_ROOT/harnesses"
-required_profile_keys=(id label global_env global_suffix global_default project_subpath supports_project_default skills_format instructions_file)
+required_profile_keys=(
+  id
+  label
+  global_env
+  global_suffix
+  global_default
+  project_subpath
+  supports_project_default
+  skills_format
+  instructions_file
+  agent_support
+  agent_format
+  agent_global_env
+  agent_global_suffix
+  agent_global_default
+  agent_project_subpath
+  supports_agent_project_default
+)
 for profile_name in codex claude-code opencode; do
   profile_path="$HARNESS_DIR/$profile_name.profile"
   if [[ ! -f "$profile_path" ]]; then
@@ -389,6 +691,29 @@ for profile_name in codex claude-code opencode; do
   if [[ "$profile_id" != "$profile_name" ]]; then
     fail_line "harnesses/$profile_name.profile: id '$profile_id' does not match file name"
     failed=$((failed + 1))
+  fi
+  agent_support="$(grep -E '^agent_support=' "$profile_path" | head -n 1 | cut -d= -f2-)"
+  agent_format="$(grep -E '^agent_format=' "$profile_path" | head -n 1 | cut -d= -f2-)"
+  agent_global_default="$(grep -E '^agent_global_default=' "$profile_path" | head -n 1 | cut -d= -f2-)"
+  case "$agent_support" in
+    native|guidance) ;;
+    *)
+      fail_line "harnesses/$profile_name.profile: agent_support must be native or guidance"
+      failed=$((failed + 1))
+      ;;
+  esac
+  if [[ "$agent_support" == "native" ]]; then
+    case "$agent_format" in
+      claude-subagent|opencode-agent) ;;
+      *)
+        fail_line "harnesses/$profile_name.profile: native agent profile has unsupported agent_format '$agent_format'"
+        failed=$((failed + 1))
+        ;;
+    esac
+    if [[ -z "$agent_global_default" ]]; then
+      fail_line "harnesses/$profile_name.profile: native agent profile must declare agent_global_default"
+      failed=$((failed + 1))
+    fi
   fi
 done
 

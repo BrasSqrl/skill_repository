@@ -84,7 +84,29 @@ Linux:
 ## Installed Agent Skills
 
 - `<bundle or skill name>`: `<when agents should use it in this repo>`
+- `<agent bundle or subagent name>`: `<when subagents should be used in this repo>`
 - Installed skill record: `docs/agents/installed-skills.md`
+
+## Subagent Use
+
+Use subagents when isolated context or independent review reduces risk:
+
+- independent repository discovery before planning
+- parallel read-only research
+- code review of a concrete diff
+- validation runs or noisy failure summaries
+- security review
+- architecture review
+- release review
+
+Do not use subagents for:
+
+- small local edits with known files and commands
+- tightly coupled implementation loops
+- tasks that require frequent user interaction
+- work where handoff overhead is higher than risk reduction
+
+When delegating to a subagent, provide objective, scope, required inputs, allowed actions, forbidden actions, expected output, and escalation conditions. The main agent owns final edits, final validation decisions, and final user-facing reporting.
 
 ## Forbidden Changes
 

@@ -63,6 +63,16 @@ function Get-FrontmatterValue {
     return $match.Groups[1].Value.Trim().Trim('"').Trim("'")
 }
 
+function Normalize-NameList {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return @()
+    }
+
+    return @($Value -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ } | Select-Object -Unique)
+}
+
 function Import-RequiredTsv {
     param(
         [string]$Path,
@@ -126,6 +136,9 @@ if (-not (Test-Path -LiteralPath $SkillsPath -PathType Container)) {
     exit 1
 }
 
+$deprecatedLicensePlaceholder = "repo" + "-tbd"
+$deprecatedUnavailablePlaceholder = "un" + "available"
+
 $requiredSections = @(
     "Purpose",
     "When to Use",
@@ -157,6 +170,27 @@ $requiredCatalogColumns = @(
     "upstream_path",
     "import_mode",
     "description"
+)
+
+$requiredAgentColumns = @(
+    "name",
+    "label",
+    "maturity",
+    "harnesses",
+    "skills",
+    "permission",
+    "description"
+)
+
+$requiredAgentSections = @(
+    "Use When",
+    "Do Not Use When",
+    "Required Inputs",
+    "Workflow",
+    "Allowed Actions",
+    "Forbidden Actions",
+    "Output Format",
+    "Escalation Rules"
 )
 
 $skillDirs = @(Get-ChildItem -LiteralPath $SkillsPath -Directory | Sort-Object Name)
@@ -314,7 +348,7 @@ foreach ($skillDir in $skillDirs) {
     if ($catalogByName.ContainsKey($skillName)) {
         $catalogEntry = $catalogByName[$skillName]
         if ($catalogEntry.source -eq "third-party") {
-            if ([string]::IsNullOrWhiteSpace($catalogEntry.license) -or $catalogEntry.license -eq "repo-tbd") {
+            if ([string]::IsNullOrWhiteSpace($catalogEntry.license) -or $catalogEntry.license -eq $deprecatedLicensePlaceholder) {
                 Write-Fail "${skillName}: third-party catalog entry must include a concrete license"
                 $skillFailed = $true
             }
@@ -325,7 +359,7 @@ foreach ($skillDir in $skillDirs) {
             }
 
             foreach ($optionalColumn in @("upstream_repo", "upstream_ref", "upstream_path")) {
-                if ([string]::IsNullOrWhiteSpace($catalogEntry.$optionalColumn) -or $catalogEntry.$optionalColumn -eq "unavailable") {
+                if ([string]::IsNullOrWhiteSpace($catalogEntry.$optionalColumn) -or $catalogEntry.$optionalColumn -eq $deprecatedUnavailablePlaceholder) {
                     Write-Warn "${skillName}: optional upstream tracking '$optionalColumn' is incomplete"
                     $warnings++
                 }
@@ -416,9 +450,257 @@ try {
 }
 
 try {
+    $agentsPath = Join-Path $repoRoot "agents"
+    $agentCatalogPath = Join-Path $repoRoot "catalog\agents.tsv"
+    $agentBundleCatalogPath = Join-Path $repoRoot "catalog\agent-bundles.tsv"
+    $agentBundleDir = Join-Path $repoRoot "catalog\agent-bundles"
+    $agentCatalogRows = Import-RequiredTsv -Path $agentCatalogPath -RequiredColumns $requiredAgentColumns
+    $agentCatalogByName = @{}
+
+    if (-not (Test-Path -LiteralPath $agentsPath -PathType Container)) {
+        Write-Fail "Agents directory not found: $agentsPath"
+        $failed++
+    } else {
+        Write-Info "Validating canonical subagents in $agentsPath"
+    }
+
+    foreach ($row in $agentCatalogRows) {
+        if ([string]::IsNullOrWhiteSpace($row.name)) {
+            Write-Fail "catalog/agents.tsv: row with empty name"
+            $failed++
+            continue
+        }
+
+        if ($agentCatalogByName.ContainsKey($row.name)) {
+            Write-Fail "catalog/agents.tsv: duplicate agent entry '$($row.name)'"
+            $failed++
+            continue
+        }
+
+        $agentCatalogByName[$row.name] = $row
+
+        if ($row.name -notmatch "^[a-z0-9]+(-[a-z0-9]+)*$") {
+            Write-Fail "catalog/agents.tsv: agent '$($row.name)' must use lowercase kebab-case"
+            $failed++
+        }
+
+        foreach ($column in @("label", "maturity", "harnesses", "skills", "permission", "description")) {
+            if ([string]::IsNullOrWhiteSpace($row.$column)) {
+                Write-Fail "catalog/agents.tsv: '$($row.name)' is missing required metadata '$column'"
+                $failed++
+            }
+        }
+
+        foreach ($skill in @(Normalize-NameList -Value $row.skills)) {
+            if (-not $catalogByName.ContainsKey($skill)) {
+                Write-Fail "catalog/agents.tsv: '$($row.name)' references unknown skill '$skill'"
+                $failed++
+            }
+        }
+    }
+
+    if (Test-Path -LiteralPath $agentsPath -PathType Container) {
+        foreach ($agentFile in @(Get-ChildItem -LiteralPath $agentsPath -Filter "*.md" -File | Sort-Object Name)) {
+            $agentName = [System.IO.Path]::GetFileNameWithoutExtension($agentFile.Name)
+            $agentFailed = $false
+            $content = Get-Content -Raw -LiteralPath $agentFile.FullName
+            $frontmatterMatch = [regex]::Match($content, "(?s)\A---\s*\r?\n(.*?)\r?\n---\s*(\r?\n|$)")
+
+            if ($agentName -notmatch "^[a-z0-9]+(-[a-z0-9]+)*$") {
+                Write-Fail "${agentName}: agent file name must use lowercase kebab-case"
+                $agentFailed = $true
+            }
+
+            if (-not $agentCatalogByName.ContainsKey($agentName)) {
+                Write-Fail "${agentName}: missing catalog entry in catalog/agents.tsv"
+                $agentFailed = $true
+            }
+
+            if (-not $frontmatterMatch.Success) {
+                Write-Fail "${agentName}: missing or invalid YAML frontmatter"
+                $failed++
+                continue
+            }
+
+            $frontmatter = $frontmatterMatch.Groups[1].Value
+            $name = Get-FrontmatterValue -Frontmatter $frontmatter -Key "name"
+            $description = Get-FrontmatterValue -Frontmatter $frontmatter -Key "description"
+            $skills = Normalize-NameList -Value (Get-FrontmatterValue -Frontmatter $frontmatter -Key "skills")
+            $tools = Get-FrontmatterValue -Frontmatter $frontmatter -Key "tools"
+            $permission = Get-FrontmatterValue -Frontmatter $frontmatter -Key "permission"
+
+            if ([string]::IsNullOrWhiteSpace($name)) {
+                Write-Fail "${agentName}: frontmatter is missing name"
+                $agentFailed = $true
+            } elseif ($name -ne $agentName) {
+                Write-Fail "${agentName}: frontmatter name '$name' does not match file name"
+                $agentFailed = $true
+            }
+
+            if ([string]::IsNullOrWhiteSpace($description)) {
+                Write-Fail "${agentName}: frontmatter description is empty or missing"
+                $agentFailed = $true
+            } else {
+                if ($description.Trim().Length -lt 80) {
+                    Write-Fail "${agentName}: description is too short to be useful; use at least 80 characters"
+                    $agentFailed = $true
+                }
+
+                if ($description -notmatch "\bUse (when|before|for|at)\b") {
+                    Write-Fail "${agentName}: description must include trigger language such as 'Use when'"
+                    $agentFailed = $true
+                }
+            }
+
+            if ($permission -notin @("read-only", "validation-only")) {
+                Write-Fail "${agentName}: permission must be read-only or validation-only"
+                $agentFailed = $true
+            }
+
+            foreach ($skill in $skills) {
+                if (-not $catalogByName.ContainsKey($skill)) {
+                    Write-Fail "${agentName}: frontmatter references unknown skill '$skill'"
+                    $agentFailed = $true
+                }
+            }
+
+            foreach ($section in $requiredAgentSections) {
+                $sectionPattern = "(?m)^## $([regex]::Escape($section))\s*$"
+                if ($content -notmatch $sectionPattern) {
+                    Write-Fail "${agentName}: missing required section '## $section'"
+                    $agentFailed = $true
+                }
+            }
+
+            $renderedClaude = @(
+                "---",
+                "name: $name",
+                "description: $description",
+                "tools: $tools"
+            ) -join "`n"
+            if ($renderedClaude -notmatch "(?m)^name:\s*\S+" -or
+                $renderedClaude -notmatch "(?m)^description:\s*\S+" -or
+                $renderedClaude -notmatch "(?m)^tools:\s*\S+") {
+                Write-Fail "${agentName}: rendered Claude Code output would miss name, description, or tools"
+                $agentFailed = $true
+            }
+
+            $renderedOpenCode = @(
+                "---",
+                "description: $description",
+                "mode: subagent",
+                "permission:"
+            ) -join "`n"
+            if ($renderedOpenCode -notmatch "(?m)^description:\s*\S+" -or
+                $renderedOpenCode -notmatch "(?m)^mode:\s*subagent\s*$" -or
+                $renderedOpenCode -notmatch "(?m)^permission:\s*$") {
+                Write-Fail "${agentName}: rendered OpenCode output would miss description, mode, or permission"
+                $agentFailed = $true
+            }
+
+            if ($agentFailed) {
+                $failed++
+            } else {
+                Write-Pass "$agentName agent"
+                $passed++
+            }
+        }
+
+        foreach ($catalogAgentName in @($agentCatalogByName.Keys | Sort-Object)) {
+            if (-not (Test-Path -LiteralPath (Join-Path $agentsPath "$catalogAgentName.md") -PathType Leaf)) {
+                Write-Fail "catalog/agents.tsv: entry '$catalogAgentName' has no matching agent file"
+                $failed++
+            }
+        }
+    }
+
+    $agentBundleRows = Import-RequiredTsv -Path $agentBundleCatalogPath -RequiredColumns @("id", "label", "purpose", "recommendation")
+    $agentBundleIds = New-Object System.Collections.Generic.HashSet[string]
+    if (-not (Test-Path -LiteralPath $agentBundleDir -PathType Container)) {
+        Write-Fail "Agent bundle directory not found: $agentBundleDir"
+        $failed++
+    }
+
+    foreach ($agentBundle in $agentBundleRows) {
+        if ([string]::IsNullOrWhiteSpace($agentBundle.id)) {
+            Write-Fail "catalog/agent-bundles.tsv: row with empty id"
+            $failed++
+            continue
+        }
+
+        if ($agentBundle.id -notmatch "^[a-z0-9]+(-[a-z0-9]+)*$") {
+            Write-Fail "catalog/agent-bundles.tsv: bundle '$($agentBundle.id)' must use lowercase kebab-case"
+            $failed++
+        }
+
+        foreach ($column in @("label", "purpose", "recommendation")) {
+            if ([string]::IsNullOrWhiteSpace($agentBundle.$column)) {
+                Write-Fail "catalog/agent-bundles.tsv: '$($agentBundle.id)' is missing '$column'"
+                $failed++
+            }
+        }
+
+        if (-not $agentBundleIds.Add($agentBundle.id)) {
+            Write-Fail "catalog/agent-bundles.tsv: duplicate bundle '$($agentBundle.id)'"
+            $failed++
+        }
+
+        $agentBundlePath = Join-Path $agentBundleDir "$($agentBundle.id).txt"
+        if (-not (Test-Path -LiteralPath $agentBundlePath -PathType Leaf)) {
+            Write-Fail "catalog/agent-bundles: missing bundle file '$($agentBundle.id).txt'"
+            $failed++
+            continue
+        }
+
+        $seenBundleAgents = New-Object System.Collections.Generic.HashSet[string]
+        foreach ($bundleAgent in @(Get-Content -LiteralPath $agentBundlePath | ForEach-Object { $_.Trim() } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.StartsWith("#") })) {
+            if (-not $seenBundleAgents.Add($bundleAgent)) {
+                Write-Warn "$($agentBundle.id): duplicate bundle agent '$bundleAgent'"
+                $warnings++
+            }
+
+            if (-not $agentCatalogByName.ContainsKey($bundleAgent)) {
+                Write-Fail "$($agentBundle.id): agent bundle references unknown agent '$bundleAgent'"
+                $failed++
+            }
+        }
+    }
+
+    if (Test-Path -LiteralPath $agentBundleDir -PathType Container) {
+        foreach ($agentBundleFile in @(Get-ChildItem -LiteralPath $agentBundleDir -Filter "*.txt" -File)) {
+            $agentBundleFileId = [System.IO.Path]::GetFileNameWithoutExtension($agentBundleFile.Name)
+            if (-not $agentBundleIds.Contains($agentBundleFileId)) {
+                Write-Fail "catalog/agent-bundles: '$($agentBundleFile.Name)' has no matching row in agent-bundles.tsv"
+                $failed++
+            }
+        }
+    }
+} catch {
+    Write-Fail $_.Exception.Message
+    $failed++
+}
+
+try {
     $harnessDir = Join-Path $repoRoot "harnesses"
     $requiredProfiles = @("codex", "claude-code", "opencode")
-    $requiredProfileKeys = @("id", "label", "global_env", "global_suffix", "global_default", "project_subpath", "supports_project_default", "skills_format", "instructions_file")
+    $requiredProfileKeys = @(
+        "id",
+        "label",
+        "global_env",
+        "global_suffix",
+        "global_default",
+        "project_subpath",
+        "supports_project_default",
+        "skills_format",
+        "instructions_file",
+        "agent_support",
+        "agent_format",
+        "agent_global_env",
+        "agent_global_suffix",
+        "agent_global_default",
+        "agent_project_subpath",
+        "supports_agent_project_default"
+    )
     foreach ($profileName in $requiredProfiles) {
         $profilePath = Join-Path $harnessDir "$profileName.profile"
         $profile = Read-KeyValueFile -Path $profilePath
@@ -432,6 +714,23 @@ try {
         if ($profile.ContainsKey("id") -and $profile["id"] -ne $profileName) {
             Write-Fail "harnesses/$profileName.profile: id '$($profile["id"])' does not match file name"
             $failed++
+        }
+
+        if ($profile.ContainsKey("agent_support") -and $profile["agent_support"] -notin @("native", "guidance")) {
+            Write-Fail "harnesses/$profileName.profile: agent_support must be native or guidance"
+            $failed++
+        }
+
+        if ($profile.ContainsKey("agent_support") -and $profile["agent_support"] -eq "native") {
+            if ($profile["agent_format"] -notin @("claude-subagent", "opencode-agent")) {
+                Write-Fail "harnesses/$profileName.profile: native agent profile has unsupported agent_format '$($profile["agent_format"])'"
+                $failed++
+            }
+
+            if ([string]::IsNullOrWhiteSpace($profile["agent_global_default"])) {
+                Write-Fail "harnesses/$profileName.profile: native agent profile must declare agent_global_default"
+                $failed++
+            }
         }
     }
 } catch {

@@ -3,7 +3,7 @@ setlocal
 
 rem Double-click installer for Windows users.
 rem Launches an interactive PowerShell menu to choose Codex, Claude Code,
-rem or OpenCode, then install selected skills.
+rem or OpenCode, then install selected skills and optional subagents.
 
 set "REPO_DIR=%~dp0"
 set "INTERACTIVE_SCRIPT=%REPO_DIR%scripts\install-skills-interactive.ps1"
