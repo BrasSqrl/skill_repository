@@ -187,6 +187,27 @@ Subagents are opt-in. Claude Code and OpenCode receive native Markdown agent fil
 | Claude Code | `%USERPROFILE%\.claude\agents` | `<project>\.claude\agents` | Native Markdown subagents. |
 | OpenCode | `%USERPROFILE%\.config\opencode\agents` | `<project>\.opencode\agents` | Native Markdown agents with `mode: subagent`. |
 
+## Harness Mental Model
+
+Global install makes this repository's reusable skills and subagents available to a harness on the current machine. It does not tell a separate target repository which commands to run, which directories matter, which changes are forbidden, or when that project expects subagents to be used.
+
+Use `templates/project-AGENTS.md` as the portable target-repo instruction template. Copy or bootstrap it into each target repo as `AGENTS.md`, then fill in that repo's setup, test, lint, build, security, workflow, and validation rules. Do not copy this repository's root `AGENTS.md` into normal software projects; the root file is for maintaining this skill library.
+
+| Harness | What Global Install Provides | What Target Repo Instructions Provide |
+| --- | --- | --- |
+| Codex | Skills under `%CODEX_HOME%\skills` when set, otherwise `%USERPROFILE%\.codex\skills`. Subagents are guidance-only in this repo because no native Codex subagent file target is encoded here. | A target `AGENTS.md` tells Codex the project's commands, constraints, validation gates, and when to use installed skills or portable subagent guidance. Bootstrap can also write `docs/agents/subagent-orchestration.md` and `docs/agents/available-subagents.md` into the target repo. |
+| Claude Code | Skills under `%USERPROFILE%\.claude\skills`; optional native subagents under `%USERPROFILE%\.claude\agents`. Project-local installs can use `<project>\.claude\skills` and `<project>\.claude\agents`. | The project instruction file gives Claude Code project-specific routing and safety rules. This repo provides the content as `templates/project-AGENTS.md`; if a Claude Code setup also uses another project-instruction filename, keep the same project-specific content aligned there. |
+| OpenCode | Skills under `%USERPROFILE%\.config\opencode\skills`; optional native subagents under `%USERPROFILE%\.config\opencode\agents`. Restart OpenCode after installing agents so `@` suggestions refresh. | A target `AGENTS.md` tells OpenCode how to route the globally available skills and subagents for that specific repo. Without it, skills and subagents still exist, but OpenCode must infer commands, boundaries, and delegation rules from less precise context. |
+
+Practical flow for a new machine:
+
+1. Clone this repository.
+2. Run a global install for the harness and include subagents when wanted.
+3. Restart the harness if it caches agents or skills.
+4. In each important target repo, copy or bootstrap `templates/project-AGENTS.md` as `AGENTS.md`.
+5. Fill in project-specific commands and routing rules.
+6. Ask the agent to use installed skills, installed subagents, or a workflow from this cloned repository.
+
 ## Bundles
 
 | Bundle | Purpose |
