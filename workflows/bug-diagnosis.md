@@ -20,6 +20,15 @@ Use when a test fails, build breaks, runtime error appears, regression is report
 - Root cause with source references.
 - Fix plus regression validation.
 
+## Phase Transitions
+
+- Entry condition: start after the trigger applies and required inputs are available or blockers are recorded.
+- Phase completion signal: each ordered phase produces its listed phase output or a documented blocker.
+- Next phase trigger: move forward only after the previous phase output is reviewed and required gates for that point are satisfied.
+- Stop condition: stop when the final handoff output is complete, validation gates pass or are explicitly blocked, and escalation rules have been checked.
+- Retry limit: revise a failed phase only while new evidence, a narrower scope, or an approved direction change can alter the result; otherwise escalate.
+- Escalation condition: escalate when required inputs, permissions, validation evidence, or approval boundaries are missing or contradictory.
+
 ## Validation Gates
 
 - Reproduction happens before broad changes.

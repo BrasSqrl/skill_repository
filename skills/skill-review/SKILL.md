@@ -7,7 +7,7 @@ description: Review AI coding-agent skills for trigger clarity, operational work
 
 ## Purpose
 
-Assess whether a skill is useful, maintainable, discoverable, and safe for agents to load in real software-development work.
+Decide whether a skill is acceptable, needs revision, should be consolidated, or should be rejected based on trigger clarity, operational contract, overlap, metadata, and validation.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Assess whether a skill is useful, maintainable, discoverable, and safe for agent
 - Validation rules and catalog metadata.
 - License and source information for imported content.
 
+## Permitted Actions
+
+- Inspect `SKILL.md`, references, scripts, assets, catalog rows, bundle entries, notices, and neighboring skills.
+- Produce findings and required edits.
+- Do not approve a skill that lacks concrete trigger, input, output, stop, and validation behavior.
+
 ## Workflow
 
 1. Check frontmatter name and description for specific trigger language.
@@ -40,6 +46,11 @@ Assess whether a skill is useful, maintainable, discoverable, and safe for agent
 6. Identify concrete edits required before acceptance.
 7. Recommend accept, revise, consolidate, or reject.
 
+## Stop Condition
+
+- Stop successfully when the review decision is backed by concrete findings and required edits.
+- Stop blocked when the intended trigger, source, license, or target audience cannot be established.
+
 ## Quality Gates
 
 - The description tells an agent exactly when to use the skill.
@@ -47,6 +58,7 @@ Assess whether a skill is useful, maintainable, discoverable, and safe for agent
 - The skill has clear boundaries and does not duplicate existing skills.
 - References are linked and materially useful.
 - Third-party content has license and notice handling.
+- The output contract includes decision, overlap, required edits, metadata, and validation status.
 
 ## Anti-Patterns
 

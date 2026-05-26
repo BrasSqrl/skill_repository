@@ -118,6 +118,10 @@ For multi-phase work, keep orchestration in the main agent and chain subagents o
 5. `code-reviewer`, `security-reviewer`, or `architecture-reviewer` reviews the result.
 6. Main agent applies any approved fixes and reports final validation.
 
+Use workflow `Phase Transitions` to decide when a subagent handoff is appropriate. Do not delegate in the middle of a tightly coupled implementation loop unless the subagent can work from a bounded input and return a compact result.
+
+When subagent behavior fails repeatedly, convert the failure into an eval scenario with `workflows/failure-to-eval-loop.md`.
+
 ## Escalation Rules
 
 Escalate to the user when:

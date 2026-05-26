@@ -6,20 +6,22 @@ The repository is Windows-first and Linux-second. PowerShell examples are primar
 
 ## Quick Start
 
-Validate the library:
+1. Pick a harness: `codex`, `claude-code`, or `opencode`.
+
+2. Validate the cloned library:
 
 ```powershell
 .\scripts\validate-skills.ps1
 ```
 
-List install bundles:
+3. List install bundles:
 
 ```powershell
 .\scripts\install-skills.ps1 -ListBundles
 .\scripts\install-skills.ps1 -ListAgentBundles
 ```
 
-Install the starter bundle for the current user:
+4. Install the starter bundle for the current user:
 
 ```powershell
 .\scripts\install-skills.ps1 -Harness codex -Bundle starter
@@ -27,14 +29,20 @@ Install the starter bundle for the current user:
 .\scripts\install-skills.ps1 -Harness opencode -Bundle starter
 ```
 
-Install the starter bundle with the recommended subagent bundle:
+5. Optionally install the starter bundle with the recommended subagent bundle:
 
 ```powershell
 .\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents
 .\scripts\install-skills.ps1 -Harness opencode -Bundle starter -IncludeAgents
 ```
 
-Use the Windows guided installer:
+6. Copy or adapt `templates/project-AGENTS.md` into the target repo as `AGENTS.md`. Add `templates/project-AGENTS.github.md` or `templates/project-AGENTS.azure-devops.md` only when that platform is used.
+
+7. Run a workflow from `workflows/` by telling the agent which workflow to follow.
+
+8. Add an eval scenario when a repeated agent failure exposes a missing gate, unsafe action, or unclear instruction.
+
+Use the Windows guided installer when users prefer menus:
 
 ```text
 install-all-skills-windows.bat
@@ -49,6 +57,16 @@ bash ./scripts/validate-skills.sh
 bash ./scripts/install-skills.sh --list-bundles
 bash ./scripts/install-skills.sh --list-agent-bundles
 bash ./scripts/install-skills.sh --harness codex --bundle starter
+```
+
+Validate eval scenarios directly:
+
+```powershell
+.\scripts\validate-evals.ps1
+```
+
+```bash
+bash ./scripts/validate-evals.sh
 ```
 
 ## Install Examples
@@ -268,8 +286,20 @@ The canonical machine-readable subagent catalog is `catalog/agents.tsv`.
 | `github-pr-lifecycle.md` | Creating, updating, reviewing, submitting, validating, enabling auto-merge, or merging GitHub PRs. |
 | `github-issue-to-pr.md` | Turning GitHub issues into branch work, implementation, validation, and linked PRs. |
 | `github-actions-response.md` | Diagnosing failed GitHub Actions, required checks, rulesets, or branch protection. |
+| `failure-to-eval-loop.md` | Turning a real agent failure into a reusable evaluation scenario. |
 
-Every workflow includes a `Context Continuity` section. For long-running work, agents should create a handoff checkpoint before phase changes, major validation output, large edits, or context pressure, then use `handoff-quality-review` before transferring work when available.
+Every workflow includes `Phase Transitions` and `Context Continuity`. Agents should move between phases only after the prior phase output and gate are satisfied, and should create a handoff checkpoint before phase changes, major validation output, large edits, or context pressure.
+
+## Evaluation Scenarios
+
+Evaluation scenarios are lightweight, dependency-free checks for skill, agent, workflow, and bundle behavior.
+
+```text
+evals/scenarios/<scenario-id>/scenario.md
+catalog/evals.tsv
+```
+
+Use evals to turn repeated agent failures into regression coverage. The first scenario set covers handoff continuity, workflow dry runs, PR preparation, debugging, skill review, GitHub PR lifecycle safety, and Azure DevOps PR lifecycle safety.
 
 ## Folder Structure
 
@@ -285,9 +315,12 @@ Every workflow includes a `Context Continuity` section. For long-running work, a
 |   |-- bundles.tsv
 |   |-- agents.tsv
 |   |-- agent-bundles.tsv
+|   |-- evals.tsv
 |   |-- bundles/
 |   `-- agent-bundles/
 |-- docs/
+|-- evals/
+|   `-- scenarios/
 |-- harnesses/
 |-- scripts/
 |   |-- bootstrap-agent-repo.ps1
@@ -299,6 +332,8 @@ Every workflow includes a `Context Continuity` section. For long-running work, a
 |   |-- score-skills.sh
 |   |-- score-agents.ps1
 |   |-- score-agents.sh
+|   |-- validate-evals.ps1
+|   |-- validate-evals.sh
 |   |-- validate-skills.ps1
 |   `-- validate-skills.sh
 |-- skills/
@@ -306,6 +341,9 @@ Every workflow includes a `Context Continuity` section. For long-running work, a
 |       |-- SKILL.md
 |       `-- references/
 |-- templates/
+|   |-- eval-scenario.md
+|   |-- project-AGENTS.azure-devops.md
+|   |-- project-AGENTS.github.md
 |   |-- project-AGENTS.md
 |   |-- skill-template.md
 |   `-- subagent-template.md
@@ -385,6 +423,7 @@ The canonical machine-readable catalog is `catalog/skills.tsv`.
 ## Validation And Scoring
 
 Validation checks skill folders, `SKILL.md` frontmatter, required sections, catalog entries, bundle membership, harness profiles, reference links, and third-party notice traceability.
+It also validates workflow required sections and eval scenario metadata.
 
 ```powershell
 .\scripts\validate-skills.ps1
@@ -406,6 +445,16 @@ bash ./scripts/score-skills.sh
 bash ./scripts/score-agents.sh
 ```
 
+Eval validation is dependency-free:
+
+```powershell
+.\scripts\validate-evals.ps1
+```
+
+```bash
+bash ./scripts/validate-evals.sh
+```
+
 ## Documentation
 
 - [Usage guide](docs/usage-guide.md)
@@ -416,6 +465,8 @@ bash ./scripts/score-agents.sh
 - [Operating modes](docs/operating-modes.md)
 - [Azure DevOps guide](docs/azure-devops-guide.md)
 - [GitHub guide](docs/github-guide.md)
+- [Evaluation guide](docs/evaluation-guide.md)
+- [Failure to eval guide](docs/failure-to-eval-guide.md)
 - [Subagent orchestration guide](docs/subagent-orchestration-guide.md)
 - [Skill authoring guide](docs/skill-authoring-guide.md)
 - [Skill quality rubric](docs/skill-quality-rubric.md)

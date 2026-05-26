@@ -7,7 +7,7 @@ description: Convert software-development goals into scoped, ordered, verifiable
 
 ## Purpose
 
-Turn a software-development goal into small work slices with clear inputs, dependencies, validation steps, and stopping points.
+Turn a software-development goal into executable work slices with clear inputs, dependencies, validation gates, approval boundaries, and stop conditions.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Turn a software-development goal into small work slices with clear inputs, depen
 - Available validation commands, with Windows commands first and Linux alternatives where useful.
 - Expected delivery format: plan, issues, checklist, or implementation sequence.
 
+## Permitted Actions
+
+- Inspect source, tests, docs, configs, and existing plans to ground the breakdown.
+- Produce plans, issue outlines, checklists, and decision records.
+- Do not edit implementation files unless the user has moved from planning into execution.
+
 ## Workflow
 
 1. Restate the desired outcome in one concrete sentence.
@@ -40,6 +46,11 @@ Turn a software-development goal into small work slices with clear inputs, depen
 6. Attach validation steps and rollback considerations to each slice.
 7. Call out decisions that require user approval before implementation.
 
+## Stop Condition
+
+- Stop successfully when each slice has an outcome, scope, validation gate, dependency, and risk note.
+- Stop blocked when a required product, architecture, security, or release decision changes the implementation path.
+
 ## Quality Gates
 
 - Each task has a clear outcome and validation method.
@@ -47,6 +58,7 @@ Turn a software-development goal into small work slices with clear inputs, depen
 - Dependencies and sequencing are explicit.
 - Blockers are surfaced instead of buried.
 - The plan can be executed incrementally.
+- The output contract does not require the implementer to invent missing gates.
 
 ## Anti-Patterns
 

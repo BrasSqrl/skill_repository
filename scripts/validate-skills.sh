@@ -130,6 +130,7 @@ required_workflow_sections=(
   "Trigger"
   "Ordered Skills"
   "Phase Outputs"
+  "Phase Transitions"
   "Validation Gates"
   "Context Continuity"
   "Handoff Format"
@@ -781,6 +782,17 @@ for catalog_name in "${!catalog_seen[@]}"; do
 done
 if [[ "$third_party_count" -gt 0 && ! -f "$NOTICES_PATH" ]]; then
   fail_line "THIRD_PARTY_NOTICES.md is required when third-party skills exist"
+  failed=$((failed + 1))
+fi
+
+if [[ -f "$REPO_ROOT/scripts/validate-evals.sh" ]]; then
+  echo "[INFO] Running eval scenario validation"
+  if ! bash "$REPO_ROOT/scripts/validate-evals.sh"; then
+    fail_line "Eval scenario validation failed"
+    failed=$((failed + 1))
+  fi
+else
+  fail_line "Eval validation script not found: $REPO_ROOT/scripts/validate-evals.sh"
   failed=$((failed + 1))
 fi
 

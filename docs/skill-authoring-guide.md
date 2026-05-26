@@ -4,7 +4,7 @@
 
 This guide explains how to write useful OpenAI-style skills for AI coding agents.
 
-A good skill turns a recurring software-development workflow into concise operational guidance. It should help an agent choose the right context, follow a reliable process, avoid known mistakes, verify the result, and communicate the outcome.
+A good skill turns a recurring software-development workflow into a concise executable contract. It should tell an agent the trigger condition, required inputs, permitted actions, stop condition, validation gate, and output contract.
 
 ## Required Skill Shape
 
@@ -41,6 +41,8 @@ Prefer:
 
 - Concrete workflows.
 - Required inputs.
+- Permitted and forbidden actions.
+- Stop conditions.
 - Quality gates.
 - Anti-patterns.
 - Output formats.
@@ -61,6 +63,8 @@ A strong description includes:
 
 - The workflow the skill supports.
 - The conditions that should trigger it.
+- The output the skill should produce.
+- The boundary that prevents false triggers.
 - Common task names or situations.
 - Any important exclusions if confusion is likely.
 
@@ -106,6 +110,25 @@ Use three levels:
 
 If `SKILL.md` is becoming long, move detailed sections into `references/` and link to them from the `References` section.
 
+## Executable Contract
+
+Write the skill as if another agent will call it as a function:
+
+```text
+trigger + inputs + allowed actions -> validated output or explicit blocker
+```
+
+Every skill should make these elements clear:
+
+- Trigger condition: when the skill should load.
+- Required inputs: what the agent must know or inspect.
+- Permitted actions: what the agent may read, run, edit, or refuse.
+- Stop condition: when the skill is done or blocked.
+- Output contract: what artifact or answer the agent must return.
+- Validation gate: what proves the output is usable.
+
+Avoid persona framing. Do not write "act as a senior engineer" when the needed behavior is "inspect the diff, run validation, report findings, and stop before merge unless authorized."
+
 ## `SKILL.md` Versus `references/`
 
 Put this in `SKILL.md`:
@@ -113,7 +136,9 @@ Put this in `SKILL.md`:
 - Purpose.
 - When to use and when not to use.
 - Required inputs.
+- Permitted action boundaries when the skill could be confused with implementation, review, or platform mutation.
 - Main workflow.
+- Stop condition.
 - Quality gates.
 - Anti-patterns.
 - Output format.
@@ -161,6 +186,8 @@ Use this checklist before adding or changing a skill:
 - The `description` clearly states when to use the skill.
 - The body is operational and concise.
 - Required inputs are explicit.
+- Permitted actions are explicit when the skill involves edits, commands, platform mutation, or read-only review.
+- Stop conditions distinguish success from blocked work.
 - Workflow steps are concrete and ordered.
 - Quality gates are verifiable.
 - Anti-patterns identify likely failure modes.
@@ -177,3 +204,4 @@ Use this checklist before adding or changing a skill:
   ```powershell
   .\scripts\score-skills.ps1
   ```
+- If behavior changed because of a real failure, add or update an eval scenario under `evals/scenarios/`.

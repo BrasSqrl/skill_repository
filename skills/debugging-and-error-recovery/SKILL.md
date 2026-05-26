@@ -7,7 +7,7 @@ description: Diagnose and recover from failing software behavior by reproducing 
 
 ## Purpose
 
-Find and fix the cause of failing behavior with a reproducible path, minimal changes, and evidence that the failure is resolved.
+Convert failing behavior into a reproducible case, identify the first confirmed cause, apply the smallest fix, and prove the failure is resolved.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Find and fix the cause of failing behavior with a reproducible path, minimal cha
 - Focused validation command, using Windows command form first and Linux equivalent when useful.
 - Environment details that affect reproduction.
 
+## Permitted Actions
+
+- Run reproduction, targeted tests, logs, and inspection commands needed to isolate the failure.
+- Add temporary instrumentation only to answer a stated hypothesis, then remove it before completion.
+- Edit code only after the failure boundary and likely cause are grounded in evidence.
+
 ## Workflow
 
 1. Reproduce the failure or identify why it cannot be reproduced.
@@ -43,6 +49,11 @@ Find and fix the cause of failing behavior with a reproducible path, minimal cha
 9. Rerun the failing command and any affected broader validation.
 10. Remove temporary diagnostics before finishing.
 
+## Stop Condition
+
+- Stop successfully when the failing path passes, the cause and fix are documented, and regression validation exists or is explicitly deferred.
+- Stop blocked when reproduction is impossible, required systems are unavailable, or the observed behavior conflicts with the source of truth.
+
 ## Quality Gates
 
 - The failure is reproduced or the inability to reproduce is documented.
@@ -50,6 +61,7 @@ Find and fix the cause of failing behavior with a reproducible path, minimal cha
 - Regression validation exists or a reason is stated.
 - Temporary logging, debug flags, and probes are removed.
 - Final report includes the before and after validation evidence.
+- The output contract separates failure, cause, fix, before evidence, and after evidence.
 
 ## Anti-Patterns
 

@@ -13,6 +13,14 @@ Use this checklist before publishing or tagging this skill library.
   ./scripts/validate-skills.sh
   ```
 - [ ] Validation reports `0` failures. Warnings are reviewed and accepted or fixed.
+- [ ] Eval scenarios validate:
+  ```powershell
+  .\scripts\validate-evals.ps1
+  ```
+- [ ] Bash eval scenario validation reviewed:
+  ```bash
+  ./scripts/validate-evals.sh
+  ```
 - [ ] Skill quality scoring reviewed:
   ```powershell
   .\scripts\score-skills.ps1
@@ -81,8 +89,11 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] Skills avoid generic prompting advice and use operational workflow language.
 - [ ] No project-specific assumptions remain.
 - [ ] Examples are accurate and match implemented script options.
-- [ ] Workflow templates include trigger, ordered skills, phase outputs, validation gates, context continuity, handoff format, and escalation rules.
+- [ ] Workflow templates include trigger, ordered skills, phase outputs, phase transitions, validation gates, context continuity, handoff format, and escalation rules.
 - [ ] Workflow continuity checkpoints specify phase, objective, completed work, pending work, files, commands, validation, blockers, risks, next action, and recommended continuation skills or subagents.
+- [ ] Workflow phase transitions state entry condition, completion signal, next trigger, stop condition, retry limit, and escalation condition.
+- [ ] Failure-to-eval workflow exists for turning repeated agent failures into scenario coverage.
+- [ ] Eval scenarios cover high-traffic or high-risk skills, workflows, or delivery-platform boundaries.
 - [ ] Workflow loop templates reference subagents only for discovery, reproduction, review, audit, validation, and strategy.
 - [ ] Azure DevOps workflows keep PR completion, policy bypass, work item transitions, and pipeline mutations behind explicit authorization gates.
 - [ ] GitHub workflows keep PR merge, admin bypass, issue state changes, and workflow mutations behind explicit authorization gates.
@@ -94,6 +105,7 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] README skill catalog matches the `skills/` directory.
 - [ ] `catalog/skills.tsv` has one row per skill.
 - [ ] `catalog/agents.tsv` has one row per canonical subagent.
+- [ ] `catalog/evals.tsv` has one row per eval scenario.
 - [ ] Every bundle file points only to existing skills.
 - [ ] Every agent bundle file points only to existing subagents.
 - [ ] Harness profiles are present for Codex, Claude Code, and OpenCode.

@@ -7,7 +7,7 @@ description: Review handoff artifacts for continuity, accuracy, validation evide
 
 ## Purpose
 
-Ensure a handoff lets another agent continue work without stale assumptions, missing files, hidden blockers, or duplicated investigation.
+Decide whether a handoff is safe to resume from, and identify exact edits when continuity, evidence, validation, or next-action detail is missing.
 
 ## When to Use
 
@@ -32,6 +32,12 @@ Ensure a handoff lets another agent continue work without stale assumptions, mis
 - Any artifacts that the next agent must inspect.
 - Workflow name, current phase, completed steps, pending steps, and recommended continuation skills or subagents when reviewing a continuity checkpoint.
 
+## Permitted Actions
+
+- Inspect the handoff, referenced files, validation summaries, branch state, and artifacts needed to verify continuity.
+- Return an accept, revise, or blocked decision.
+- Do not invent missing facts or perform the continuation task while reviewing the handoff.
+
 ## Workflow
 
 1. Check that the handoff states the goal, current state, and intended next step.
@@ -43,6 +49,11 @@ Ensure a handoff lets another agent continue work without stale assumptions, mis
 7. Identify missing context that would force repeated discovery.
 8. Produce required edits or an acceptance decision.
 
+## Stop Condition
+
+- Stop successfully when the handoff is accepted or required revisions are specific enough for the author to apply.
+- Stop blocked when referenced artifacts are unavailable or the handoff cannot be validated without private context.
+
 ## Quality Gates
 
 - A fresh agent can identify where to start.
@@ -51,6 +62,7 @@ Ensure a handoff lets another agent continue work without stale assumptions, mis
 - Risks and blockers are not buried.
 - No secrets or unnecessary personal data are included.
 - Workflow checkpoints can be resumed without relying on chat history.
+- The output contract includes a decision and exact missing fields or required edits.
 
 ## Anti-Patterns
 

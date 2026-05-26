@@ -1,13 +1,13 @@
 ---
 name: replace-with-kebab-case-name
-description: State what this skill does and the specific situations when an AI coding agent should use it.
+description: State the workflow, trigger condition, expected output, and use boundary. Use when an AI coding agent must perform this exact repeatable task.
 ---
 
 # Replace With Skill Title
 
 ## Purpose
 
-State the concrete engineering capability this skill provides. Keep this section short. Explain the outcome the agent should produce, not general advice.
+State the concrete engineering capability this skill provides. Treat the skill like a small callable program: identify the input state it handles and the output state it must produce.
 
 ## When to Use
 
@@ -27,13 +27,23 @@ State the concrete engineering capability this skill provides. Keep this section
 - `<required commands or environment details>`
 - `<acceptance criteria or expected output>`
 
+## Permitted Actions
+
+- `<files, commands, analysis, or review actions the agent may perform>`
+- `<whether edits, validation commands, or read-only inspection are allowed>`
+
 ## Workflow
 
 1. Inspect the relevant source context.
 2. Identify constraints, assumptions, and open questions.
 3. Make the smallest useful change or produce the requested analysis.
 4. Run the relevant verification steps.
-5. Report the outcome, changed files, tests run, and unresolved risks.
+5. Stop when the output contract and validation gate are satisfied, or when a blocker prevents safe completion.
+
+## Stop Condition
+
+- Stop successfully when `<observable completion state>`.
+- Stop blocked when `<missing input, failed gate, unsafe operation, or approval boundary>`.
 
 ## Quality Gates
 
@@ -41,6 +51,7 @@ State the concrete engineering capability this skill provides. Keep this section
 - The work is scoped to the requested task.
 - The output includes concrete verification evidence.
 - The result does not introduce tool-specific assumptions.
+- The stop condition is met or the blocker is explicit.
 
 ## Anti-Patterns
 

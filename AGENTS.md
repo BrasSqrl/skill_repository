@@ -16,6 +16,7 @@ Each skill should help an AI coding agent perform a concrete engineering workflo
 - Keep documentation scoped to this repository. Do not reference any specific downstream project.
 - Keep machine-readable metadata aligned with content. Update `catalog/skills.tsv`, bundle files, and harness/profile documentation when changing installable skills or installer behavior.
 - Keep canonical subagents aligned with `catalog/agents.tsv`, `catalog/agent-bundles.tsv`, harness profiles, and validation scripts.
+- Keep eval scenarios aligned with `catalog/evals.tsv` when repeated agent failures or behavior changes need regression coverage.
 
 ## Skill Format Rules
 
@@ -56,10 +57,26 @@ Each skill should help an AI coding agent perform a concrete engineering workflo
 - Forbid vague prompt advice such as "be careful", "think deeply", or "write good code" unless paired with concrete actions.
 - Prefer concrete workflows, quality gates, anti-patterns, and output formats.
 - State required inputs and assumptions explicitly.
+- State permitted actions and stop conditions when a skill, workflow, or subagent could cross from review into implementation or from planning into mutation.
 - Include verification steps that an agent can execute.
 - Use imperative language.
 - Avoid motivational, marketing, or tutorial filler.
 - Avoid duplicating the same instruction in `SKILL.md` and `references/`.
+
+## Workflow Rules
+
+- Every workflow under `workflows/` must include `Trigger`, `Ordered Skills`, `Phase Outputs`, `Phase Transitions`, `Validation Gates`, `Context Continuity`, `Handoff Format`, and `Escalation Rules`.
+- `Phase Transitions` must state entry condition, phase completion signal, next phase trigger, stop condition, retry or revision limit, and escalation condition.
+- Use `workflows/failure-to-eval-loop.md` when a real failure should become reusable eval coverage.
+
+## Eval Scenario Rules
+
+- Every eval scenario must have one row in `catalog/evals.tsv`.
+- Every eval row must point to an existing skill, agent, workflow, or bundle.
+- Every scenario must live at `evals/scenarios/<scenario-id>/scenario.md`.
+- Scenario IDs must use lowercase kebab-case.
+- Keep fixtures synthetic and free of secrets, personal identifiers, local machine paths, and private repo names.
+- New scenarios start as `draft` unless representative validation evidence already exists.
 
 ## Validation
 
@@ -67,12 +84,14 @@ Run validation after changing skills, references, templates, scripts, catalog fi
 
 ```powershell
 .\scripts\validate-skills.ps1
+.\scripts\validate-evals.ps1
 ```
 
 Linux alternative:
 
 ```bash
 ./scripts/validate-skills.sh
+./scripts/validate-evals.sh
 ```
 
 Run quality scoring after adding or rewriting skills:

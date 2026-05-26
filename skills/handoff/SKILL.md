@@ -7,7 +7,7 @@ description: Create a compact handoff document so another agent or future sessio
 
 ## Purpose
 
-Write a concise continuation document that preserves current state, source references, validation, and suggested next skills.
+Write a concise continuation artifact that preserves the current task state, source references, validation evidence, blockers, and exact next action for another agent or future session.
 
 ## When to Use
 
@@ -32,6 +32,12 @@ Write a concise continuation document that preserves current state, source refer
 - Focus for the next session, if provided by the user.
 - Workflow name, current phase, completed steps, pending steps, blockers, risks, and exact next action when creating a continuity checkpoint.
 
+## Permitted Actions
+
+- Inspect current status, changed files, validation output, and existing durable artifacts.
+- Write or propose a compact handoff artifact.
+- Do not store secrets, raw credentials, unrelated personal data, or long transcript dumps.
+
 ## Workflow
 
 1. Identify what a fresh agent needs to continue safely.
@@ -43,6 +49,11 @@ Write a concise continuation document that preserves current state, source refer
 7. Save the handoff document to the OS temporary directory, not the workspace, unless the user or active workflow explicitly requires a project-local generated-output location.
 8. Report the absolute path to the user.
 
+## Stop Condition
+
+- Stop successfully when a fresh agent can continue from the handoff without reconstructing the conversation.
+- Stop blocked when required current-state facts cannot be verified from files, commands, artifacts, or explicit user-provided context.
+
 ## Quality Gates
 
 - A fresh agent can continue without reconstructing the full conversation.
@@ -51,6 +62,7 @@ Write a concise continuation document that preserves current state, source refer
 - The handoff names suggested next skills.
 - The file is saved outside the repository unless the user asked otherwise.
 - Workflow checkpoints identify the current phase and exact next action.
+- The output contract names the saved path or clearly states that only handoff content was requested.
 
 ## Anti-Patterns
 

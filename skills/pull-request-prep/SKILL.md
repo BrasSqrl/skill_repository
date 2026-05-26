@@ -7,7 +7,7 @@ description: Prepare software changes for review by inspecting the final diff, r
 
 ## Purpose
 
-Create a reviewer-ready summary of a change set with accurate scope, validation evidence, and known risks.
+Convert a final change set into a reviewer-ready package with accurate scope, real validation evidence, explicit risks, and a concise review narrative.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Create a reviewer-ready summary of a change set with accurate scope, validation 
 - Known risks, follow-ups, migrations, dependency changes, or docs changes.
 - Review destination format when known, without assuming a specific hosting platform.
 
+## Permitted Actions
+
+- Inspect diffs, branch state, commits, validation output, docs, migrations, and dependency changes.
+- Run final validation commands when authorized and practical.
+- Do not merge, approve, request changes, or mutate a hosting platform unless a delivery-specific skill and authorization apply.
+
 ## Workflow
 
 1. Inspect the final diff and current worktree state.
@@ -40,6 +46,11 @@ Create a reviewer-ready summary of a change set with accurate scope, validation 
 6. Draft a concise title and review description.
 7. Include a validation checklist with exact commands and outcomes.
 
+## Stop Condition
+
+- Stop successfully when the PR package names actual changes, validation, skipped checks, risks, and reviewer notes.
+- Stop blocked when the diff is not inspectable, validation evidence is unavailable, or platform mutation is requested without authorization.
+
 ## Quality Gates
 
 - The summary matches the actual diff.
@@ -47,6 +58,7 @@ Create a reviewer-ready summary of a change set with accurate scope, validation 
 - Risks and follow-ups are explicit.
 - The PR text is concise and reviewer-oriented.
 - No unrelated changes are hidden in the summary.
+- The output contract distinguishes actual validation from planned or skipped validation.
 
 ## Anti-Patterns
 

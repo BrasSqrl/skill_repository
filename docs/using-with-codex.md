@@ -147,6 +147,11 @@ Then fill in project-specific facts:
 - installed skills and when the repo expects agents to use them
 - installed subagents and when independent delegation is expected
 
+Add platform-specific delivery guidance only when needed:
+
+- `templates/project-AGENTS.github.md` for GitHub PRs, issues, checks, and merge rules.
+- `templates/project-AGENTS.azure-devops.md` for Azure Repos PRs, Azure Boards, Azure Pipelines, and completion rules.
+
 Keep reusable workflow guidance in skills. Keep project-specific facts in `AGENTS.md`.
 
 ## 4. Ask The Agent To Use Installed Skills
@@ -191,6 +196,7 @@ For repeatable flows, start from the workflow templates in `workflows/`:
 - `release-prep.md`
 - `architecture-review.md`
 - `agent-skill-development.md`
+- `failure-to-eval-loop.md`
 
 Common combinations:
 
@@ -206,6 +212,8 @@ Prompt pattern:
 ```text
 Use the feature-development workflow from this skill repository. Load only the skills needed for this task, then proceed through the workflow gates.
 ```
+
+Workflow templates include phase transitions. Ask the agent to stop or checkpoint when a phase output, validation gate, or approval boundary is missing.
 
 Subagent prompt pattern:
 
@@ -297,6 +305,18 @@ If a review package is needed first:
 
 ```text
 Use pull-request-prep to prepare reviewer notes from the final diff, then use release-readiness for the release checklist.
+```
+
+### Turning A Failure Into An Eval
+
+```text
+Use the failure-to-eval-loop workflow. Convert this repeated agent failure into a small eval scenario with target, inputs, expected behavior, pass criteria, failure signals, and catalog row.
+```
+
+Then validate the scenario:
+
+```powershell
+.\scripts\validate-evals.ps1
 ```
 
 ## 8. Good Prompt Examples

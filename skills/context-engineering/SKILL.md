@@ -7,7 +7,7 @@ description: Gather, compress, refresh, and preserve working context for AI-assi
 
 ## Purpose
 
-Build the smallest accurate context set needed to do the current software-development task without flooding the agent context window.
+Build the smallest accurate context set needed for the current task and produce a reusable context packet for planning, implementation, review, or continuation.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Build the smallest accurate context set needed to do the current software-develo
 - Known constraints, deadlines, forbidden files, or validation commands.
 - Windows command environment first; Linux shell alternatives when the target repo supports them.
 
+## Permitted Actions
+
+- Inspect repository instructions, manifests, source files, tests, docs, logs, and diffs.
+- Run read-only discovery commands and targeted validation only when needed to identify context.
+- Do not edit files unless another loaded skill or the user request authorizes implementation.
+
 ## Workflow
 
 1. Inspect repository instructions, root files, and current status before drawing conclusions.
@@ -40,6 +46,11 @@ Build the smallest accurate context set needed to do the current software-develo
 6. Refresh the context after edits, new failures, user changes, or branch changes.
 7. Produce a compact context summary that another agent could continue from.
 
+## Stop Condition
+
+- Stop successfully when the next agent action has enough files, commands, facts, assumptions, and blockers to proceed.
+- Stop blocked when the task requires unavailable private systems, missing files, contradictory instructions, or a user decision.
+
 ## Quality Gates
 
 - The summary names concrete files, commands, or artifacts.
@@ -47,6 +58,7 @@ Build the smallest accurate context set needed to do the current software-develo
 - The context set is scoped to the current task.
 - User or pre-existing changes are identified and not overwritten.
 - Open questions are limited to blockers.
+- The output contract is a compact context packet, not a broad repo essay.
 
 ## Anti-Patterns
 

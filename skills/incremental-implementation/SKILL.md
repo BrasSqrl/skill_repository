@@ -7,7 +7,7 @@ description: Implement software changes in small, verifiable slices while preser
 
 ## Purpose
 
-Make the smallest useful code changes that satisfy the requested behavior, with frequent verification and minimal blast radius.
+Make the smallest useful code changes that satisfy the requested behavior, preserve local conventions, and produce validation evidence after each meaningful slice.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Make the smallest useful code changes that satisfy the requested behavior, with 
 - Focused validation commands, using Windows commands first and Linux equivalents when relevant.
 - Any forbidden files, generated outputs, or compatibility constraints.
 
+## Permitted Actions
+
+- Edit only files needed for the approved slice.
+- Run targeted tests, linters, builds, type checks, or manual checks that verify the slice.
+- Leave unrelated files, generated artifacts, and user changes untouched unless explicitly authorized.
+
 ## Workflow
 
 1. Inspect current status and relevant source before editing.
@@ -40,6 +46,11 @@ Make the smallest useful code changes that satisfy the requested behavior, with 
 6. Repeat with the next slice only after the previous one is understood.
 7. Stop when the requested behavior is complete and validation evidence is available.
 
+## Stop Condition
+
+- Stop successfully when the requested behavior is implemented, relevant validation has run or been explicitly blocked, and the final diff is scoped.
+- Stop blocked when required context, permissions, tests, or user decisions are missing.
+
 ## Quality Gates
 
 - Changes are scoped to the requested outcome.
@@ -47,6 +58,7 @@ Make the smallest useful code changes that satisfy the requested behavior, with 
 - New abstractions are justified by real complexity or existing patterns.
 - Validation is run after meaningful edits, or the reason it cannot run is stated.
 - Final output identifies changed files and residual risk.
+- The output contract names changed files, validation, and remaining risks.
 
 ## Anti-Patterns
 

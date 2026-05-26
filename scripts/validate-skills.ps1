@@ -197,6 +197,7 @@ $requiredWorkflowSections = @(
     "Trigger",
     "Ordered Skills",
     "Phase Outputs",
+    "Phase Transitions",
     "Validation Gates",
     "Context Continuity",
     "Handoff Format",
@@ -806,6 +807,29 @@ if (Test-Path -LiteralPath $noticesPath -PathType Leaf) {
         Write-Fail "THIRD_PARTY_NOTICES.md is required when third-party skills exist"
         $failed++
     }
+}
+
+$evalValidationScript = Join-Path $repoRoot "scripts\validate-evals.ps1"
+if (Test-Path -LiteralPath $evalValidationScript -PathType Leaf) {
+    Write-Info "Running eval scenario validation"
+    $powershellCommand = Get-Command pwsh -ErrorAction SilentlyContinue
+    if (-not $powershellCommand) {
+        $powershellCommand = Get-Command powershell -ErrorAction SilentlyContinue
+    }
+
+    if ($powershellCommand) {
+        & $powershellCommand.Source -NoProfile -ExecutionPolicy Bypass -File $evalValidationScript
+        if ($LASTEXITCODE -ne 0) {
+            Write-Fail "Eval scenario validation failed"
+            $failed++
+        }
+    } else {
+        Write-Fail "Could not find a PowerShell executable to run eval scenario validation"
+        $failed++
+    }
+} else {
+    Write-Fail "Eval validation script not found: $evalValidationScript"
+    $failed++
 }
 
 Write-Host ""

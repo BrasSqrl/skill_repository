@@ -11,10 +11,13 @@ Use this rubric to review new and changed skills before publishing or installing
 | Description specificity | The description states the workflow and exact trigger conditions. |
 | Trigger clarity | `When to Use` and `When Not to Use` separate adjacent skills. |
 | Required inputs | The agent knows what context, files, commands, or decisions it needs. |
+| Action boundary | The agent knows what it may inspect, run, edit, mutate, or refuse. |
 | Workflow | Steps are ordered and operational. |
+| Stop condition | Success and blocked states are explicit. |
 | Quality gates | Completion checks are concrete and executable where possible. |
 | Anti-patterns | The skill prevents common failure modes. |
 | Output format | The agent knows how to report work consistently. |
+| Eval coverage | Repeatable scenarios exist for high-risk or high-traffic behavior. |
 | Reference hygiene | Long examples and rubrics live in `references/` and are linked only when useful. |
 | Catalog metadata | `catalog/skills.tsv` is complete and bundle placement is intentional. |
 | License traceability | Imported or adapted material has notices and license metadata. |
@@ -37,11 +40,13 @@ Use this rubric to review new and changed skills before publishing or installing
 - `SKILL.md` starts with YAML frontmatter containing `name` and `description`.
 - The description includes trigger wording such as `Use when`, `Use before`, or `Use for`.
 - Required sections are present in the standard order.
+- The skill states permitted actions and stop conditions when action boundaries matter.
 - The skill does not assume a downstream project, harness, editor, or hosting provider.
 - Windows-first command examples are used when command examples are necessary.
 - Linux alternatives are included when they help portability.
 - The skill is not a tutorial for a human beginner.
 - Any overlap with existing skills is intentional and documented by trigger boundaries.
+- High-traffic or risky skills have at least one scenario in `catalog/evals.tsv` or a documented reason for no scenario yet.
 
 ## Scoring Script
 
@@ -69,4 +74,16 @@ Linux alternative:
 
 ```bash
 ./scripts/score-agents.sh
+```
+
+Validate eval scenarios:
+
+```powershell
+.\scripts\validate-evals.ps1
+```
+
+Linux alternative:
+
+```bash
+./scripts/validate-evals.sh
 ```

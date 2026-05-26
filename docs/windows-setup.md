@@ -7,6 +7,7 @@ Run commands from the repository root:
 ```powershell
 cd <repo-root>
 .\scripts\validate-skills.ps1
+.\scripts\validate-evals.ps1
 ```
 
 Use the double-click guided installer:
@@ -166,6 +167,14 @@ Score skills:
 .\scripts\score-skills.ps1
 .\scripts\score-agents.ps1
 ```
+
+Validate eval scenarios:
+
+```powershell
+.\scripts\validate-evals.ps1
+```
+
+Use eval validation after adding or changing files under `evals/` or `catalog/evals.tsv`.
 
 ## Execution Policy
 

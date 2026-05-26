@@ -7,6 +7,7 @@ Run commands from the repository root:
 ```bash
 cd <repo-root>
 bash ./scripts/validate-skills.sh
+bash ./scripts/validate-evals.sh
 ```
 
 ## Harness Defaults
@@ -158,6 +159,14 @@ Score skills:
 bash ./scripts/score-skills.sh
 bash ./scripts/score-agents.sh
 ```
+
+Validate eval scenarios:
+
+```bash
+bash ./scripts/validate-evals.sh
+```
+
+Use eval validation after adding or changing files under `evals/` or `catalog/evals.tsv`.
 
 ## Executable Permissions
 

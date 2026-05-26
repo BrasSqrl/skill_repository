@@ -23,6 +23,15 @@ Use when changing backend services, APIs, request handling, authorization hooks,
 - Security review for auth, input handling, data exposure, and unsafe defaults.
 - Validation evidence from tests, lint, build, or contract checks.
 
+## Phase Transitions
+
+- Entry condition: start after the trigger applies and required inputs are available or blockers are recorded.
+- Phase completion signal: each ordered phase produces its listed phase output or a documented blocker.
+- Next phase trigger: move forward only after the previous phase output is reviewed and required gates for that point are satisfied.
+- Stop condition: stop when the final handoff output is complete, validation gates pass or are explicitly blocked, and escalation rules have been checked.
+- Retry limit: revise a failed phase only while new evidence, a narrower scope, or an approved direction change can alter the result; otherwise escalate.
+- Escalation condition: escalate when required inputs, permissions, validation evidence, or approval boundaries are missing or contradictory.
+
 ## Validation Gates
 
 - Contract changes are intentional and documented.

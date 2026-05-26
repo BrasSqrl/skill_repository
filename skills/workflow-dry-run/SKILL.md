@@ -7,7 +7,7 @@ description: Dry-run an AI agent workflow before execution to find missing conte
 
 ## Purpose
 
-Simulate an agent workflow before execution so missing inputs, weak validation gates, and unsafe assumptions are caught early.
+Simulate an agent workflow before execution and return a go, revise, or blocked decision based on inputs, gates, action boundaries, and handoff readiness.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Simulate an agent workflow before execution so missing inputs, weak validation g
 - Approval boundaries and handoff points.
 - Expected final output.
 
+## Permitted Actions
+
+- Inspect proposed workflow text, referenced skills, validation commands, approval rules, and target repo instructions.
+- Produce a dry-run report and revised workflow recommendations.
+- Do not execute the workflow, mutate files, run destructive commands, or treat the dry run as validation success.
+
 ## Workflow
 
 1. Restate the goal and planned phases.
@@ -40,6 +46,11 @@ Simulate an agent workflow before execution so missing inputs, weak validation g
 6. Recommend changes to the workflow before execution.
 7. Produce a go, revise, or blocked decision.
 
+## Stop Condition
+
+- Stop successfully when the workflow has a go, revise, or blocked decision with concrete reasons.
+- Stop blocked when required target repo policy, credentials, validation commands, or approval boundaries cannot be determined.
+
 ## Quality Gates
 
 - Every phase has an owner, input, output, and validation gate.
@@ -47,6 +58,7 @@ Simulate an agent workflow before execution so missing inputs, weak validation g
 - Missing context is explicit.
 - Handoffs include enough information to continue.
 - The dry run ends with a concrete decision.
+- The output contract distinguishes planned validation from executed validation.
 
 ## Anti-Patterns
 

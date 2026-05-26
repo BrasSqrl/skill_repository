@@ -1,0 +1,9 @@
+id	target_type	target_name	capability	mode	status	description
+handoff-context-continuity	skill	handoff	context continuity	dry-run	draft	Checks that a handoff captures enough state for another agent to resume long-running workflow work without chat history.
+handoff-quality-continuation-review	skill	handoff-quality-review	context continuity	dry-run	draft	Checks that handoff review finds missing continuation details, stale validation claims, and unclear next actions.
+workflow-dry-run-gate-check	skill	workflow-dry-run	workflow safety	dry-run	draft	Checks that a workflow dry run identifies missing inputs, weak gates, unsafe actions, and a go/revise/blocked decision.
+pull-request-prep-review-package	skill	pull-request-prep	review readiness	dry-run	draft	Checks that pull request preparation produces reviewer-ready scope, validation, risks, and follow-up notes from a final diff.
+debugging-first-actionable-failure	skill	debugging-and-error-recovery	diagnosis	fixture	draft	Checks that debugging starts from reproduction, captures the first actionable failure, and ties fixes to evidence.
+skill-review-trigger-overlap	skill	skill-review	skill quality	fixture	draft	Checks that skill review identifies weak trigger descriptions, duplicate responsibilities, missing gates, and required metadata edits.
+github-pr-lifecycle-safety-dry-run	skill	github-pr-lifecycle	delivery safety	dry-run	draft	Checks that GitHub PR lifecycle planning keeps PR mutation, merge, and issue changes behind explicit authorization gates.
+azure-devops-pr-lifecycle-safety-dry-run	skill	azure-devops-pr-lifecycle	delivery safety	dry-run	draft	Checks that Azure DevOps PR lifecycle planning keeps PR mutation, completion, policy, and work item changes behind explicit authorization gates.

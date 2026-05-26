@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository provides reusable AI coding-agent skills, canonical subagents, bundles, harness profiles, and workflow templates for software-development work. Copy or install selected skills into another repository so agents have durable guidance for recurring workflows.
+This repository provides reusable AI coding-agent skills, canonical subagents, bundles, harness profiles, workflow templates, and evaluation scenarios for software-development work. Copy or install selected skills into another repository so agents have durable guidance for recurring workflows.
 
 Skills are tool-agnostic. A target repository can use them with any agent system that reads skill folders containing `SKILL.md`. Subagents are optional and install only when requested.
 
@@ -14,8 +14,9 @@ Use manual copy when you want exact control over what enters a target repository
 2. Create the target skills directory if it does not exist.
 3. Copy each selected folder from `skills/` into the target skills directory.
 4. Copy `templates/project-AGENTS.md` into the target repository as `AGENTS.md` if the project does not already have one.
-5. Edit the target `AGENTS.md` with project-specific setup, test, lint, build, security, and workflow details.
-6. Validate this library before committing library changes.
+5. Add `templates/project-AGENTS.github.md` or `templates/project-AGENTS.azure-devops.md` only when that delivery platform applies.
+6. Edit the target `AGENTS.md` with project-specific setup, test, lint, build, security, workflow, subagent, and validation details.
+7. Validate this library before committing library changes.
 
 Windows:
 
@@ -155,6 +156,21 @@ bash ./scripts/bootstrap-agent-repo.sh --project-path "$TARGET_REPO" --harness o
 
 Use `-DryRun` or `--dry-run` first when the target already has agent instructions.
 
+## Composing Target Instructions
+
+Start with the base project template:
+
+```text
+templates/project-AGENTS.md
+```
+
+Add platform-specific sections only when needed:
+
+- `templates/project-AGENTS.github.md` for GitHub PR, issue, check, and merge policy.
+- `templates/project-AGENTS.azure-devops.md` for Azure Repos PR, Boards, Pipelines, and completion policy.
+
+Keep reusable skills generic. Store project-specific commands, branch policy, issue policy, reviewers, and merge authority in the target repo `AGENTS.md`.
+
 ## Choosing Skills
 
 Install only skills that match repeated work in the target repository. Too many installed skills can add maintenance overhead and reduce trigger clarity.
@@ -214,6 +230,7 @@ Good target customizations:
 - Installed bundles and local workflow expectations.
 - Subagent rules, installed agent bundles, and permission boundaries.
 - Project-specific validation checklist.
+- Optional GitHub or Azure DevOps delivery add-on sections.
 
 Avoid putting these into reusable skills:
 
@@ -228,8 +245,28 @@ Avoid putting these into reusable skills:
 - Prefer bundles over installing every skill.
 - Install subagents only when independent review or validation is useful.
 - Avoid copying unused references manually.
+- Do not copy eval scenarios into the target repo unless that repo is intentionally maintaining local agent regression tests.
 - Keep target `AGENTS.md` project-specific and keep skills reusable.
 - Remove skills that do not trigger or improve agent behavior.
+
+## Evaluation Scenarios
+
+Use eval scenarios in this repository when agent behavior fails in a repeatable way.
+
+```text
+catalog/evals.tsv
+evals/scenarios/<scenario-id>/scenario.md
+```
+
+Use `workflows/failure-to-eval-loop.md` to convert a failure into a scenario. Keep fixtures small, synthetic, and free of secrets. Scenario validation is dependency-free:
+
+```powershell
+.\scripts\validate-evals.ps1
+```
+
+```bash
+bash ./scripts/validate-evals.sh
+```
 
 ## Validate Before Committing
 
@@ -239,6 +276,7 @@ Windows:
 
 ```powershell
 .\scripts\validate-skills.ps1
+.\scripts\validate-evals.ps1
 .\scripts\score-skills.ps1
 .\scripts\score-agents.ps1
 ```
@@ -247,6 +285,7 @@ Linux:
 
 ```bash
 bash ./scripts/validate-skills.sh
+bash ./scripts/validate-evals.sh
 bash ./scripts/score-skills.sh
 bash ./scripts/score-agents.sh
 ```

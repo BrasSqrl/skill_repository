@@ -13,11 +13,13 @@ Canonical subagents are curated under the same standard. They must provide isola
 - The workflow is tool-agnostic and avoids downstream project assumptions.
 - The `SKILL.md` file stays concise; detailed examples belong in `references/`.
 - Required inputs, quality gates, anti-patterns, and output format are explicit.
+- Action boundaries and stop conditions are explicit when the skill can mutate files, run commands, delegate work, or affect delivery platforms.
 - Windows examples are primary when commands are needed; Linux alternatives are included where useful.
 - `catalog/skills.tsv` is updated with category, maturity, source, license, harness support, import mode, and description.
 - Relevant bundles under `catalog/bundles/` are updated when the skill should be part of an install set.
 - Subagents include explicit permission boundaries and are listed in `catalog/agents.tsv`.
 - Agent bundles under `catalog/agent-bundles/` include only subagents that should be installed together.
+- High-traffic or risky behavior has an eval scenario in `catalog/evals.tsv`, or the omission is intentional.
 
 ## Rejection Criteria
 
@@ -34,9 +36,17 @@ Imported or adapted skills must be MIT-licensed, listed in `THIRD_PARTY_NOTICES.
 
 ## Maturity Levels
 
-- `draft`: usable but newly added or lightly tested.
-- `stable`: validated across several repos or workflows.
-- `retired`: retained for historical tracking but not recommended for installation.
+- `draft`: usable but newly added, lightly tested, or covered only by draft eval scenarios.
+- `stable`: validated across representative repos, workflows, or eval scenarios with documented passing evidence.
+- `retired`: retained for historical tracking but not recommended for installation or new workflows.
+
+## Eval Scenario Rules
+
+- New behavior that closes a repeated failure should include an eval scenario under `evals/scenarios/`.
+- Scenario metadata must be tracked in `catalog/evals.tsv`.
+- New scenarios start as `draft` unless representative passing evidence already exists.
+- Promote a scenario to `validated` only after review notes record a representative pass.
+- Retire scenarios that no longer represent current workflows, but keep enough context to explain why.
 
 ## Bundle Rules
 

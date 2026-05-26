@@ -86,6 +86,7 @@ $results = New-Object System.Collections.Generic.List[object]
 
 foreach ($skillDir in @(Get-ChildItem -LiteralPath $SkillsPath -Directory | Sort-Object Name)) {
     $score = 0
+    $contractPenalty = 0
     $notes = New-Object System.Collections.Generic.List[string]
     $skillFile = Join-Path $skillDir.FullName "SKILL.md"
 
@@ -143,6 +144,20 @@ foreach ($skillDir in @(Get-ChildItem -LiteralPath $SkillsPath -Directory | Sort
         $notes.Add("weak output format")
     }
 
+    if ($content -match "(?m)^## Permitted Actions\s*$") {
+        $score += 4
+    } else {
+        $notes.Add("missing explicit action boundary")
+        $contractPenalty += 4
+    }
+
+    if ($content -match "(?m)^## Stop Condition\s*$") {
+        $score += 4
+    } else {
+        $notes.Add("missing stop condition")
+        $contractPenalty += 4
+    }
+
     $referencesDir = Join-Path $skillDir.FullName "references"
     if (Test-Path -LiteralPath $referencesDir -PathType Container) {
         if ($content -match "references/") {
@@ -183,9 +198,12 @@ foreach ($skillDir in @(Get-ChildItem -LiteralPath $SkillsPath -Directory | Sort
         $notes.Add("missing catalog entry")
     }
 
+    $finalScore = [Math]::Min(100, $score)
+    $finalScore = [Math]::Max(0, $finalScore - $contractPenalty)
+
     $results.Add([pscustomobject]@{
         Skill = $skillDir.Name
-        Score = [Math]::Min(100, $score)
+        Score = $finalScore
         Notes = if ($notes.Count -gt 0) { $notes -join "; " } else { "ok" }
     })
 }

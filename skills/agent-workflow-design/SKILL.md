@@ -7,7 +7,7 @@ description: Design repeatable AI coding-agent workflows, skill sets, handoffs, 
 
 ## Purpose
 
-Create practical workflows that help AI coding agents perform software-development tasks reliably with clear context, boundaries, validation, and handoff points.
+Design repeatable agent workflows as executable operating procedures with triggers, ordered phases, action boundaries, validation gates, transition rules, and handoff checkpoints.
 
 ## When to Use
 
@@ -30,6 +30,12 @@ Create practical workflows that help AI coding agents perform software-developme
 - Expected output format for agents and humans.
 - Windows-first operational commands, with Linux alternatives where useful.
 
+## Permitted Actions
+
+- Inspect existing skills, workflows, subagents, target repo instructions, validation commands, and failure reports.
+- Produce or revise workflow templates, operating modes, handoff formats, and escalation rules.
+- Do not solve the underlying software task unless workflow design itself is the requested deliverable.
+
 ## Workflow
 
 1. Define the recurring task and the failure the workflow must prevent.
@@ -40,6 +46,11 @@ Create practical workflows that help AI coding agents perform software-developme
 6. Remove tool-specific assumptions unless explicitly required.
 7. Test the workflow mentally against a realistic task and tighten ambiguous steps.
 
+## Stop Condition
+
+- Stop successfully when the workflow has trigger, inputs, ordered phases, phase transitions, gates, outputs, continuity, and escalation rules.
+- Stop blocked when ownership, authority, validation, or target environment constraints cannot be inferred safely.
+
 ## Quality Gates
 
 - The workflow has concrete triggers and outputs.
@@ -47,6 +58,7 @@ Create practical workflows that help AI coding agents perform software-developme
 - Handoffs include enough context for another agent to continue.
 - Approval boundaries are explicit.
 - The workflow reduces repeated failure modes without excessive process.
+- The output contract can be executed by another agent without inventing missing state transitions.
 
 ## Anti-Patterns
 

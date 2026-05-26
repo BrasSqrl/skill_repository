@@ -83,3 +83,13 @@ Use only for GitHub pull request, issue, and GitHub Actions delivery work in a t
 - Subagents: `github-pr-reviewer`, `ci-pipeline-reviewer`, `validation-runner`, `release-reviewer`
 - Gate: explicit authority exists for PR creation, issue updates, reviews, auto-merge, or merge
 - Handoff: PR number, issues, reviewers, check state, validation, and exact next action
+
+## Failure To Eval
+
+Use when a real agent failure should become reusable regression coverage.
+
+- Workflow: `failure-to-eval-loop.md`
+- Skills: `context-engineering`, `agent-evaluation`, `prompt-regression-testing`, `skill-review`, `workflow-dry-run`, `handoff-quality-review`
+- Subagents: none by default; add reviewers only when the failed target needs independent review
+- Gate: expected behavior, actual behavior, pass criteria, failure signals, and target metadata are explicit
+- Handoff: scenario id, catalog row, fixture status, validation result, maturity recommendation, and exact next action

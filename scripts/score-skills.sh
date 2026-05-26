@@ -89,6 +89,7 @@ for skill_dir in "${skill_dirs[@]}"; do
   skill_name="$(basename "$skill_dir")"
   skill_file="$skill_dir/SKILL.md"
   score=0
+  contract_penalty=0
   notes=()
 
   if [[ ! -f "$skill_file" ]]; then
@@ -153,6 +154,20 @@ for skill_dir in "${skill_dirs[@]}"; do
     notes+=("weak output format")
   fi
 
+  if grep -Eq '^## Permitted Actions[[:space:]]*$' "$skill_file"; then
+    score=$((score + 4))
+  else
+    notes+=("missing action boundary")
+    contract_penalty=$((contract_penalty + 4))
+  fi
+
+  if grep -Eq '^## Stop Condition[[:space:]]*$' "$skill_file"; then
+    score=$((score + 4))
+  else
+    notes+=("missing stop condition")
+    contract_penalty=$((contract_penalty + 4))
+  fi
+
   if [[ -d "$skill_dir/references" ]]; then
     if grep -q 'references/' "$skill_file"; then
       score=$((score + 8))
@@ -179,6 +194,8 @@ for skill_dir in "${skill_dirs[@]}"; do
   fi
 
   (( score > 100 )) && score=100
+  score=$((score - contract_penalty))
+  (( score < 0 )) && score=0
   [[ "$score" -lt 80 ]] && below=$((below + 1))
   total=$((total + score))
   count=$((count + 1))

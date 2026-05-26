@@ -12,6 +12,7 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Harness profiles define where skills are installed for Codex, Claude Code, and OpenCode.
 - Workflow templates define ordered skill sequences for common work.
 - Operating modes define common ways to combine workflows, skills, subagents, validation, and handoffs.
+- Eval scenarios define repeatable checks for skill, agent, workflow, and bundle behavior.
 - A target repo `AGENTS.md` supplies project-specific commands, architecture notes, and constraints.
 
 ## Recommended Bootstrap Flow
@@ -21,8 +22,10 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 3. Choose a bundle, usually `starter` for a new repo.
 4. Decide whether subagents are useful for the target repo.
 5. Bootstrap the target repo with `templates/project-AGENTS.md`.
-6. Fill in project-specific commands, forbidden changes, and subagent use rules.
-7. Ask the agent to use a workflow template and load only the needed skills.
+6. Add `templates/project-AGENTS.github.md` or `templates/project-AGENTS.azure-devops.md` only when the target repo uses that delivery platform.
+7. Fill in project-specific commands, forbidden changes, and subagent use rules.
+8. Ask the agent to use a workflow template and load only the needed skills.
+9. Add or update an eval scenario when a repeated agent failure exposes a missing gate.
 
 ## Workflow Selection
 
@@ -46,6 +49,7 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Use `workflows/github-pr-lifecycle.md` when authorized to create, update, review, validate, auto-merge, or merge GitHub pull requests.
 - Use `workflows/github-issue-to-pr.md` when turning a GitHub issue into implementation, validation, and a linked PR.
 - Use `workflows/github-actions-response.md` when GitHub Actions, required checks, rulesets, or branch protection block delivery.
+- Use `workflows/failure-to-eval-loop.md` when a real skill, agent, workflow, bundle, installer, or bootstrap failure should become a reusable eval scenario.
 
 ## Skill Combination Rules
 
@@ -53,6 +57,28 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Add one domain skill for the surface being changed.
 - Add verification or review skills at the end of the workflow.
 - Avoid loading every skill by default; broad context reduces precision.
+
+## Phase Transitions
+
+Every workflow template includes `Phase Transitions` so agents can run workflows as state machines instead of loose checklists.
+
+- Start only when the trigger applies and required inputs are available or blockers are recorded.
+- Complete a phase only when its phase output exists or a blocker is documented.
+- Move to the next phase only after reviewing the prior output and satisfying the relevant gate.
+- Stop when the final handoff output is complete and validation gates pass or are explicitly blocked.
+- Retry a failed phase only when new evidence, narrower scope, or approved direction can change the result.
+- Escalate when required inputs, permissions, validation evidence, or approval boundaries are missing or contradictory.
+
+## Evaluation Scenarios
+
+Use eval scenarios to make the agent system improve from failures.
+
+- Store metadata in `catalog/evals.tsv`.
+- Store scenario specs under `evals/scenarios/<scenario-id>/scenario.md`.
+- Keep scenarios small, synthetic, and free of secrets.
+- Write expected behavior and pass criteria before judging an output.
+- Use `draft` for new scenarios, `validated` after representative passing evidence, and `retired` only for historical scenarios.
+- Run `.\scripts\validate-evals.ps1` or `bash ./scripts/validate-evals.sh` before publishing scenario changes.
 
 ## Context Continuity
 
