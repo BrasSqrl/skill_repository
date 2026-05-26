@@ -51,6 +51,8 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] Agent bundle install tested for Claude Code and OpenCode.
 - [ ] Default agent-bundle mapping tested: `backend` -> `backend-review`, `frontend` -> `frontend-review`, and `quality` -> `testing-review`.
 - [ ] New specialist agent bundles tested: `testing-review`, `backend-review`, `data-review`, `ci-review`, `frontend-review`, and `documentation-review`.
+- [ ] Optional Azure DevOps bundle tested with `azure-devops-delivery` and `azure-devops-review`.
+- [ ] Optional GitHub bundle tested with `github-delivery` and `github-review`.
 - [ ] Codex `-IncludeAgents` dry run reports guidance-only behavior.
 - [ ] Existing native agent files are blocked without force mode.
 - [ ] Force mode replaces only files inside the resolved native agent target.
@@ -82,6 +84,8 @@ Use this checklist before publishing or tagging this skill library.
 - [ ] Workflow templates include trigger, ordered skills, phase outputs, validation gates, context continuity, handoff format, and escalation rules.
 - [ ] Workflow continuity checkpoints specify phase, objective, completed work, pending work, files, commands, validation, blockers, risks, next action, and recommended continuation skills or subagents.
 - [ ] Workflow loop templates reference subagents only for discovery, reproduction, review, audit, validation, and strategy.
+- [ ] Azure DevOps workflows keep PR completion, policy bypass, work item transitions, and pipeline mutations behind explicit authorization gates.
+- [ ] GitHub workflows keep PR merge, admin bypass, issue state changes, and workflow mutations behind explicit authorization gates.
 - [ ] Subagent definitions include trigger descriptions, permission boundaries, forbidden actions, output format, and escalation rules.
 
 ## Repository Review

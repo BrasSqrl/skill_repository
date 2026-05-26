@@ -4,6 +4,9 @@ agent-evaluation	agent-orchestration	draft	first-party	MIT	codex,claude-code,ope
 api-backend-development	implementation	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Build or modify backend APIs, services, handlers, jobs, and server-side contracts.
 api-contract-testing	quality	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Verify API contracts, schemas, compatibility, and consumer-provider expectations.
 architecture-review	review	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Review architecture, module boundaries, coupling, data flow, and design tradeoffs.
+azure-boards-work-item-management	delivery	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Create, update, link, and summarize Azure Boards work items for traceable delivery.
+azure-devops-pr-lifecycle	delivery	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Operate Azure DevOps pull requests through guarded git and Azure CLI lifecycle steps.
+azure-pipelines-validation	delivery	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Inspect Azure Pipelines and branch-policy validation for PR and release decisions.
 caveman	conversation	stable	third-party	MIT	codex,claude-code,opencode	not-recorded	not-recorded	not-recorded	imported	Switch to ultra-compressed communication while preserving technical accuracy.
 ci-cd-pipeline-maintenance	delivery	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Maintain CI/CD pipelines, workflows, caches, gates, artifacts, and deployment checks.
 code-review-and-quality	review	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Review software changes for correctness, maintainability, regressions, and delivery risk.
@@ -15,6 +18,9 @@ diagnose	diagnosis	stable	third-party	MIT	codex,claude-code,opencode	not-recorde
 documentation-and-adrs	delivery	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Create or update developer documentation and architecture decision records.
 error-message-triage	diagnosis	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Classify noisy compiler, test, install, linter, type-check, and runtime errors.
 frontend-ui-development	implementation	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Build or modify frontend UI, components, state, styling, accessibility, and interactions.
+github-actions-validation	delivery	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Inspect GitHub Actions, pull-request checks, and branch protection for delivery decisions.
+github-issues-management	delivery	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Create, update, link, and summarize GitHub issues for traceable delivery.
+github-pr-lifecycle	delivery	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Operate GitHub pull requests through guarded git and GitHub CLI lifecycle steps.
 grill-me	conversation	stable	third-party	MIT	codex,claude-code,opencode	not-recorded	not-recorded	not-recorded	imported	Stress-test a plan or design by interviewing through one decision at a time.
 grill-with-docs	conversation	stable	third-party	MIT	codex,claude-code,opencode	not-recorded	not-recorded	not-recorded	imported	Stress-test a plan against repository language and durable decision records.
 handoff	delivery	stable	third-party	MIT	codex,claude-code,opencode	not-recorded	not-recorded	not-recorded	imported	Create a compact handoff document for another agent or future session.

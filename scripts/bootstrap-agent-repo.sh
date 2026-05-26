@@ -94,6 +94,8 @@ default_agent_bundle() {
     quality) printf 'testing-review' ;;
     security) printf 'security-review' ;;
     delivery) printf 'delivery-review' ;;
+    azure-devops-delivery) printf 'azure-devops-review' ;;
+    github-delivery) printf 'github-review' ;;
     agent-orchestration|all-software-dev) printf 'all-agents' ;;
     *) printf 'starter-review' ;;
   esac

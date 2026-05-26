@@ -6,4 +6,6 @@ quality	Quality Engineering	Testing, review, and verification workflows	Install 
 delivery	Delivery	PR, release, CI/CD, documentation, and handoff workflows	Install for team delivery and release work.
 security	Security	Security review, dependency, access, and risky-change workflows	Install for security-sensitive repos.
 agent-orchestration	Agent Orchestration	Agent workflow, evaluation, handoff, and skill quality workflows	Install when coordinating AI agents.
-all-software-dev	All Software Development	Complete software-development skill set from this repository	Install only when broad coverage is preferred.
+azure-devops-delivery	Azure DevOps Delivery	Azure Repos PR, Azure Boards, and Azure Pipelines delivery workflows	Install only for repos using Azure DevOps as the delivery platform.
+github-delivery	GitHub Delivery	GitHub PR, issue, and GitHub Actions delivery workflows	Install only for repos using GitHub as the delivery platform.
+all-software-dev	All Software Development	Complete core software-development skill set from this repository	Install only when broad non-platform-specific coverage is preferred.

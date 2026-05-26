@@ -11,6 +11,7 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Bundles define installable groups of skills for common repo types.
 - Harness profiles define where skills are installed for Codex, Claude Code, and OpenCode.
 - Workflow templates define ordered skill sequences for common work.
+- Operating modes define common ways to combine workflows, skills, subagents, validation, and handoffs.
 - A target repo `AGENTS.md` supplies project-specific commands, architecture notes, and constraints.
 
 ## Recommended Bootstrap Flow
@@ -39,6 +40,12 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Use `workflows/release-gate-loop.md` before publish, tag, deploy, or release handoff.
 - Use `workflows/model-methodology-documentation.md` to draft evidence-backed model methodology or technical model documentation from an extracted `llm_documentation_package/`.
 - Use `workflows/agent-skill-quality-loop.md` when adding or revising skills, subagents, bundles, or workflow templates.
+- Use `workflows/azure-devops-pr-lifecycle.md` when authorized to create, update, validate, auto-complete, or complete Azure Repos pull requests.
+- Use `workflows/azure-devops-work-item-to-pr.md` when turning an Azure Boards work item into implementation, validation, and a linked PR.
+- Use `workflows/azure-devops-pipeline-response.md` when Azure Pipelines or Azure Repos branch-policy validation blocks delivery.
+- Use `workflows/github-pr-lifecycle.md` when authorized to create, update, review, validate, auto-merge, or merge GitHub pull requests.
+- Use `workflows/github-issue-to-pr.md` when turning a GitHub issue into implementation, validation, and a linked PR.
+- Use `workflows/github-actions-response.md` when GitHub Actions, required checks, rulesets, or branch protection block delivery.
 
 ## Skill Combination Rules
 
@@ -75,10 +82,34 @@ Use subagents at phase boundaries where isolated context or independent review r
 - Use `database-migration-reviewer` when migrations, indexes, backfills, destructive operations, or deploy ordering are involved.
 - Use `frontend-accessibility-reviewer` when UI changes affect keyboard flow, semantics, focus, contrast, responsiveness, or screen-reader behavior.
 - Use `documentation-reviewer` when docs, ADRs, examples, setup commands, or release notes may drift from source behavior.
+- Use `azure-devops-pr-reviewer` when Azure Repos PR metadata, linked work items, branch policies, reviewer state, comments, or CI status need independent read-only review.
+- Use `github-pr-reviewer` when GitHub PR metadata, linked issues, branch protection, reviewer state, comments, or GitHub Actions status need independent read-only review.
 
 Do not use subagents for small local edits, tightly coupled implementation loops, or tasks where a handoff would add more cost than clarity.
 
 See [subagent-orchestration-guide.md](subagent-orchestration-guide.md) for permission boundaries, handoff format, and harness-specific behavior.
+
+## Azure DevOps Delivery
+
+Azure DevOps support is optional. Use the `azure-devops-delivery` bundle only in target repos that use Azure Repos, Azure Boards, or Azure Pipelines.
+
+- Azure DevOps is the delivery platform, not the agent harness.
+- Target repo instructions must provide organization, project, repository, branch, reviewer, work item, pipeline, and completion rules.
+- Agents may create or update PRs and work items only when the user asks or target repo instructions authorize it.
+- Agents may complete or auto-complete PRs only after local validation and required Azure policies pass.
+- Do not use policy bypass, mutate pipeline secrets, or change work item state without explicit authorization.
+
+## GitHub Delivery
+
+GitHub support is optional. Use the `github-delivery` bundle only in target repos that use GitHub pull requests, issues, or GitHub Actions.
+
+- GitHub is the delivery platform, not the agent harness.
+- Target repo instructions must provide owner/repository, branch, reviewer, issue, project, required-check, ruleset, and merge rules.
+- Agents may create or update PRs and issues only when the user asks or target repo instructions authorize it.
+- Agents may merge or enable auto-merge only after local validation and required GitHub checks pass.
+- Do not use admin bypass, force operations, mutate workflow secrets, or change issue state without explicit authorization.
+
+Use [operating-modes.md](operating-modes.md) to choose between solo implementation, review-and-validate, multi-agent investigation, release gate, documentation drafting, Azure DevOps PR delivery, and GitHub PR delivery modes.
 
 ## Handoff Rules
 

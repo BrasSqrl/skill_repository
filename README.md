@@ -83,6 +83,18 @@ Install an explicit subagent bundle:
 .\scripts\install-skills.ps1 -Harness opencode -Bundle security -IncludeAgents -AgentBundle security-review
 ```
 
+Install Azure DevOps delivery support:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle azure-devops-delivery -IncludeAgents -AgentBundle azure-devops-review
+```
+
+Install GitHub delivery support:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle github-delivery -IncludeAgents -AgentBundle github-review
+```
+
 Install explicit subagents:
 
 ```powershell
@@ -168,7 +180,9 @@ Subagents are opt-in. Claude Code and OpenCode receive native Markdown agent fil
 | `delivery` | PR, release, CI/CD, documentation, and handoff workflows. |
 | `security` | Security review, dependency, access, and risky-change workflows. |
 | `agent-orchestration` | Agent workflow, evaluation, handoff, and skill quality workflows. |
-| `all-software-dev` | Complete software-development skill set from this repository. |
+| `azure-devops-delivery` | Optional Azure Repos PR, Azure Boards, and Azure Pipelines delivery workflows. |
+| `github-delivery` | Optional GitHub PR, issue, and GitHub Actions delivery workflows. |
+| `all-software-dev` | Complete core software-development skill set from this repository, excluding optional delivery-platform adapters. |
 
 Bundle membership is stored in `catalog/bundles/*.txt`.
 
@@ -186,6 +200,8 @@ Bundle membership is stored in `catalog/bundles/*.txt`.
 | `ci-review` | CI pipeline, dependency, validation, and release readiness agents. |
 | `frontend-review` | Frontend accessibility, code quality, and validation agents. |
 | `documentation-review` | Documentation drift and release handoff review agents. |
+| `azure-devops-review` | Azure Repos PR, work item traceability, policy, validation, and release readiness review agents. |
+| `github-review` | GitHub PR, issue traceability, checks, validation, and release readiness review agents. |
 | `all-agents` | Complete subagent set from this repository. |
 
 Agent bundle membership is stored in `catalog/agent-bundles/*.txt`.
@@ -201,6 +217,8 @@ Default `-IncludeAgents` mappings:
 | `delivery` | `delivery-review` |
 | `security` | `security-review` |
 | `agent-orchestration` | `all-agents` |
+| `azure-devops-delivery` | `azure-devops-review` |
+| `github-delivery` | `github-review` |
 | `all-software-dev` | `all-agents` |
 
 ## Subagent Catalog
@@ -213,6 +231,8 @@ Default `-IncludeAgents` mappings:
 | `architecture-reviewer` | read-only | Review architecture, module boundaries, coupling, data flow, dependency direction, scalability constraints, and tradeoffs. |
 | `validation-runner` | validation-only | Run or review tests, lint, build, type checks, and targeted verification commands. |
 | `release-reviewer` | read-only | Review release readiness, validation evidence, changelog, versioning, migrations, rollback notes, docs, and known risks. |
+| `azure-devops-pr-reviewer` | read-only | Review Azure Repos PR metadata, linked work items, branch policies, reviewer state, comments, and CI status. |
+| `github-pr-reviewer` | read-only | Review GitHub PR metadata, linked issues, branch protection, reviewer state, comments, and GitHub Actions status. |
 | `bug-reproducer` | validation-only | Isolate failing behavior and return minimal reproduction commands and evidence. |
 | `test-strategist` | read-only | Propose the smallest useful test plan for a feature, fix, refactor, or risky change. |
 | `dependency-auditor` | read-only | Inspect manifests, lockfiles, runtime versions, upgrade risk, and environment drift. |
@@ -242,6 +262,12 @@ The canonical machine-readable subagent catalog is `catalog/agents.tsv`.
 | `release-gate-loop.md` | Running a release gate across validation, CI, docs, security, and release readiness. |
 | `model-methodology-documentation.md` | Draft evidence-backed model methodology or technical model documentation from an extracted `llm_documentation_package/`. |
 | `agent-skill-quality-loop.md` | Reviewing skills, subagents, bundles, and workflow templates for publication. |
+| `azure-devops-pr-lifecycle.md` | Creating, updating, submitting, validating, auto-completing, or completing Azure Repos PRs. |
+| `azure-devops-work-item-to-pr.md` | Turning Azure Boards work items into branch work, implementation, validation, and linked PRs. |
+| `azure-devops-pipeline-response.md` | Diagnosing failed Azure Pipelines or Azure Repos branch-policy validation. |
+| `github-pr-lifecycle.md` | Creating, updating, reviewing, submitting, validating, enabling auto-merge, or merging GitHub PRs. |
+| `github-issue-to-pr.md` | Turning GitHub issues into branch work, implementation, validation, and linked PRs. |
+| `github-actions-response.md` | Diagnosing failed GitHub Actions, required checks, rulesets, or branch protection. |
 
 Every workflow includes a `Context Continuity` section. For long-running work, agents should create a handoff checkpoint before phase changes, major validation output, large edits, or context pressure, then use `handoff-quality-review` before transferring work when available.
 
@@ -298,6 +324,8 @@ Add domain bundles when those workflows repeat:
 - `frontend` for UI-heavy repos.
 - `quality` for test strategy, prompt regression, and review workflows.
 - `agent-orchestration` for multi-agent handoffs, evaluations, and workflow design.
+- `azure-devops-delivery` only for repos using Azure DevOps as the delivery platform.
+- `github-delivery` only for repos using GitHub as the delivery platform.
 
 ## Skill Catalog
 
@@ -316,6 +344,9 @@ Add domain bundles when those workflows repeat:
 | `caveman` | conversation | Switch to ultra-compressed communication while preserving technical accuracy. | Use when the user asks for terse updates or fewer tokens. |
 | `grill-me` | conversation | Stress-test a plan or design through focused questions. | Use when the user wants to be grilled on a plan. |
 | `grill-with-docs` | conversation | Stress-test a plan against repository language and durable docs. | Use when terminology, context docs, or ADRs matter to a design. |
+| `azure-boards-work-item-management` | delivery | Create, update, link, and summarize Azure Boards work items for traceable delivery. | Use when authorized to manage Azure Boards items from plans, bugs, PRs, or review findings. |
+| `azure-devops-pr-lifecycle` | delivery | Operate Azure DevOps pull requests through guarded git and Azure CLI lifecycle steps. | Use when explicitly authorized to create, update, submit, auto-complete, or complete Azure Repos PRs. |
+| `azure-pipelines-validation` | delivery | Inspect Azure Pipelines and branch-policy validation for PR and release decisions. | Use when Azure DevOps CI or branch policies block PR completion or release handoff. |
 | `ci-cd-pipeline-maintenance` | delivery | Maintain CI/CD workflows, caches, gates, artifacts, and deployment checks. | Use when pipeline behavior, automation, or release gates change. |
 | `documentation-and-adrs` | delivery | Create or update developer documentation and architecture decision records. | Use for guides, runbooks, ADRs, setup notes, or durable technical decisions. |
 | `handoff` | delivery | Create a compact continuation document for another agent or future session. | Use when context is about to be lost or work should transfer cleanly. |
@@ -330,6 +361,9 @@ Add domain bundles when those workflows repeat:
 | `api-backend-development` | implementation | Build or modify backend APIs, services, handlers, jobs, and server-side contracts. | Use for request handling, validation, auth hooks, service logic, jobs, and backend integrations. |
 | `database-data-workflow-development` | implementation | Develop schema, migration, query, seed, ETL, reporting, and data workflow changes. | Use when modifying data models, migrations, indexes, fixtures, analytics queries, or data integrity checks. |
 | `frontend-ui-development` | implementation | Build or modify frontend UI, components, state flows, styling, accessibility, and interactions. | Use for screens, components, forms, client state, responsive layout, and UI tests. |
+| `github-actions-validation` | delivery | Inspect GitHub Actions, pull-request checks, and branch protection for delivery decisions. | Use when GitHub checks, workflows, rulesets, or branch protection block PR merge or release handoff. |
+| `github-issues-management` | delivery | Create, update, link, and summarize GitHub issues for traceable delivery. | Use when authorized to manage GitHub issues from plans, bugs, PRs, or review findings. |
+| `github-pr-lifecycle` | delivery | Operate GitHub pull requests through guarded git and GitHub CLI lifecycle steps. | Use when explicitly authorized to create, update, review, submit, auto-merge, or merge GitHub PRs. |
 | `incremental-implementation` | implementation | Implement changes in small, validated slices while preserving behavior. | Use when applying a scoped feature, bug fix, or maintenance change. |
 | `prototype` | implementation | Build a throwaway prototype to answer a design, state, workflow, or UI question. | Use when a quick prototype can validate an idea before production implementation. |
 | `refactoring` | implementation | Improve internal structure while preserving externally observable behavior. | Use when simplifying, reorganizing, decoupling, extracting, or consolidating code. |
@@ -379,6 +413,9 @@ bash ./scripts/score-agents.sh
 - [Linux setup](docs/linux-setup.md)
 - [Using with Codex, Claude Code, OpenCode, or another agent](docs/using-with-codex.md)
 - [Orchestration guide](docs/orchestration-guide.md)
+- [Operating modes](docs/operating-modes.md)
+- [Azure DevOps guide](docs/azure-devops-guide.md)
+- [GitHub guide](docs/github-guide.md)
 - [Subagent orchestration guide](docs/subagent-orchestration-guide.md)
 - [Skill authoring guide](docs/skill-authoring-guide.md)
 - [Skill quality rubric](docs/skill-quality-rubric.md)

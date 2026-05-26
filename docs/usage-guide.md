@@ -83,6 +83,18 @@ Install explicit subagents:
 .\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents -Agents code-reviewer,validation-runner
 ```
 
+Install optional Azure DevOps delivery support:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle azure-devops-delivery -IncludeAgents -AgentBundle azure-devops-review
+```
+
+Install optional GitHub delivery support:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle github-delivery -IncludeAgents -AgentBundle github-review
+```
+
 Install selected skills:
 
 ```powershell
@@ -161,6 +173,8 @@ Add bundles by repo shape:
 - `delivery` for PR, CI/CD, documentation, release, and handoff work.
 - `security` for auth, permissions, secrets, dependencies, and risk review.
 - `agent-orchestration` for multi-agent workflows, evaluation, and handoff quality.
+- `azure-devops-delivery` only for target repos that use Azure Repos, Azure Boards, or Azure Pipelines.
+- `github-delivery` only for target repos that use GitHub pull requests, issues, or GitHub Actions.
 
 Recommended first subagent set:
 

@@ -1,0 +1,10 @@
+azure-devops-pr-lifecycle
+azure-boards-work-item-management
+azure-pipelines-validation
+pull-request-prep
+ci-cd-pipeline-maintenance
+release-readiness
+to-issues
+triage
+handoff
+handoff-quality-review

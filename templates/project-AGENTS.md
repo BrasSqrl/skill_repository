@@ -87,6 +87,37 @@ Linux:
 - `<agent bundle or subagent name>`: `<when subagents should be used in this repo>`
 - Installed skill record: `docs/agents/installed-skills.md`
 
+## Azure DevOps Delivery
+
+- Organization URL: `<Azure DevOps organization URL, or "not used">`
+- Project: `<Azure DevOps project name>`
+- Repository: `<Azure Repos repository name>`
+- Default target branch: `<main branch>`
+- Branch naming: `<branch prefix and work item convention>`
+- PR authority: `<review only, create/update, vote, auto-complete, complete>`
+- Work item process: `<Basic, Agile, Scrum, CMMI, or custom>`
+- Allowed work item changes: `<types, fields, and state transitions agents may update>`
+- Reviewer policy: `<required reviewers, groups, or approval rules>`
+- Pipeline validation: `<required Azure Pipelines or branch-policy checks>`
+- Completion rules: `<merge strategy, source branch deletion, work item transition, auto-complete rules>`
+
+Agents may use Azure DevOps PR or work item skills only when this section authorizes the action or the user explicitly asks for that action. Agents must not use policy bypass, mutate pipeline secrets, or complete PRs with failed, pending, or unknown required policies unless a human explicitly authorizes the exact exception.
+
+## GitHub Delivery
+
+- Host: `<github.com, GitHub Enterprise host, or "not used">`
+- Repository: `<owner>/<repo>`
+- Default target branch: `<main branch>`
+- Branch naming: `<branch prefix and issue convention>`
+- PR authority: `<review only, create/update, comment, review, approve, request changes, auto-merge, merge>`
+- Issue conventions: `<labels, milestones, projects, templates, and closing rules>`
+- Allowed issue changes: `<fields and state changes agents may update>`
+- Reviewer policy: `<required reviewers, teams, CODEOWNERS, or approval rules>`
+- Check validation: `<required GitHub Actions, status checks, rulesets, or branch protection>`
+- Merge rules: `<merge method, source branch deletion, auto-merge, issue closing rules>`
+
+Agents may use GitHub PR or issue skills only when this section authorizes the action or the user explicitly asks for that action. Agents must not use admin bypass, force operations, mutate workflow secrets, or merge PRs with failed, pending, cancelled, or unknown required checks unless a human explicitly authorizes the exact exception.
+
 ## Subagent Use
 
 Use subagents when isolated context or independent review reduces risk:

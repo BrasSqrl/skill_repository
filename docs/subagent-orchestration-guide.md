@@ -91,6 +91,8 @@ Codex currently uses portable guidance in this repository because no confirmed n
 - Use `database-migration-reviewer` for migrations, indexes, backfills, destructive data operations, rollback, and deploy ordering.
 - Use `frontend-accessibility-reviewer` for UI changes that affect keyboard navigation, semantics, focus, contrast, responsiveness, or screen-reader behavior.
 - Use `documentation-reviewer` for README, docs, ADRs, examples, setup commands, usage guides, and release notes.
+- Use `azure-devops-pr-reviewer` for Azure Repos PR metadata, linked work items, reviewer state, comments, branch policies, and CI status.
+- Use `github-pr-reviewer` for GitHub PR metadata, linked issues, reviewer state, comments, branch protection, and GitHub Actions status.
 
 ## Agent Bundle Selection
 
@@ -101,6 +103,8 @@ Codex currently uses portable guidance in this repository because no confirmed n
 - Use `ci-review` for CI failures, pipeline edits, dependency delivery risk, and release gate automation.
 - Use `frontend-review` for user-facing UI and interaction changes.
 - Use `documentation-review` for documentation-heavy changes and release notes.
+- Use `azure-devops-review` for Azure DevOps PR delivery workflows that need PR metadata, work item traceability, pipeline policy review, and release readiness.
+- Use `github-review` for GitHub PR delivery workflows that need PR metadata, issue traceability, Actions checks, branch protection review, and release readiness.
 - Use `all-agents` only when broad subagent coverage is more useful than a concise harness suggestion list.
 
 ## Chaining Pattern

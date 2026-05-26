@@ -106,6 +106,20 @@ Install an explicit subagent bundle:
 .\scripts\install-skills.ps1 -Harness claude-code -Bundle starter -IncludeAgents -AgentBundle all-agents -DryRun
 ```
 
+Install optional Azure DevOps delivery support:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle azure-devops-delivery -IncludeAgents -AgentBundle azure-devops-review -DryRun
+.\scripts\install-skills.ps1 -Harness opencode -Bundle azure-devops-delivery -IncludeAgents -AgentBundle azure-devops-review
+```
+
+Install optional GitHub delivery support:
+
+```powershell
+.\scripts\install-skills.ps1 -Harness opencode -Bundle github-delivery -IncludeAgents -AgentBundle github-review -DryRun
+.\scripts\install-skills.ps1 -Harness opencode -Bundle github-delivery -IncludeAgents -AgentBundle github-review
+```
+
 Install selected subagents:
 
 ```powershell

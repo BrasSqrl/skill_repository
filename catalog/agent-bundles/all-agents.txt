@@ -4,6 +4,7 @@ security-reviewer
 architecture-reviewer
 validation-runner
 release-reviewer
+azure-devops-pr-reviewer
 bug-reproducer
 test-strategist
 dependency-auditor
@@ -12,3 +13,4 @@ api-contract-reviewer
 database-migration-reviewer
 frontend-accessibility-reviewer
 documentation-reviewer
+github-pr-reviewer

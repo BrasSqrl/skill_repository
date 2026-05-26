@@ -98,6 +98,20 @@ bash ./scripts/install-skills.sh --harness opencode --bundle security --include-
 bash ./scripts/install-skills.sh --harness claude-code --bundle starter --include-agents --agent-bundle all-agents --dry-run
 ```
 
+Install optional Azure DevOps delivery support:
+
+```bash
+bash ./scripts/install-skills.sh --harness opencode --bundle azure-devops-delivery --include-agents --agent-bundle azure-devops-review --dry-run
+bash ./scripts/install-skills.sh --harness opencode --bundle azure-devops-delivery --include-agents --agent-bundle azure-devops-review
+```
+
+Install optional GitHub delivery support:
+
+```bash
+bash ./scripts/install-skills.sh --harness opencode --bundle github-delivery --include-agents --agent-bundle github-review --dry-run
+bash ./scripts/install-skills.sh --harness opencode --bundle github-delivery --include-agents --agent-bundle github-review
+```
+
 Install selected subagents:
 
 ```bash

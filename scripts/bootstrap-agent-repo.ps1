@@ -142,6 +142,8 @@ function Get-DefaultAgentBundle {
         "quality" { return "testing-review" }
         "security" { return "security-review" }
         "delivery" { return "delivery-review" }
+        "azure-devops-delivery" { return "azure-devops-review" }
+        "github-delivery" { return "github-review" }
         { $_ -in @("agent-orchestration", "all-software-dev") } { return "all-agents" }
         default { return "starter-review" }
     }

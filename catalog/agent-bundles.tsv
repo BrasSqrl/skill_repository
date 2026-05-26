@@ -9,4 +9,6 @@ data-review	Data Review	Database migration, validation, and release readiness ag
 ci-review	CI Review	CI pipeline, dependency, validation, and release readiness agents	Install for pipeline failures, workflow edits, or dependency-related delivery risk.
 frontend-review	Frontend Review	Frontend accessibility, code quality, and validation agents	Install for user-facing UI and interaction changes.
 documentation-review	Documentation Review	Documentation drift and release handoff review agents	Install for documentation-heavy changes and release note checks.
+azure-devops-review	Azure DevOps Review	Azure Repos PR, work item traceability, policy, validation, and release readiness review agents	Install for repositories using Azure DevOps PR delivery workflows.
+github-review	GitHub Review	GitHub PR, issue traceability, checks, validation, and release readiness review agents	Install for repositories using GitHub PR delivery workflows.
 all-agents	All Agents	Complete subagent set from this repository	Install when broad subagent coverage is preferred.
