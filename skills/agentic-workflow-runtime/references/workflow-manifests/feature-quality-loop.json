@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "feature-quality-loop",
+  "name": "Feature Quality Loop",
+  "description": "Implement a scoped feature through source analysis, test strategy, implementation, validation, review, and handoff.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Do not broaden product behavior without user direction.", "Do not perform external mutations without separate authorization."],
+  "phases": [
+    {"id":"source-context","name":"Source context","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Inspect authoritative source and state acceptance criteria before planning.","output":"Source-backed requirements and acceptance criteria.","required_evidence":["source-files","acceptance-criteria"],"retry_limit":2},
+    {"id":"implementation-plan","name":"Implementation plan","owner":{"type":"skill","name":"planning-and-task-breakdown"},"permission":"read-only","instructions":"Create small, ordered implementation slices with explicit validation targets.","output":"A scoped implementation plan.","required_evidence":["plan","validation-targets"],"retry_limit":2},
+    {"id":"test-strategy","name":"Test strategy","owner":{"type":"subagent","name":"test-strategist"},"permission":"read-only","instructions":"Independently propose the smallest useful behavioral test strategy.","output":"Focused test strategy.","required_evidence":["test-strategy"],"retry_limit":1},
+    {"id":"implementation","name":"Implementation","owner":{"type":"main-agent","name":"incremental-implementation"},"permission":"workspace-write","instructions":"Implement the approved slices and tests while preserving unrelated work.","output":"Scoped code and test changes.","required_evidence":["files-touched","implementation-summary"],"retry_limit":2},
+    {"id":"validation","name":"Independent validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run or inspect focused validation and capture commands, exit codes, and results.","output":"Independent validation evidence.","required_evidence":["validation-command","validation-exit-code","validation-result"],"retry_limit":2},
+    {"id":"review","name":"Independent review","owner":{"type":"subagent","name":"code-reviewer"},"permission":"read-only","instructions":"Review the concrete diff and identify evidence-based findings.","output":"Review findings and their disposition.","required_evidence":["review-findings","finding-disposition"],"retry_limit":2},
+    {"id":"handoff","name":"Review-ready handoff","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Summarize scope, validation, findings, risks, and the exact next action.","output":"Review-ready change package.","required_evidence":["change-summary","risk-summary","next-action"],"retry_limit":1}
+  ]
+}

@@ -11,6 +11,8 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 - Bundles define installable groups of skills for common repo types.
 - Harness profiles define where skills are installed for Codex, Claude Code, and OpenCode.
 - Workflow templates define ordered skill sequences for common work.
+- Workflow manifests define executable phase ownership, permissions, evidence gates, retry limits, and approval boundaries.
+- The agentic workflow runtime persists run state and enforces manifest transitions.
 - Operating modes define common ways to combine workflows, skills, subagents, validation, and handoffs.
 - Eval scenarios define repeatable checks for skill, agent, workflow, and bundle behavior.
 - A target repo `AGENTS.md` supplies project-specific commands, architecture notes, and constraints.
@@ -28,6 +30,8 @@ This guide explains how to combine skills, bundles, workflow templates, and targ
 9. Add or update an eval scenario when a repeated agent failure exposes a missing gate.
 
 ## Workflow Selection
+
+Use `scripts/run-agent-workflow.ps1 -Action Select -Task "<task>"` to rank executable workflows, then confirm that the result matches the request and target-repository rules. Start the run with `-Action Start` and use the displayed phase contract as the only active work unit. See [agentic-workflow-guide.md](agentic-workflow-guide.md) for the complete operating procedure.
 
 - Use `workflows/feature-development.md` for scoped implementation.
 - Use `workflows/bug-diagnosis.md` for failures and regressions.

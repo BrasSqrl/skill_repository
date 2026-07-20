@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "release-prep",
+  "name": "Release Preparation",
+  "description": "Prepare a release candidate with source context, readiness, dependency, CI, documentation, and handoff evidence.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Do not publish, deploy, or tag without explicit authorization.", "Escalate missing rollback or required validation."],
+  "phases": [
+    {"id":"context","name":"Release context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Identify release scope, target, rules, commands, and current evidence.","output":"Release context.","required_evidence":["release-scope","release-target"],"retry_limit":2},
+    {"id":"readiness","name":"Readiness assessment","owner":{"type":"skill","name":"release-readiness"},"permission":"read-only","instructions":"Assess compatibility, migrations, versioning, changelog, rollback, and known risk.","output":"Readiness findings.","required_evidence":["readiness-findings","rollback-plan"],"retry_limit":2},
+    {"id":"dependencies","name":"Dependency review","owner":{"type":"skill","name":"dependency-environment-management"},"permission":"read-only","instructions":"Check lockfiles, runtime pins, and dependency drift.","output":"Dependency disposition.","required_evidence":["dependency-findings"],"retry_limit":1},
+    {"id":"ci","name":"Delivery validation","owner":{"type":"skill","name":"ci-cd-pipeline-maintenance"},"permission":"validation-only","instructions":"Run or inspect required validation and delivery gates.","output":"CI and validation evidence.","required_evidence":["validation-command","validation-exit-code","validation-result"],"retry_limit":2},
+    {"id":"documentation","name":"Release documentation","owner":{"type":"skill","name":"documentation-and-adrs"},"permission":"workspace-write","instructions":"Update required release notes, usage docs, or migration guidance.","output":"Aligned release documentation.","required_evidence":["documentation-disposition"],"retry_limit":1},
+    {"id":"handoff","name":"Release handoff","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Prepare the release decision record without performing the release.","output":"Release-ready handoff.","required_evidence":["risk-summary","release-recommendation","next-action"],"retry_limit":1}
+  ]
+}

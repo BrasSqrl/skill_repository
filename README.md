@@ -38,9 +38,17 @@ The repository is Windows-first and Linux-second. PowerShell examples are primar
 
 6. Copy or adapt `templates/project-AGENTS.md` into the target repo as `AGENTS.md`. Add `templates/project-AGENTS.github.md` or `templates/project-AGENTS.azure-devops.md` only when that platform is used.
 
-7. Run a workflow from `workflows/` by telling the agent which workflow to follow.
+7. Select and start a durable workflow run:
 
-8. Add an eval scenario when a repeated agent failure exposes a missing gate, unsafe action, or unclear instruction.
+```powershell
+.\scripts\run-agent-workflow.ps1 -Action Select -Task "Implement a tested feature"
+$TargetRepo = "<target-repo>"
+.\scripts\run-agent-workflow.ps1 -Action Start -Workflow feature-quality-loop -Objective "Implement the requested feature" -ProjectPath $TargetRepo
+```
+
+8. Follow the displayed phase contract, record required evidence, and advance through the runner.
+
+9. Add an eval scenario when a repeated agent failure exposes a missing gate, unsafe action, or unclear instruction.
 
 Use the Windows guided installer when users prefer menus:
 
@@ -212,7 +220,7 @@ Practical flow for a new machine:
 
 | Bundle | Purpose |
 | --- | --- |
-| `starter` | Baseline skills for a new software repository. |
+| `starter` | Baseline source-grounded skills plus the gated workflow runtime for a new software repository. |
 | `backend` | Backend, API, data, observability, and performance workflows. |
 | `frontend` | Frontend UI, client behavior, and browser-facing delivery workflows. |
 | `quality` | Testing, review, verification, and skill quality workflows. |
@@ -311,6 +319,8 @@ The canonical machine-readable subagent catalog is `catalog/agents.tsv`.
 
 Every workflow includes `Phase Transitions` and `Context Continuity`. Agents should move between phases only after the prior phase output and gate are satisfied, and should create a handoff checkpoint before phase changes, major validation output, large edits, or context pressure.
 
+Every workflow also has a machine-readable manifest under `skills/agentic-workflow-runtime/references/workflow-manifests/`. Use `scripts/run-agent-workflow.ps1` to select a workflow, persist its current phase, enforce evidence gates and retry limits, pause for input, resume, and generate a durable handoff. See [Agentic workflow guide](docs/agentic-workflow-guide.md).
+
 ## Evaluation Scenarios
 
 Evaluation scenarios are lightweight, dependency-free checks for skill, agent, workflow, and bundle behavior.
@@ -320,7 +330,7 @@ evals/scenarios/<scenario-id>/scenario.md
 catalog/evals.tsv
 ```
 
-Use evals to turn repeated agent failures into regression coverage. The first scenario set covers handoff continuity, workflow dry runs, PR preparation, debugging, skill review, GitHub PR lifecycle safety, and Azure DevOps PR lifecycle safety.
+Use evals to turn repeated agent failures into regression coverage. The scenario set covers handoff continuity, workflow dry runs, PR preparation, debugging, skill review, delivery lifecycle safety, executable transition gates, and workflow resume behavior.
 
 ## Folder Structure
 
@@ -333,6 +343,7 @@ Use evals to turn repeated agent failures into regression coverage. The first sc
 |-- agents/
 |-- catalog/
 |   |-- skills.tsv
+|   |-- workflows.tsv
 |   |-- bundles.tsv
 |   |-- agents.tsv
 |   |-- agent-bundles.tsv
@@ -353,6 +364,9 @@ Use evals to turn repeated agent failures into regression coverage. The first sc
 |   |-- score-skills.sh
 |   |-- score-agents.ps1
 |   |-- score-agents.sh
+|   |-- run-agent-workflow.ps1
+|   |-- run-agent-workflow.sh
+|   |-- test-workflow-runner.ps1
 |   |-- validate-evals.ps1
 |   |-- validate-evals.sh
 |   |-- validate-skills.ps1
@@ -391,6 +405,7 @@ Add domain bundles when those workflows repeat:
 | Skill | Category | Purpose | When To Use |
 | --- | --- | --- | --- |
 | `agent-workflow-design` | agent-orchestration | Design repeatable AI coding-agent workflows, handoffs, validation loops, and skill sets. | Use when improving agent operating procedures or recurring AI-assisted development flows. |
+| `agentic-workflow-runtime` | agent-orchestration | Select and execute durable, gated workflow state machines. | Use for multi-phase work that needs evidence gates, retry limits, permission boundaries, escalation, or resumable handoffs. |
 | `agent-evaluation` | agent-orchestration | Evaluate AI coding-agent behavior against repeatable tasks, rubrics, artifacts, and validation gates. | Use when comparing agents, skills, prompts, or orchestration patterns. |
 | `handoff-quality-review` | agent-orchestration | Review handoff artifacts for continuity, validation evidence, and restart readiness. | Use before another agent resumes work or after context compaction. |
 | `prompt-regression-testing` | agent-orchestration | Test prompt, skill, and agent behavior against repeatable fixtures. | Use when changing prompts, skills, workflows, or agent instructions. |
@@ -483,6 +498,8 @@ bash ./scripts/validate-evals.sh
 - [Linux setup](docs/linux-setup.md)
 - [Using with Codex, Claude Code, OpenCode, or another agent](docs/using-with-codex.md)
 - [Orchestration guide](docs/orchestration-guide.md)
+- [Agentic work operating model](docs/agentic-work-operating-model.md)
+- [Agentic workflow guide](docs/agentic-workflow-guide.md)
 - [Operating modes](docs/operating-modes.md)
 - [Azure DevOps guide](docs/azure-devops-guide.md)
 - [GitHub guide](docs/github-guide.md)

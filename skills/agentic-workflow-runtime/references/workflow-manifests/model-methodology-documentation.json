@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "model-methodology-documentation",
+  "name": "Model Methodology Documentation",
+  "description": "Draft evidence-backed technical model documentation while preserving human validation and approval boundaries.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Do not claim model approval, validation, compliance, or production readiness.", "Label unsupported claims and preserve qualified human review."],
+  "phases": [
+    {"id":"package-context","name":"Package context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Inventory the documentation package, requested output, constraints, and missing evidence.","output":"Documentation source map.","required_evidence":["source-files","documentation-scope"],"retry_limit":2},
+    {"id":"evidence-analysis","name":"Evidence analysis","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Trace every material claim to available package evidence or label it as a gap.","output":"Evidence matrix.","required_evidence":["evidence-matrix","evidence-gaps"],"retry_limit":2},
+    {"id":"draft","name":"Documentation draft","owner":{"type":"skill","name":"documentation-and-adrs"},"permission":"workspace-write","instructions":"Draft the requested technical documentation without overstating evidence.","output":"Source-grounded draft.","required_evidence":["files-touched","draft-summary"],"retry_limit":2},
+    {"id":"documentation-review","name":"Independent documentation review","owner":{"type":"subagent","name":"documentation-reviewer"},"permission":"read-only","instructions":"Review traceability, clarity, internal consistency, and unsupported claims.","output":"Documentation findings.","required_evidence":["documentation-findings","documentation-disposition"],"retry_limit":2},
+    {"id":"validation","name":"Package validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run available package validation or record manual validation requirements.","output":"Validation evidence.","required_evidence":["validation-command","validation-result"],"retry_limit":2},
+    {"id":"handoff","name":"Human-review handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Produce a qualified-human review package with evidence gaps and next action.","output":"Resumable documentation handoff.","required_evidence":["risk-summary","human-review-needs","next-action"],"retry_limit":1}
+  ]
+}

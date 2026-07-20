@@ -809,6 +809,21 @@ if (Test-Path -LiteralPath $noticesPath -PathType Leaf) {
     }
 }
 
+$workflowRuntime = Join-Path $repoRoot "scripts\run-agent-workflow.ps1"
+if (Test-Path -LiteralPath $workflowRuntime -PathType Leaf) {
+    Write-Info "Validating executable workflow manifests"
+    & $workflowRuntime -Action Validate
+    if ($LASTEXITCODE -ne 0) {
+        Write-Fail "Executable workflow manifest validation failed"
+        $failed++
+    } else {
+        $passed++
+    }
+} else {
+    Write-Fail "Workflow runtime not found: $workflowRuntime"
+    $failed++
+}
+
 $evalValidationScript = Join-Path $repoRoot "scripts\validate-evals.ps1"
 if (Test-Path -LiteralPath $evalValidationScript -PathType Leaf) {
     Write-Info "Running eval scenario validation"

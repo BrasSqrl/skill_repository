@@ -16,6 +16,7 @@ Each skill should help an AI coding agent perform a concrete engineering workflo
 - Keep documentation scoped to this repository. Do not reference any specific downstream project.
 - Keep machine-readable metadata aligned with content. Update `catalog/skills.tsv`, bundle files, and harness/profile documentation when changing installable skills or installer behavior.
 - Keep canonical subagents aligned with `catalog/agents.tsv`, `catalog/agent-bundles.tsv`, harness profiles, and validation scripts.
+- Keep workflow documents aligned with `catalog/workflows.tsv` and the executable manifests bundled under `skills/agentic-workflow-runtime/references/workflow-manifests/`.
 - Keep eval scenarios aligned with `catalog/evals.tsv` when repeated agent failures or behavior changes need regression coverage.
 
 ## Skill Format Rules
@@ -66,6 +67,10 @@ Each skill should help an AI coding agent perform a concrete engineering workflo
 ## Workflow Rules
 
 - Every workflow under `workflows/` must include `Trigger`, `Ordered Skills`, `Phase Outputs`, `Phase Transitions`, `Validation Gates`, `Context Continuity`, `Handoff Format`, and `Escalation Rules`.
+- Every workflow must have one matching row in `catalog/workflows.tsv` and one matching executable JSON manifest.
+- Every executable phase must declare one owner, a permission boundary, imperative instructions, a checkable output, required evidence, and a bounded retry limit.
+- Keep `catalog/workflows.tsv` aligned with `skills/agentic-workflow-runtime/references/workflows.tsv`; manifest paths may differ only by their repository or installed-skill base path.
+- Treat `external-mutation` as a maximum capability, never as authorization. Require explicit authorization evidence at the relevant phase gate.
 - `Phase Transitions` must state entry condition, phase completion signal, next phase trigger, stop condition, retry or revision limit, and escalation condition.
 - Use `workflows/failure-to-eval-loop.md` when a real failure should become reusable eval coverage.
 
@@ -85,6 +90,8 @@ Run validation after changing skills, references, templates, scripts, catalog fi
 ```powershell
 .\scripts\validate-skills.ps1
 .\scripts\validate-evals.ps1
+.\scripts\run-agent-workflow.ps1 -Action Validate
+.\scripts\test-workflow-runner.ps1
 ```
 
 Linux alternative:
@@ -92,6 +99,8 @@ Linux alternative:
 ```bash
 ./scripts/validate-skills.sh
 ./scripts/validate-evals.sh
+bash ./scripts/run-agent-workflow.sh -Action Validate
+pwsh -NoLogo -NoProfile -File ./scripts/test-workflow-runner.ps1
 ```
 
 Run quality scoring after adding or rewriting skills:

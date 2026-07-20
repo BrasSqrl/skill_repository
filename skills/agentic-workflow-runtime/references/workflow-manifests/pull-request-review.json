@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "pull-request-review",
+  "name": "Pull Request Review",
+  "description": "Review a concrete diff through context, correctness, conditional security and architecture checks, and a merge recommendation.",
+  "mutation": "read-only",
+  "approval_boundaries": ["Do not edit reviewed files or submit review state without authorization.", "Distinguish blocking findings from suggestions."],
+  "phases": [
+    {"id":"context","name":"Review context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Identify requested behavior, diff scope, repository rules, and validation evidence.","output":"Review context.","required_evidence":["diff-scope","acceptance-criteria"],"retry_limit":2},
+    {"id":"code-review","name":"Correctness review","owner":{"type":"skill","name":"code-review-and-quality"},"permission":"read-only","instructions":"Review correctness, regressions, maintainability, and missing tests.","output":"Prioritized code findings.","required_evidence":["review-findings"],"retry_limit":2},
+    {"id":"security-review","name":"Conditional security review","owner":{"type":"skill","name":"security-review"},"permission":"read-only","instructions":"Assess security-sensitive surfaces when present; otherwise record not applicable.","output":"Security findings or not-applicable evidence.","required_evidence":["security-disposition"],"retry_limit":1},
+    {"id":"architecture-review","name":"Conditional architecture review","owner":{"type":"skill","name":"architecture-review"},"permission":"read-only","instructions":"Assess boundary and dependency changes when present; otherwise record not applicable.","output":"Architecture findings or not-applicable evidence.","required_evidence":["architecture-disposition"],"retry_limit":1},
+    {"id":"recommendation","name":"Review recommendation","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Reconcile findings, validation, risks, and readiness into a recommendation.","output":"Evidence-based merge recommendation.","required_evidence":["finding-disposition","validation-result","recommendation"],"retry_limit":1}
+  ]
+}

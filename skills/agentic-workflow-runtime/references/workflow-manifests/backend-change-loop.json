@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "id": "backend-change-loop",
+  "name": "Backend Change Loop",
+  "description": "Implement backend behavior with contract, security, validation, and code-review gates.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Escalate authentication, authorization, or public compatibility changes.", "Do not mutate external services without authorization."],
+  "phases": [
+    {"id":"context","name":"Backend context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Map handlers, services, contracts, commands, and trust boundaries.","output":"Backend change context.","required_evidence":["source-files","acceptance-criteria"],"retry_limit":2},
+    {"id":"implementation","name":"Backend implementation","owner":{"type":"skill","name":"api-backend-development"},"permission":"workspace-write","instructions":"Implement the requested backend behavior in small verified slices.","output":"Scoped backend changes.","required_evidence":["files-touched","implementation-summary"],"retry_limit":2},
+    {"id":"contract-tests","name":"Contract tests","owner":{"type":"skill","name":"api-contract-testing"},"permission":"workspace-write","instructions":"Add or run focused compatibility and contract tests.","output":"Contract test evidence.","required_evidence":["contract-surface","validation-result"],"retry_limit":2},
+    {"id":"contract-review","name":"Contract review","owner":{"type":"subagent","name":"api-contract-reviewer"},"permission":"read-only","instructions":"Review consumer and provider compatibility independently.","output":"Contract findings.","required_evidence":["review-findings","finding-disposition"],"retry_limit":1},
+    {"id":"security-review","name":"Security review","owner":{"type":"subagent","name":"security-reviewer"},"permission":"read-only","instructions":"Review trust boundaries, inputs, authorization, and data exposure.","output":"Security findings.","required_evidence":["security-findings","security-disposition"],"retry_limit":1},
+    {"id":"validation","name":"Independent validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run focused tests, lint, type checks, and build checks.","output":"Validation evidence.","required_evidence":["validation-command","validation-exit-code","validation-result"],"retry_limit":2},
+    {"id":"review","name":"Code review","owner":{"type":"subagent","name":"code-reviewer"},"permission":"read-only","instructions":"Review the final diff for correctness and regression risk.","output":"Code review result.","required_evidence":["review-findings","finding-disposition"],"retry_limit":2},
+    {"id":"handoff","name":"Backend handoff","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Prepare a review-ready summary with validation and risks.","output":"Backend review package.","required_evidence":["change-summary","risk-summary","next-action"],"retry_limit":1}
+  ]
+}

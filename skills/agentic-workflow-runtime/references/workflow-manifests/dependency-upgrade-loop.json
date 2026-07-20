@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "dependency-upgrade-loop",
+  "name": "Dependency Upgrade Loop",
+  "description": "Change dependencies or runtimes with environment, compatibility, CI, validation, and security gates.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Do not change package managers or runtime families without approval.", "Escalate vulnerable, abandoned, or license-incompatible dependencies."],
+  "phases": [
+    {"id":"environment","name":"Environment analysis","owner":{"type":"skill","name":"dependency-environment-management"},"permission":"read-only","instructions":"Inspect manifests, lockfiles, runtime pins, and install conventions.","output":"Dependency change context.","required_evidence":["manifest-files","current-versions"],"retry_limit":2},
+    {"id":"dependency-review","name":"Dependency review","owner":{"type":"subagent","name":"dependency-auditor"},"permission":"read-only","instructions":"Assess upgrade, compatibility, license, and maintenance risk.","output":"Dependency risk report.","required_evidence":["dependency-findings","recommended-scope"],"retry_limit":1},
+    {"id":"implementation","name":"Dependency change","owner":{"type":"skill","name":"source-driven-development"},"permission":"workspace-write","instructions":"Apply only the source-backed manifest, lockfile, and compatibility changes.","output":"Scoped dependency diff.","required_evidence":["files-touched","implementation-summary"],"retry_limit":2},
+    {"id":"ci-review","name":"CI compatibility review","owner":{"type":"subagent","name":"ci-pipeline-reviewer"},"permission":"validation-only","instructions":"Review pipeline runtime, cache, matrix, and packaging implications.","output":"CI findings.","required_evidence":["ci-findings","finding-disposition"],"retry_limit":1},
+    {"id":"validation","name":"Independent validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run install, test, lint, build, and targeted compatibility checks.","output":"Validation evidence.","required_evidence":["validation-command","validation-exit-code","validation-result"],"retry_limit":2},
+    {"id":"security-review","name":"Security review","owner":{"type":"subagent","name":"security-reviewer"},"permission":"read-only","instructions":"Review the resulting dependency exposure and known security risk.","output":"Security disposition.","required_evidence":["security-findings","security-disposition"],"retry_limit":1},
+    {"id":"handoff","name":"Upgrade handoff","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Package version changes, validation, compatibility notes, and risks.","output":"Review-ready upgrade package.","required_evidence":["change-summary","risk-summary","next-action"],"retry_limit":1}
+  ]
+}

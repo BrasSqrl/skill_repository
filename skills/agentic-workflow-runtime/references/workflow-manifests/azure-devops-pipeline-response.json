@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "azure-devops-pipeline-response",
+  "name": "Azure DevOps Pipeline Response",
+  "description": "Diagnose and resolve Azure Pipelines or branch-policy failures with guarded external updates.",
+  "mutation": "external-mutation",
+  "approval_boundaries": ["Do not rerun, cancel, update, complete, or bypass policy without authorization.", "Do not expose variables, secrets, or service credentials."],
+  "phases": [
+    {"id":"remote-evidence","name":"Pipeline evidence","owner":{"type":"skill","name":"azure-pipelines-validation"},"permission":"read-only","instructions":"Inspect pipeline runs, branch policies, logs, and PR validation state.","output":"Remote failure evidence.","required_evidence":["run-identifiers","failure-evidence"],"retry_limit":2},
+    {"id":"triage","name":"Failure triage","owner":{"type":"skill","name":"error-message-triage"},"permission":"read-only","instructions":"Identify the first actionable failure and likely owner.","output":"Triage result.","required_evidence":["first-actionable-failure","failure-owner"],"retry_limit":2},
+    {"id":"diagnosis","name":"Local diagnosis","owner":{"type":"skill","name":"debugging-and-error-recovery"},"permission":"validation-only","instructions":"Reproduce locally when possible and isolate the root cause.","output":"Diagnosis evidence.","required_evidence":["reproduction-disposition","root-cause"],"retry_limit":2},
+    {"id":"environment","name":"Environment check","owner":{"type":"skill","name":"dependency-environment-management"},"permission":"read-only","instructions":"Check runtime, install, cache, and lockfile drift.","output":"Environment disposition.","required_evidence":["environment-disposition"],"retry_limit":1},
+    {"id":"pipeline","name":"Pipeline repair","owner":{"type":"skill","name":"ci-cd-pipeline-maintenance"},"permission":"workspace-write","instructions":"When evidence requires it, apply the smallest pipeline or source repair.","output":"Scoped repair or no-change decision.","required_evidence":["repair-disposition"],"retry_limit":2},
+    {"id":"ci-review","name":"Independent CI review","owner":{"type":"subagent","name":"ci-pipeline-reviewer"},"permission":"validation-only","instructions":"Review the failure and repair against configured gates.","output":"CI review findings.","required_evidence":["ci-findings","finding-disposition"],"retry_limit":1},
+    {"id":"validation","name":"Independent validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run applicable local validation.","output":"Validation evidence.","required_evidence":["validation-command","validation-result"],"retry_limit":2},
+    {"id":"remote-update","name":"Authorized PR update","owner":{"type":"skill","name":"azure-devops-pr-lifecycle"},"permission":"external-mutation","instructions":"Only when authorized, rerun or update the PR or policy state required by the task.","output":"Remote action record or no-action disposition.","required_evidence":["authorization-evidence","remote-action-result"],"retry_limit":1},
+    {"id":"handoff","name":"Pipeline response handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Report cause, repair, policy state, authorization, risk, and next action.","output":"Resumable pipeline handoff.","required_evidence":["risk-summary","next-action"],"retry_limit":1}
+  ]
+}

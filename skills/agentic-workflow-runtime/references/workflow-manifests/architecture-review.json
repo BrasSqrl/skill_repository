@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "architecture-review",
+  "name": "Architecture Review",
+  "description": "Assess architecture and produce source-grounded options, tradeoffs, and a durable decision record.",
+  "mutation": "read-only",
+  "approval_boundaries": ["Do not implement the reviewed design unless separately authorized.", "Escalate missing ownership or incompatible constraints."],
+  "phases": [
+    {"id":"context","name":"Architecture context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Map relevant modules, callers, constraints, and decision scope.","output":"Architecture context map.","required_evidence":["source-files","architecture-boundaries"],"retry_limit":2},
+    {"id":"source-analysis","name":"Source analysis","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Ground claims in code, tests, schemas, and existing decisions.","output":"Source-backed current-state analysis.","required_evidence":["current-state","source-evidence"],"retry_limit":2},
+    {"id":"review","name":"Architecture review","owner":{"type":"skill","name":"architecture-review"},"permission":"read-only","instructions":"Compare viable options and assess coupling, cohesion, data flow, and scalability.","output":"Options and tradeoffs.","required_evidence":["options","tradeoffs","recommendation"],"retry_limit":2},
+    {"id":"security","name":"Trust-boundary review","owner":{"type":"skill","name":"security-review"},"permission":"read-only","instructions":"When relevant, assess changes to trust boundaries and data exposure.","output":"Security implications.","required_evidence":["security-implications"],"retry_limit":1},
+    {"id":"decision","name":"Decision record","owner":{"type":"skill","name":"documentation-and-adrs"},"permission":"read-only","instructions":"Document the decision, alternatives, consequences, validation, and follow-up.","output":"Architecture decision handoff.","required_evidence":["decision","consequences","next-action"],"retry_limit":1}
+  ]
+}

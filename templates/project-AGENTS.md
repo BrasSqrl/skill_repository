@@ -141,11 +141,15 @@ Continuity checkpoints must include workflow name and current phase, objective a
 ## Agent Workflow
 
 1. Inspect the relevant source files before making changes.
-2. Keep changes small and scoped to the request.
-3. Prefer existing project patterns over new abstractions.
-4. Run the relevant tests, lint checks, and build commands.
-5. Report changed files, validation results, and unresolved risks.
-6. Add or update an eval scenario when a repeatable agent failure exposes a missing gate, unsafe action, or unclear instruction.
+2. For multi-phase work, use `agentic-workflow-runtime` to select or explicitly start a workflow and persist its run outside this repository.
+3. Follow only the current phase contract and its permission boundary.
+4. Keep changes small and scoped to the request.
+5. Prefer existing project patterns over new abstractions.
+6. Record concrete evidence for each required gate before advancing.
+7. Run the relevant tests, lint checks, and build commands.
+8. Generate a workflow handoff before transfer, context loss, or user escalation.
+9. Report changed files, validation results, and unresolved risks.
+10. Add or update an eval scenario when a repeatable agent failure exposes a missing gate, unsafe action, or unclear instruction.
 
 ## Validation Checklist
 

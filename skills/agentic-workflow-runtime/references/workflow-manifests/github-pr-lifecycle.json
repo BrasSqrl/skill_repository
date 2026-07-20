@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "github-pr-lifecycle",
+  "name": "GitHub PR Lifecycle",
+  "description": "Operate an authorized GitHub pull request through local preparation, checks, independent review, and guarded merge decisions.",
+  "mutation": "external-mutation",
+  "approval_boundaries": ["Require explicit authority for PR creation, review submission, auto-merge, merge, and issue mutation.", "Never bypass branch protection or required checks."],
+  "phases": [
+    {"id":"context","name":"PR context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Identify repository rules, branch state, requested PR action, and authorization.","output":"PR operation context.","required_evidence":["repository-context","requested-action","authorization-evidence"],"retry_limit":2},
+    {"id":"source-check","name":"Source check","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Confirm the local change and acceptance criteria.","output":"Source-backed scope.","required_evidence":["diff-scope","acceptance-criteria"],"retry_limit":2},
+    {"id":"local-change","name":"Conditional local change","owner":{"type":"skill","name":"incremental-implementation"},"permission":"workspace-write","instructions":"Apply only authorized local changes, or record that none are needed.","output":"Local change disposition.","required_evidence":["local-change-disposition"],"retry_limit":2},
+    {"id":"pr-operation","name":"Authorized PR operation","owner":{"type":"skill","name":"github-pr-lifecycle"},"permission":"external-mutation","instructions":"Perform only the currently authorized PR action.","output":"PR identifier and action result.","required_evidence":["pr-identifier","remote-action-result"],"retry_limit":1},
+    {"id":"issue-traceability","name":"Issue traceability","owner":{"type":"skill","name":"github-issues-management"},"permission":"external-mutation","instructions":"When authorized, link or update issues; otherwise record no-action.","output":"Issue traceability disposition.","required_evidence":["issue-disposition"],"retry_limit":1},
+    {"id":"checks","name":"Required checks","owner":{"type":"skill","name":"github-actions-validation"},"permission":"validation-only","instructions":"Inspect required checks, rulesets, and branch protection.","output":"Check evidence.","required_evidence":["check-state","validation-result"],"retry_limit":2},
+    {"id":"independent-review","name":"Independent PR review","owner":{"type":"subagent","name":"github-pr-reviewer"},"permission":"read-only","instructions":"Review metadata, issue linkage, reviewers, policies, comments, and checks.","output":"PR review findings.","required_evidence":["review-findings","finding-disposition"],"retry_limit":1},
+    {"id":"release-decision","name":"Merge readiness","owner":{"type":"skill","name":"release-readiness"},"permission":"read-only","instructions":"Before merge or auto-merge, confirm validation, rollback, and required gates.","output":"Merge recommendation.","required_evidence":["release-recommendation"],"retry_limit":1},
+    {"id":"handoff","name":"PR lifecycle handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Report PR state, actions, checks, approvals, risks, and next action.","output":"Resumable PR handoff.","required_evidence":["risk-summary","next-action"],"retry_limit":1}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "feature-development",
+  "name": "Feature Development",
+  "description": "Implement a scoped feature through context, source analysis, planning, implementation, validation, and handoff.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Escalate incompatible interpretations of product behavior.", "Do not introduce unrelated architecture changes."],
+  "phases": [
+    {"id":"context","name":"Repository context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Gather relevant files, commands, constraints, and assumptions.","output":"Task context summary.","required_evidence":["source-files","repository-constraints"],"retry_limit":2},
+    {"id":"requirements","name":"Source-backed requirements","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Derive intended behavior from authoritative sources.","output":"Acceptance criteria.","required_evidence":["acceptance-criteria"],"retry_limit":2},
+    {"id":"plan","name":"Implementation plan","owner":{"type":"skill","name":"planning-and-task-breakdown"},"permission":"read-only","instructions":"Plan small verifiable implementation slices.","output":"Scoped plan.","required_evidence":["plan","validation-targets"],"retry_limit":2},
+    {"id":"implementation","name":"Implementation","owner":{"type":"main-agent","name":"incremental-implementation"},"permission":"workspace-write","instructions":"Implement the planned behavior using the appropriate domain and testing skills.","output":"Scoped implementation and tests.","required_evidence":["files-touched","implementation-summary"],"retry_limit":2},
+    {"id":"validation","name":"Validation","owner":{"type":"main-agent","name":"pull-request-prep"},"permission":"validation-only","instructions":"Run focused tests, lint, build, or manual checks and package the result.","output":"Validation and review-ready summary.","required_evidence":["validation-command","validation-result","risk-summary"],"retry_limit":2}
+  ]
+}

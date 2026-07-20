@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "bug-diagnosis",
+  "name": "Bug Diagnosis",
+  "description": "Reproduce, isolate, fix, and verify a software failure without speculative edits.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Do not fix before the failure is reproduced or evidence explains why reproduction is unavailable.", "Escalate when expected behavior is contradictory."],
+  "phases": [
+    {"id":"triage","name":"Failure triage","owner":{"type":"skill","name":"error-message-triage"},"permission":"read-only","instructions":"Identify the first actionable failure and separate secondary noise.","output":"Classified failure.","required_evidence":["failure-evidence","first-actionable-failure"],"retry_limit":2},
+    {"id":"diagnosis","name":"Diagnosis","owner":{"type":"skill","name":"debugging-and-error-recovery"},"permission":"validation-only","instructions":"Reproduce, narrow, and test causal hypotheses.","output":"Supported root-cause hypothesis.","required_evidence":["reproduction-command","observed-result","root-cause"],"retry_limit":3},
+    {"id":"source-check","name":"Source check","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Confirm the fix against authoritative behavior.","output":"Fix acceptance criteria.","required_evidence":["source-files","acceptance-criteria"],"retry_limit":2},
+    {"id":"fix","name":"Regression fix","owner":{"type":"skill","name":"test-driven-development"},"permission":"workspace-write","instructions":"Add a focused regression test and make the smallest fix.","output":"Test-backed fix.","required_evidence":["red-result","files-touched","green-result"],"retry_limit":2},
+    {"id":"handoff","name":"Fix handoff","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Report cause, changes, validation, risk, and next action.","output":"Review-ready fix package.","required_evidence":["validation-result","risk-summary","next-action"],"retry_limit":1}
+  ]
+}

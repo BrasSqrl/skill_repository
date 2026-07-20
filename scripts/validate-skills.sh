@@ -785,6 +785,19 @@ if [[ "$third_party_count" -gt 0 && ! -f "$NOTICES_PATH" ]]; then
   failed=$((failed + 1))
 fi
 
+if [[ -f "$REPO_ROOT/scripts/run-agent-workflow.sh" ]]; then
+  echo "[INFO] Validating executable workflow manifests"
+  if bash "$REPO_ROOT/scripts/run-agent-workflow.sh" -Action Validate; then
+    passed=$((passed + 1))
+  else
+    fail_line "Executable workflow manifest validation failed"
+    failed=$((failed + 1))
+  fi
+else
+  fail_line "Workflow runtime not found: $REPO_ROOT/scripts/run-agent-workflow.sh"
+  failed=$((failed + 1))
+fi
+
 if [[ -f "$REPO_ROOT/scripts/validate-evals.sh" ]]; then
   echo "[INFO] Running eval scenario validation"
   if ! bash "$REPO_ROOT/scripts/validate-evals.sh"; then

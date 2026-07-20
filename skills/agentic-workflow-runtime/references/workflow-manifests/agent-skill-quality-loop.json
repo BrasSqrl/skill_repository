@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "agent-skill-quality-loop",
+  "name": "Agent Skill Quality Loop",
+  "description": "Prepare skills, subagents, bundles, and workflow templates for publication through quality and regression gates.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Do not promote maturity without representative evidence.", "Escalate license or attribution uncertainty."],
+  "phases": [
+    {"id":"quality-review","name":"Quality review","owner":{"type":"skill","name":"skill-review"},"permission":"read-only","instructions":"Review triggers, overlap, workflow clarity, validation, and context cost.","output":"Prioritized quality findings.","required_evidence":["review-findings","recommended-scope"],"retry_limit":2},
+    {"id":"workflow-design","name":"Workflow refinement","owner":{"type":"skill","name":"agent-workflow-design"},"permission":"workspace-write","instructions":"Apply the smallest operational improvements to contracts and gates.","output":"Scoped quality changes.","required_evidence":["files-touched","change-summary"],"retry_limit":2},
+    {"id":"regression","name":"Prompt regression coverage","owner":{"type":"skill","name":"prompt-regression-testing"},"permission":"workspace-write","instructions":"Add or update representative behavior checks when justified.","output":"Regression coverage disposition.","required_evidence":["eval-disposition"],"retry_limit":2},
+    {"id":"dry-run","name":"Workflow dry run","owner":{"type":"skill","name":"workflow-dry-run"},"permission":"validation-only","instructions":"Dry-run the changed workflow or skill behavior.","output":"Dry-run decision.","required_evidence":["dry-run-result"],"retry_limit":2},
+    {"id":"documentation-review","name":"Documentation review","owner":{"type":"subagent","name":"documentation-reviewer"},"permission":"read-only","instructions":"Review catalog, guides, examples, and cross-links for drift.","output":"Documentation findings.","required_evidence":["documentation-findings","documentation-disposition"],"retry_limit":1},
+    {"id":"validation","name":"Repository validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run repository validation and scoring commands.","output":"Validation and scoring evidence.","required_evidence":["validation-command","validation-exit-code","validation-result"],"retry_limit":2},
+    {"id":"handoff","name":"Publication handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Reconcile findings, maturity, bundle changes, and next action.","output":"Publication decision record.","required_evidence":["maturity-recommendation","risk-summary","next-action"],"retry_limit":1}
+  ]
+}

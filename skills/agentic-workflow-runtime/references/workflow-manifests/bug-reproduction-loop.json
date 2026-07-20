@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "bug-reproduction-loop",
+  "name": "Bug Reproduction Loop",
+  "description": "Establish a reliable failure reproduction and bounded diagnosis before any implementation begins.",
+  "mutation": "validation-only",
+  "approval_boundaries": ["Do not edit production source during reproduction.", "Escalate destructive, credentialed, or production-only reproduction steps."],
+  "phases": [
+    {"id":"triage","name":"Symptom triage","owner":{"type":"skill","name":"error-message-triage"},"permission":"read-only","instructions":"Classify the reported symptom and isolate relevant evidence.","output":"Triage summary.","required_evidence":["failure-evidence","first-actionable-failure"],"retry_limit":2},
+    {"id":"context","name":"Reproduction context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Find setup, commands, fixtures, and environmental constraints.","output":"Reproduction context.","required_evidence":["source-files","reproduction-prerequisites"],"retry_limit":2},
+    {"id":"reproduce","name":"Independent reproduction","owner":{"type":"subagent","name":"bug-reproducer"},"permission":"validation-only","instructions":"Produce the smallest reliable reproduction with exact output.","output":"Minimal reproduction.","required_evidence":["reproduction-command","observed-result","exit-code"],"retry_limit":3},
+    {"id":"diagnosis","name":"Bounded diagnosis","owner":{"type":"skill","name":"debugging-and-error-recovery"},"permission":"read-only","instructions":"Form evidence-backed hypotheses without implementing a fix.","output":"Diagnosis and recommended fix boundary.","required_evidence":["root-cause","recommended-scope"],"retry_limit":2},
+    {"id":"validation","name":"Reproduction validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Confirm the reproduction command and evidence independently.","output":"Validated reproduction package.","required_evidence":["validation-command","validation-result"],"retry_limit":2},
+    {"id":"handoff","name":"Implementation handoff","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Hand off exact reproduction, diagnosis, scope, risks, and next action.","output":"Fix-ready handoff.","required_evidence":["risk-summary","next-action"],"retry_limit":1}
+  ]
+}

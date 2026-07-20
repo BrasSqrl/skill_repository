@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "azure-devops-pr-lifecycle",
+  "name": "Azure DevOps PR Lifecycle",
+  "description": "Operate an authorized Azure Repos pull request through local preparation, policies, independent review, and guarded completion decisions.",
+  "mutation": "external-mutation",
+  "approval_boundaries": ["Require explicit authority for PR creation, voting, auto-complete, completion, and work-item mutation.", "Never bypass branch policies."],
+  "phases": [
+    {"id":"context","name":"PR context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Identify repository rules, branch state, requested PR action, and authorization.","output":"PR operation context.","required_evidence":["repository-context","requested-action","authorization-evidence"],"retry_limit":2},
+    {"id":"source-check","name":"Source check","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Confirm local change scope and acceptance criteria.","output":"Source-backed scope.","required_evidence":["diff-scope","acceptance-criteria"],"retry_limit":2},
+    {"id":"local-change","name":"Conditional local change","owner":{"type":"skill","name":"incremental-implementation"},"permission":"workspace-write","instructions":"Apply only authorized local changes, or record that none are needed.","output":"Local change disposition.","required_evidence":["local-change-disposition"],"retry_limit":2},
+    {"id":"pr-operation","name":"Authorized PR operation","owner":{"type":"skill","name":"azure-devops-pr-lifecycle"},"permission":"external-mutation","instructions":"Perform only the currently authorized PR action.","output":"PR identifier and action result.","required_evidence":["pr-identifier","remote-action-result"],"retry_limit":1},
+    {"id":"work-item-traceability","name":"Work item traceability","owner":{"type":"skill","name":"azure-boards-work-item-management"},"permission":"external-mutation","instructions":"When authorized, link or update work items; otherwise record no-action.","output":"Work item traceability disposition.","required_evidence":["work-item-disposition"],"retry_limit":1},
+    {"id":"policies","name":"Required policies","owner":{"type":"skill","name":"azure-pipelines-validation"},"permission":"validation-only","instructions":"Inspect required policies and build validation.","output":"Policy evidence.","required_evidence":["policy-state","validation-result"],"retry_limit":2},
+    {"id":"independent-review","name":"Independent PR review","owner":{"type":"subagent","name":"azure-devops-pr-reviewer"},"permission":"read-only","instructions":"Review metadata, work-item linkage, reviewers, policies, comments, and CI.","output":"PR review findings.","required_evidence":["review-findings","finding-disposition"],"retry_limit":1},
+    {"id":"release-decision","name":"Completion readiness","owner":{"type":"skill","name":"release-readiness"},"permission":"read-only","instructions":"Before completion or auto-complete, confirm validation, rollback, and required gates.","output":"Completion recommendation.","required_evidence":["release-recommendation"],"retry_limit":1},
+    {"id":"handoff","name":"PR lifecycle handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Report PR state, actions, policies, approvals, risks, and next action.","output":"Resumable PR handoff.","required_evidence":["risk-summary","next-action"],"retry_limit":1}
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "release-gate-loop",
+  "name": "Release Gate Loop",
+  "description": "Independently gate a release candidate across readiness, validation, CI, documentation, security, and final release review.",
+  "mutation": "validation-only",
+  "approval_boundaries": ["Do not publish, deploy, merge, or tag.", "A failed required gate blocks the release recommendation."],
+  "phases": [
+    {"id":"readiness","name":"Readiness inventory","owner":{"type":"skill","name":"release-readiness"},"permission":"read-only","instructions":"Inventory release scope, required gates, rollback, migrations, and known risks.","output":"Release gate checklist.","required_evidence":["release-scope","required-gates","rollback-plan"],"retry_limit":2},
+    {"id":"validation","name":"Independent validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run the required local validation commands.","output":"Local validation evidence.","required_evidence":["validation-command","validation-exit-code","validation-result"],"retry_limit":2},
+    {"id":"ci-review","name":"CI review","owner":{"type":"subagent","name":"ci-pipeline-reviewer"},"permission":"validation-only","instructions":"Inspect required remote or configured pipeline gates without mutation.","output":"CI gate disposition.","required_evidence":["ci-findings","ci-disposition"],"retry_limit":2},
+    {"id":"documentation-review","name":"Documentation review","owner":{"type":"subagent","name":"documentation-reviewer"},"permission":"read-only","instructions":"Review release notes, migration guidance, and user-facing documentation for drift.","output":"Documentation disposition.","required_evidence":["documentation-findings","documentation-disposition"],"retry_limit":1},
+    {"id":"security-review","name":"Security review","owner":{"type":"subagent","name":"security-reviewer"},"permission":"read-only","instructions":"Review security-sensitive release changes and dependency exposure.","output":"Security disposition.","required_evidence":["security-findings","security-disposition"],"retry_limit":1},
+    {"id":"release-review","name":"Independent release review","owner":{"type":"subagent","name":"release-reviewer"},"permission":"read-only","instructions":"Reconcile all gate evidence and blockers.","output":"Release review recommendation.","required_evidence":["release-findings","release-recommendation"],"retry_limit":1},
+    {"id":"handoff","name":"Release decision handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Produce a complete release decision record and exact next authorized action.","output":"Resumable release handoff.","required_evidence":["risk-summary","next-action"],"retry_limit":1}
+  ]
+}

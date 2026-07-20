@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/portable-agent-workflow.schema.json",
+  "title": "Portable Agent Workflow Manifest",
+  "type": "object",
+  "required": ["schema_version", "id", "name", "description", "mutation", "approval_boundaries", "phases"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "mutation": { "enum": ["read-only", "validation-only", "workspace-write", "external-mutation"] },
+    "approval_boundaries": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "owner", "permission", "instructions", "output", "required_evidence", "retry_limit"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "owner": {
+            "type": "object",
+            "required": ["type", "name"],
+            "properties": {
+              "type": { "enum": ["main-agent", "skill", "subagent"] },
+              "name": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          },
+          "permission": { "enum": ["read-only", "validation-only", "workspace-write", "external-mutation"] },
+          "instructions": { "type": "string", "minLength": 1 },
+          "output": { "type": "string", "minLength": 1 },
+          "required_evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+            "uniqueItems": true
+          },
+          "retry_limit": { "type": "integer", "minimum": 0, "maximum": 5 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

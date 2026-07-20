@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "id": "failure-to-eval-loop",
+  "name": "Failure To Eval Loop",
+  "description": "Capture a reusable agent-system failure and convert it into sanitized regression coverage.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Do not preserve secrets, private identifiers, or private repository paths in fixtures.", "Do not encode one-off preferences as reusable requirements."],
+  "phases": [
+    {"id":"failure-capture","name":"Failure capture","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Separate expected and actual behavior and capture minimal reproduction context.","output":"Sanitized failure record.","required_evidence":["target","expected-behavior","actual-behavior"],"retry_limit":2},
+    {"id":"scenario-design","name":"Scenario design","owner":{"type":"skill","name":"agent-evaluation"},"permission":"read-only","instructions":"Define observable pass criteria, failure signals, fixtures, and maturity.","output":"Eval scenario design.","required_evidence":["scenario-id","pass-criteria","failure-signals"],"retry_limit":2},
+    {"id":"regression-design","name":"Regression design","owner":{"type":"skill","name":"prompt-regression-testing"},"permission":"workspace-write","instructions":"Create minimal synthetic scenario artifacts and catalog metadata.","output":"Draft eval artifacts.","required_evidence":["files-touched","fixture-disposition"],"retry_limit":2},
+    {"id":"target-review","name":"Target review","owner":{"type":"skill","name":"skill-review"},"permission":"read-only","instructions":"When applicable, review the failed skill or instruction surface for the smallest justified change.","output":"Target change recommendation.","required_evidence":["target-findings"],"retry_limit":1},
+    {"id":"dry-run","name":"Workflow dry run","owner":{"type":"skill","name":"workflow-dry-run"},"permission":"validation-only","instructions":"Dry-run multi-phase changes and confirm boundaries and gates.","output":"Dry-run decision.","required_evidence":["dry-run-result"],"retry_limit":2},
+    {"id":"handoff","name":"Eval handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Verify continuation context, validation, maturity, and next action.","output":"Eval implementation handoff.","required_evidence":["validation-result","maturity-recommendation","next-action"],"retry_limit":1}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "agent-skill-development",
+  "name": "Agent Skill Development",
+  "description": "Create or revise a reusable agent skill through context, overlap review, workflow design, dry run, and handoff review.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Escalate substantial overlap with an existing skill.", "Preserve license and attribution requirements for adapted content."],
+  "phases": [
+    {"id":"context","name":"Skill context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Identify intended triggers, examples, repository rules, and existing related skills.","output":"Skill requirements.","required_evidence":["usage-examples","trigger-scope"],"retry_limit":2},
+    {"id":"overlap-review","name":"Overlap review","owner":{"type":"skill","name":"skill-review"},"permission":"read-only","instructions":"Review trigger clarity, responsibility overlap, context cost, and required resources.","output":"Skill review findings.","required_evidence":["overlap-findings","recommended-scope"],"retry_limit":2},
+    {"id":"design","name":"Operational design","owner":{"type":"skill","name":"agent-workflow-design"},"permission":"workspace-write","instructions":"Implement concise operational guidance, references, metadata, and gates.","output":"Skill and metadata changes.","required_evidence":["files-touched","skill-contract"],"retry_limit":2},
+    {"id":"dry-run","name":"Skill dry run","owner":{"type":"skill","name":"workflow-dry-run"},"permission":"validation-only","instructions":"Dry-run representative use and identify missing context or unsafe behavior.","output":"Dry-run result.","required_evidence":["dry-run-result"],"retry_limit":2},
+    {"id":"handoff","name":"Publication handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Verify metadata, validation, bundle decisions, risks, and exact next action.","output":"Publication-ready handoff.","required_evidence":["validation-result","bundle-disposition","next-action"],"retry_limit":1}
+  ]
+}

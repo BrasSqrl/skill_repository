@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "github-issue-to-pr",
+  "name": "GitHub Issue To PR",
+  "description": "Turn an authorized GitHub issue into scoped implementation, validation, a linked PR, and a traceable handoff.",
+  "mutation": "external-mutation",
+  "approval_boundaries": ["Require authority for issue mutation and PR creation.", "Require separate merge authorization and passing checks."],
+  "phases": [
+    {"id":"issue-context","name":"Issue context","owner":{"type":"skill","name":"github-issues-management"},"permission":"read-only","instructions":"Read the issue, linkage, labels, constraints, and requested outcome.","output":"Issue brief.","required_evidence":["issue-identifier","acceptance-criteria"],"retry_limit":2},
+    {"id":"repository-context","name":"Repository context","owner":{"type":"skill","name":"context-engineering"},"permission":"read-only","instructions":"Map relevant source, commands, rules, and risks.","output":"Implementation context.","required_evidence":["source-files","repository-constraints"],"retry_limit":2},
+    {"id":"plan","name":"Implementation plan","owner":{"type":"skill","name":"planning-and-task-breakdown"},"permission":"read-only","instructions":"Create small testable slices linked to acceptance criteria.","output":"Issue implementation plan.","required_evidence":["plan","validation-targets"],"retry_limit":2},
+    {"id":"source-check","name":"Source check","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Confirm the implementation against authoritative source behavior.","output":"Source-backed scope.","required_evidence":["source-evidence"],"retry_limit":1},
+    {"id":"implementation","name":"Implementation","owner":{"type":"main-agent","name":"incremental-implementation"},"permission":"workspace-write","instructions":"Implement the issue in small verified slices.","output":"Code and test changes.","required_evidence":["files-touched","implementation-summary"],"retry_limit":2},
+    {"id":"pr-prep","name":"PR preparation","owner":{"type":"skill","name":"pull-request-prep"},"permission":"validation-only","instructions":"Run local validation and prepare the review package.","output":"PR-ready local change.","required_evidence":["validation-command","validation-result","risk-summary"],"retry_limit":2},
+    {"id":"pr-create","name":"Authorized PR creation","owner":{"type":"skill","name":"github-pr-lifecycle"},"permission":"external-mutation","instructions":"Create or update the linked PR only with explicit authority.","output":"PR identifier and linkage.","required_evidence":["authorization-evidence","pr-identifier"],"retry_limit":1},
+    {"id":"checks","name":"Required checks","owner":{"type":"skill","name":"github-actions-validation"},"permission":"validation-only","instructions":"Inspect required checks and branch protection.","output":"Check state.","required_evidence":["check-state"],"retry_limit":2},
+    {"id":"review","name":"Independent PR review","owner":{"type":"subagent","name":"github-pr-reviewer"},"permission":"read-only","instructions":"Review PR metadata, issue traceability, findings, and checks.","output":"Independent PR findings.","required_evidence":["review-findings","finding-disposition"],"retry_limit":1},
+    {"id":"handoff","name":"Issue-to-PR handoff","owner":{"type":"skill","name":"handoff-quality-review"},"permission":"read-only","instructions":"Report issue, PR, validation, checks, risks, and next authorized action.","output":"Traceable delivery handoff.","required_evidence":["next-action"],"retry_limit":1}
+  ]
+}

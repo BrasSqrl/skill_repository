@@ -1,4 +1,5 @@
 name	category	maturity	source	license	harnesses	upstream_repo	upstream_ref	upstream_path	import_mode	description
+agentic-workflow-runtime	agent-orchestration	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Select and execute durable agent workflows with phase gates, permission boundaries, evidence, retries, escalation, and resumable handoffs.
 agent-workflow-design	agent-orchestration	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Design repeatable AI coding-agent workflows, handoffs, validation loops, and skill sets.
 agent-evaluation	agent-orchestration	draft	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Evaluate AI coding-agent behavior against repeatable tasks, rubrics, expected artifacts, and validation gates.
 api-backend-development	implementation	stable	first-party	MIT	codex,claude-code,opencode	none	none	none	original	Build or modify backend APIs, services, handlers, jobs, and server-side contracts.

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "data-change-loop",
+  "name": "Data Change Loop",
+  "description": "Implement data changes with migration, security, validation, rollback, and release gates.",
+  "mutation": "workspace-write",
+  "approval_boundaries": ["Escalate destructive data operations and irreversible migrations.", "Require an explicit deployment and rollback decision for production data changes."],
+  "phases": [
+    {"id":"implementation","name":"Data change implementation","owner":{"type":"skill","name":"database-data-workflow-development"},"permission":"workspace-write","instructions":"Implement the smallest schema, migration, query, or data workflow change.","output":"Scoped data changes.","required_evidence":["files-touched","implementation-summary"],"retry_limit":2},
+    {"id":"source-check","name":"Source and contract check","owner":{"type":"skill","name":"source-driven-development"},"permission":"read-only","instructions":"Confirm behavior and data contracts against authoritative sources.","output":"Data acceptance criteria.","required_evidence":["source-files","acceptance-criteria"],"retry_limit":2},
+    {"id":"migration-review","name":"Migration review","owner":{"type":"subagent","name":"database-migration-reviewer"},"permission":"read-only","instructions":"Review ordering, locking, indexes, backfills, and rollback.","output":"Migration findings.","required_evidence":["migration-findings","rollback-plan"],"retry_limit":2},
+    {"id":"security-review","name":"Data security review","owner":{"type":"subagent","name":"security-reviewer"},"permission":"read-only","instructions":"Review sensitive data access, exposure, and authorization.","output":"Security disposition.","required_evidence":["security-findings","security-disposition"],"retry_limit":1},
+    {"id":"validation","name":"Independent validation","owner":{"type":"subagent","name":"validation-runner"},"permission":"validation-only","instructions":"Run migration, data integrity, and application checks.","output":"Validation evidence.","required_evidence":["validation-command","validation-exit-code","validation-result"],"retry_limit":2},
+    {"id":"release-review","name":"Release review","owner":{"type":"subagent","name":"release-reviewer"},"permission":"read-only","instructions":"Review deploy order, observability, rollback, and release risk.","output":"Release decision inputs.","required_evidence":["release-findings","finding-disposition"],"retry_limit":1},
+    {"id":"handoff","name":"Data change handoff","owner":{"type":"skill","name":"pull-request-prep"},"permission":"read-only","instructions":"Package changes, validation, rollback, risks, and next action.","output":"Review-ready data change package.","required_evidence":["change-summary","risk-summary","next-action"],"retry_limit":1}
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agentic Workflow Runtime"
+  short_description: "Run gated, resumable agent workflows"
+  default_prompt: "Use $agentic-workflow-runtime to select and execute a gated workflow for this task."
