@@ -1,0 +1,332 @@
+OPENCODE AGENTIC WORKFLOW PROMPTS
+==================================
+
+Purpose
+-------
+Use these prompts in an OpenCode TUI started from the root of the target
+software repository. Use OpenCode's Build agent when the task may edit files.
+
+The GitHub Copilot credential supplies model access. OpenCode remains the agent
+harness that loads skills, invokes subagents, runs tools, and coordinates the
+workflow.
+
+Before pasting a prompt:
+
+1. Start OpenCode in the target repository, not in this skill repository.
+2. Confirm that the target repository has an accurate AGENTS.md.
+3. Confirm that agentic-workflow-runtime and the relevant skills and subagents
+   are installed and available to OpenCode.
+4. Replace every value inside square brackets. Delete optional lines that do
+   not apply.
+
+
+PROMPT 1 - RECOMMENDED: SELECT AND RUN THE BEST WORKFLOW
+========================================================
+
+Copy and paste everything between START PROMPT and END PROMPT.
+
+------------------------------ START PROMPT ------------------------------
+Act as the main coordinator for a durable agentic workflow run.
+
+Read and comply with the target repository's AGENTS.md before taking action.
+Use the current working directory as the target project path. Load the
+agentic-workflow-runtime skill with OpenCode's native skill tool. Use the
+runtime's bundled runner and machine-readable workflow manifests; do not treat
+the human-readable workflow document as a loose checklist and do not simulate
+state transitions in prose.
+
+TASK OBJECTIVE
+[Describe the outcome to deliver.]
+
+SUCCESS CRITERIA
+- [State observable acceptance criterion 1.]
+- [State observable acceptance criterion 2.]
+- [State the required test, lint, build, review, or documentation result.]
+
+CONSTRAINTS
+- [State important scope, compatibility, architecture, or file boundaries.]
+- Preserve unrelated user changes already present in the working tree.
+- Do not store secrets, tokens, personal data, or large raw logs in workflow
+  evidence or handoff files.
+
+AUTHORITY
+- Repository inspection, safe local commands, and changes required by a
+  workspace-write phase are authorized only within this task and AGENTS.md.
+- No push, merge, deployment, release, issue update, pull-request update, or
+  other external mutation is authorized unless the task objective above
+  explicitly requests that exact action and AGENTS.md permits it.
+- Never infer external-mutation authority from the selected workflow.
+
+Execute the workflow as follows:
+
+1. Run the runtime Select action using the complete task objective. Inspect the
+   ranked candidates, mutation levels, and routing evidence. Treat the ranking
+   as a routing aid, not as permission or a final semantic decision. Accept the
+   highest positive match only when its description and mutation level clearly
+   fit the requested outcome, authority, and AGENTS.md. If Select returns no
+   positive match or its highest result conflicts with the actual objective,
+   run List and compare the available workflow descriptions. Start an explicit
+   workflow when one is clearly the semantic match. If two plausible workflows
+   would materially change the work, show them and ask one focused question.
+   Do not ask for confirmation when the match is clear and safe.
+
+2. Start a durable run for the selected workflow and current project path.
+   Capture the printed run-state path and retain it throughout the task.
+
+3. Before every phase, run Status and read the complete
+   current_phase_contract. Treat that contract as the only active work unit.
+   Obey its owner, permission boundary, instructions, expected output,
+   required evidence, and retry limit. User instructions and AGENTS.md may
+   narrow the phase permission but never broaden it.
+
+4. Dispatch the phase according to its declared owner:
+   - For a skill-owned phase, load only the named skill with OpenCode's native
+     skill tool and follow it.
+   - For a subagent-owned phase, invoke the named installed OpenCode subagent
+     with the native task/subagent tool. Give it the phase objective, scoped
+     inputs, allowed actions, forbidden actions, required evidence, output
+     format, and escalation conditions. Keep it within the declared read-only
+     or validation-only boundary. Do not allow nested delegation.
+   - For a main-agent phase, load the skill named by the owner when it is an
+     installed skill, then perform the work directly in this session.
+   - Keep final edits, evidence decisions, state transitions, and the final
+     user-facing conclusion with the main coordinator.
+
+5. After completing the phase, record every required evidence key separately
+   with the runtime Record action. Use concrete, concise evidence such as file
+   paths, acceptance criteria, commands, exit codes, validation summaries,
+   review findings and dispositions, decisions, authorization records,
+   rollback plans, or artifact locations. Never use placeholders such as
+   "done", "looks good", or unjustified "N/A".
+
+6. Run Advance. If the gate rejects the transition, do not bypass it or claim
+   completion in prose. Supply genuinely missing evidence, use Retry only when
+   new evidence or a narrower approach can change the result, or use Escalate
+   when a user decision, credential, protected access, contradictory source,
+   or missing authority blocks progress.
+
+7. Continue through the control loop without waiting for another prompt after
+   each successful phase. Do not stop after discovery, planning, implementation,
+   or the first validation result. Continue until the runtime status is
+   completed or awaiting-input.
+
+8. Before context pressure, after material validation output, before a user
+   escalation, and at final completion, generate a runtime Handoff. A handoff
+   must preserve the objective, workflow and phase, run path, completed and
+   pending work, files inspected or changed, commands and results, evidence,
+   decisions, blockers, risks, and exact next action.
+
+9. When the run reaches completed, verify the final Status, generate the final
+   Handoff, and report:
+   - run-state path and workflow name
+   - final runtime status
+   - requested outcome
+   - files changed or reviewed
+   - skills and subagents used by phase
+   - commands run and validation results
+   - review findings and their disposition
+   - unresolved risks or explicitly skipped checks
+   - handoff path and next authorized action
+
+Begin now. First read AGENTS.md, load agentic-workflow-runtime, and run Select.
+------------------------------- END PROMPT -------------------------------
+
+
+PROMPT 2 - START A SPECIFIC WORKFLOW
+====================================
+
+Use this prompt when the workflow ID is already known. Replace [WORKFLOW-ID]
+with an ID from the quick reference near the end of this file.
+
+------------------------------ START PROMPT ------------------------------
+Act as the main coordinator for a durable agentic workflow run.
+
+Read and comply with AGENTS.md. Load the agentic-workflow-runtime skill using
+OpenCode's native skill tool. Use the current working directory as the target
+project path. Start the workflow named [WORKFLOW-ID] for this objective:
+
+[Describe the complete task objective.]
+
+Success criteria:
+- [Observable criterion 1.]
+- [Observable criterion 2.]
+- [Required validation or review result.]
+
+Constraints and authority:
+- [State task-specific boundaries.]
+- Preserve unrelated working-tree changes.
+- Workspace changes are allowed only when the current phase, this objective,
+  and AGENTS.md all permit them.
+- No external mutation is authorized unless the objective explicitly requests
+  the exact action and AGENTS.md permits it.
+- Never record secrets, tokens, personal data, or large raw logs as evidence.
+
+Use the runtime's actual runner and machine-readable manifest. Capture the run
+path. For every phase: run Status; read the complete current_phase_contract;
+obey its owner, permission, output, evidence, and retry limit; load a named
+skill with the native skill tool; invoke a named subagent with OpenCode's native
+task/subagent tool at the declared boundary; load the named guiding skill and
+perform main-agent phases directly; record each required evidence key with
+concrete values; and run Advance.
+
+Do not skip phases, fabricate evidence, substitute prose for a transition, or
+stop after one phase. If a gate fails, add real evidence, Retry only with a
+reason that can change the outcome, or Escalate for a missing decision or
+authority. Keep subagents within their declared permissions, forbid nested
+delegation, and keep final edits and transitions with the main coordinator.
+
+Continue autonomously until Status is completed or awaiting-input. Generate a
+Handoff before escalation or context pressure and again at completion. At
+completion report the run path, workflow, status, files, skills and subagents,
+commands and results, evidence, review disposition, risks, handoff path, and
+next authorized action.
+
+Begin now by loading the runtime and starting [WORKFLOW-ID].
+------------------------------- END PROMPT -------------------------------
+
+
+PROMPT 3 - RESUME AN EXISTING RUN
+=================================
+
+Use this in a new OpenCode session or after a context interruption.
+
+------------------------------ START PROMPT ------------------------------
+Act as the main coordinator and resume the durable agentic workflow run at:
+
+[FULL RUN-STATE PATH]
+
+Read and comply with AGENTS.md. Load the agentic-workflow-runtime skill. Read
+the existing handoff if one is present beside the run-state file, then run
+Status against the supplied run path. Treat the persisted manifest snapshot
+and current_phase_contract as authoritative for workflow state. Do not restart
+the workflow, repeat completed phases, or reconstruct state from chat memory.
+
+Continue the current phase within its declared permission. Load only its named
+skill or invoke only its named OpenCode subagent. Record concrete required
+evidence and Advance through every remaining gate. Retry only with new evidence
+or a narrower approach. Escalate for a missing decision, credential, protected
+access, contradictory source, or missing authority. Do not perform external
+mutations without explicit authorization in the task and AGENTS.md.
+
+Continue until Status is completed or awaiting-input. Generate a Handoff before
+context pressure or escalation and at completion. Report the run path, current
+or final status, work performed in this session, validation, blockers, risks,
+handoff path, and exact next action.
+
+Begin now by loading the runtime and running Status on the supplied run path.
+------------------------------- END PROMPT -------------------------------
+
+
+PROMPT 4 - RESOLVE AN ESCALATION AND CONTINUE
+==============================================
+
+Use this after the runtime has paused in awaiting-input state.
+
+------------------------------ START PROMPT ------------------------------
+Resume the agentic workflow run at:
+
+[FULL RUN-STATE PATH]
+
+Use this user decision or authorization as the resolution to the open blocker:
+
+[STATE THE DECISION OR PRECISELY AUTHORIZED ACTION.]
+
+Read AGENTS.md and load agentic-workflow-runtime. Run Status, confirm that the
+open blocker matches this resolution, and use the runtime Resume action to
+record the resolution. This resolution applies only to the stated blocker and
+does not grant broader permissions.
+
+Continue as the main coordinator from the same phase. Follow the complete
+current_phase_contract, use its named skill or subagent, record concrete
+evidence, and Advance through all remaining phases. Continue until completed or
+another genuine awaiting-input condition occurs. Generate the final Handoff and
+report the run path, status, work performed, validation, risks, handoff path,
+and next authorized action.
+------------------------------- END PROMPT -------------------------------
+
+
+PROMPT 5 - CONTINUE IF THE MODEL STOPS AFTER ONE PHASE
+======================================================
+
+Use this only when an active run exists but the model summarized prematurely.
+
+------------------------------ START PROMPT ------------------------------
+Do not start a new workflow and do not provide another interim summary.
+
+Resume the active agentic workflow run at [FULL RUN-STATE PATH]. Load
+agentic-workflow-runtime, run Status, and continue the control loop from the
+current phase. For each remaining phase, follow the current_phase_contract,
+invoke its named skill or OpenCode subagent, record every required evidence
+key, and Advance with the runtime. Continue until Status is completed or
+awaiting-input. Then generate a Handoff and provide the required final report.
+------------------------------- END PROMPT -------------------------------
+
+
+WORKFLOW ID QUICK REFERENCE
+===========================
+
+Stable general workflows:
+
+agent-skill-development
+  Create or revise a reusable coding-agent skill.
+
+architecture-review
+  Assess architecture, boundaries, dependencies, and data flow.
+
+bug-diagnosis
+  Diagnose and fix a reproducible software failure.
+
+feature-development
+  Implement a scoped feature with source, planning, and validation gates.
+
+feature-quality-loop
+  Implement a feature with test strategy, independent validation, and review.
+
+pull-request-review
+  Review a concrete change set without editing it.
+
+release-prep
+  Prepare a release candidate and review-ready evidence.
+
+Additional specialized workflows:
+
+agent-skill-quality-loop
+  Prepare skills, agents, bundles, and workflows for publication.
+
+backend-change-loop
+  Implement backend or API changes with contract and review gates.
+
+bug-reproduction-loop
+  Establish reliable reproduction evidence before implementation.
+
+data-change-loop
+  Implement and review schema, migration, and data-workflow changes.
+
+dependency-upgrade-loop
+  Manage dependency and runtime changes with compatibility and security gates.
+
+failure-to-eval-loop
+  Convert a repeated agent-system failure into regression coverage.
+
+model-methodology-documentation
+  Draft evidence-backed technical model documentation for human review.
+
+release-gate-loop
+  Run independent validation, documentation, security, and readiness gates.
+
+External-delivery workflows; use only with explicit authority:
+
+github-actions-response
+github-issue-to-pr
+github-pr-lifecycle
+azure-devops-pipeline-response
+azure-devops-pr-lifecycle
+azure-devops-work-item-to-pr
+
+
+RECOMMENDED DEFAULT
+===================
+
+Use Prompt 1 for most multi-phase tasks. Let the runtime select the workflow.
+Use Prompt 2 only when you deliberately want a specific workflow. Prompts 3-5
+continue the same durable run rather than creating a new one.

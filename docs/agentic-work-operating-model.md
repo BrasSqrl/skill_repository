@@ -69,22 +69,7 @@ The repository does not provide unrestricted autonomous execution. It does not i
 
 Agentic work uses a closed control loop:
 
-```mermaid
-flowchart LR
-    O["Business outcome"] --> R["Repository rules and authority"]
-    R --> W["Select workflow"]
-    W --> P["Perform current phase"]
-    P --> E["Capture evidence"]
-    E --> G{"Gate decision"}
-    G -- "pass" --> N["Next phase"]
-    N --> P
-    G -- "new evidence may help" --> T["Bounded retry"]
-    T --> P
-    G -- "decision or authority missing" --> H["Human escalation"]
-    H --> P
-    G -- "final gate passes" --> D["Reviewable delivery outcome"]
-    D --> L["Failure-to-eval learning loop"]
-```
+![Closed control loop for agentic work](assets/agentic-work-closed-control-loop.svg)
 
 The agent decides how to perform the current phase using repository context and the named skill. The workflow runtime decides whether the recorded evidence is sufficient to move to the next phase. The person or target repository remains the authority for business decisions and external changes.
 

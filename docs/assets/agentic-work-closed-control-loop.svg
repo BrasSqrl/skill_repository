@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title description">
+  <title id="title">Closed control loop for agentic work</title>
+  <desc id="description">A business outcome passes through repository rules, workflow selection, phase execution, evidence capture, and a gate decision. Passing, retry, and escalation paths return to phase execution. A final pass produces a reviewable delivery outcome and feeds a failure-to-evaluation learning loop.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#335d92"/>
+    </marker>
+    <style>
+      .box { fill: #f7f9fc; stroke: #335d92; stroke-width: 2; rx: 10; }
+      .decision { fill: #fff5d6; stroke: #9a6b00; stroke-width: 2; }
+      .outcome { fill: #eaf6ec; stroke: #3c7a48; stroke-width: 2; rx: 10; }
+      .learning { fill: #f2edfb; stroke: #6b4da1; stroke-width: 2; rx: 10; }
+      .line { fill: none; stroke: #335d92; stroke-width: 2; marker-end: url(#arrow); }
+      .label { fill: #172033; font: 600 18px "Segoe UI", Arial, sans-serif; text-anchor: middle; }
+      .edge-label { fill: #344054; font: 15px "Segoe UI", Arial, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect class="box" x="35" y="80" width="190" height="70"/>
+  <text class="label" x="130" y="122">Business outcome</text>
+
+  <rect class="box" x="275" y="70" width="245" height="90"/>
+  <text class="label" x="397.5" y="108">
+    <tspan x="397.5" dy="0">Repository rules</tspan>
+    <tspan x="397.5" dy="24">and authority</tspan>
+  </text>
+
+  <rect class="box" x="570" y="80" width="180" height="70"/>
+  <text class="label" x="660" y="122">Select workflow</text>
+
+  <rect class="box" x="800" y="70" width="220" height="90"/>
+  <text class="label" x="910" y="108">
+    <tspan x="910" dy="0">Perform current</tspan>
+    <tspan x="910" dy="24">phase</tspan>
+  </text>
+
+  <rect class="box" x="1070" y="80" width="190" height="70"/>
+  <text class="label" x="1165" y="122">Capture evidence</text>
+
+  <polygon class="decision" points="1165,220 1285,290 1165,360 1045,290"/>
+  <text class="label" x="1165" y="296">Gate decision</text>
+
+  <rect class="box" x="760" y="235" width="190" height="70"/>
+  <text class="label" x="855" y="277">Next phase</text>
+
+  <rect class="box" x="760" y="375" width="190" height="70"/>
+  <text class="label" x="855" y="417">Bounded retry</text>
+
+  <rect class="box" x="760" y="515" width="190" height="70"/>
+  <text class="label" x="855" y="557">Human escalation</text>
+
+  <rect class="outcome" x="1040" y="430" width="250" height="90"/>
+  <text class="label" x="1165" y="468">
+    <tspan x="1165" dy="0">Reviewable delivery</tspan>
+    <tspan x="1165" dy="24">outcome</tspan>
+  </text>
+
+  <rect class="learning" x="1015" y="620" width="300" height="90"/>
+  <text class="label" x="1165" y="658">
+    <tspan x="1165" dy="0">Failure-to-eval</tspan>
+    <tspan x="1165" dy="24">learning loop</tspan>
+  </text>
+
+  <path class="line" d="M 225 115 L 275 115"/>
+  <path class="line" d="M 520 115 L 570 115"/>
+  <path class="line" d="M 750 115 L 800 115"/>
+  <path class="line" d="M 1020 115 L 1070 115"/>
+  <path class="line" d="M 1165 150 L 1165 220"/>
+
+  <path class="line" d="M 1045 290 L 950 270"/>
+  <text class="edge-label" x="1002" y="260">pass</text>
+  <path class="line" d="M 760 270 C 710 270 710 185 800 145"/>
+
+  <path class="line" d="M 1100 332 C 1040 370 1005 410 950 410"/>
+  <text class="edge-label" x="1040" y="382">new evidence may help</text>
+  <path class="line" d="M 760 410 C 665 410 670 220 800 145"/>
+
+  <path class="line" d="M 1100 332 C 1025 390 1000 500 950 550"/>
+  <text class="edge-label" x="885" y="492">decision or authority missing</text>
+  <path class="line" d="M 760 550 C 590 550 590 225 800 135"/>
+
+  <path class="line" d="M 1205 342 C 1235 375 1235 410 1205 430"/>
+  <text class="edge-label" x="1280" y="390">final gate passes</text>
+  <path class="line" d="M 1165 520 L 1165 620"/>
+</svg>
